@@ -25,7 +25,7 @@ const options = (): DataSourceOptions => {
     schema: 'public',
     ssl: configService.get<boolean>('POSTGRES_SSL'),
     logging: configService.get('IS_LOG') === 'true',
-    entities: [],
+    entities: [join(process.cwd(), 'dist', 'entities', '**', '*.entity.{ts,js}' )],
     migrations: [join(process.cwd(), 'dist', 'migrations', '**', '*{.ts,.js}')],
     migrationsRun: false,
     migrationsTableName: 'migrations',
