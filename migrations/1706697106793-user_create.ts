@@ -31,11 +31,11 @@ export class UserCreate1706697106793 implements MigrationInterface {
           name: "type",
           type: "varchar",
         },
-        {
-          name: "lastActive",
-          type: "timestamp",
-          default: "CURRENT_TIMESTAMP",
-        },
+        // {
+        //   name: "lastActive",
+        //   type: "timestamp",
+        //   default: "CURRENT_TIMESTAMP",
+        // },
         {
           name: "createdAt",
           type: "timestamp",
