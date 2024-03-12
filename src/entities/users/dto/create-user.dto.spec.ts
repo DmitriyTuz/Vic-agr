@@ -9,7 +9,7 @@ describe('create-task.dto', () => {
       password: '11111',
       phone: '',
       type: '',
-      companyId: 1,
+      // companyId: 1,
     };
     const ofImportDto = plainToInstance(CreateUserDto, dto);
     const errors = await validate(ofImportDto);
