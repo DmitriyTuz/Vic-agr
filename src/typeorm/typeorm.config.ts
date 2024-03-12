@@ -1,17 +1,17 @@
-import { DataSource, DataSourceOptions } from "typeorm";
-import { config } from "dotenv";
-import { join } from "path";
-import { ConfigService } from "@nestjs/config";
+import { DataSource, DataSourceOptions } from 'typeorm';
+import { config } from 'dotenv';
+import { join } from 'path';
+import { ConfigService } from '@nestjs/config';
 
 const configService = new ConfigService();
 
 config({
   path:
-      configService.get('NODE_ENV') === 'production'
-          ? join(process.cwd(), '.production.env')
-          : configService.get('NODE_ENV') === 'test'
-          ? join(process.cwd(), '.test.env')
-          : join(process.cwd(), '.development.env'),
+    configService.get('NODE_ENV') === 'production'
+      ? join(process.cwd(), '.production.env')
+      : configService.get('NODE_ENV') === 'test'
+      ? join(process.cwd(), '.test.env')
+      : join(process.cwd(), '.development.env'),
 });
 
 const options = (): DataSourceOptions => {
@@ -25,7 +25,7 @@ const options = (): DataSourceOptions => {
     schema: 'public',
     ssl: configService.get<boolean>('POSTGRES_SSL'),
     logging: configService.get('IS_LOG') === 'true',
-    entities: [join(process.cwd(), 'dist', 'entities', '**', '*.entity.{ts,js}' )],
+    entities: [join(process.cwd(), 'dist', 'entities', '**', '*.entity.{ts,js}')],
     migrations: [join(process.cwd(), 'dist', 'migrations', '**', '*{.ts,.js}')],
     migrationsRun: false,
     migrationsTableName: 'migrations',

@@ -1,8 +1,7 @@
-import {Entity, Column, PrimaryGeneratedColumn, OneToMany} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity('users')
 export class User {
-
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -10,9 +9,11 @@ export class User {
   name: string;
 
   @Column()
-  email: string;
-
-  @Column()
   password: string;
 
+  @Column()
+  phone: string;
+
+  @Column()
+  companyId: number;
 }
