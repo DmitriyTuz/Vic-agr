@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, JoinTable} from 'typeorm';
 import {ApiProperty} from "@nestjs/swagger";
+import {Tag} from "@src/entities/tags/tags.entity";
 
 @Entity({ schema: 'public', name: 'Users' })
 export class User {
@@ -25,4 +26,18 @@ export class User {
 
   // @Column()
   // companyId: number;
+
+  @ManyToMany(() => Tag)
+  @JoinTable({
+    name: 'UserTags',
+    joinColumn: {
+      name: 'userId',
+      referencedColumnName: 'id'
+    },
+    inverseJoinColumn: {
+      name: 'tagId',
+      referencedColumnName: 'id'
+    }
+  })
+  tags: Tag[];
 }

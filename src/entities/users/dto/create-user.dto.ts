@@ -24,8 +24,8 @@ export class CreateUserDto {
   @IsString({ message: 'Must be a string' })
   readonly type: string;
 
-  @ApiProperty({ example: 1, description: "Company ID" })
-  @IsNotEmpty({ message: 'CompanyId required !' })
-  @IsNumber({}, { message: 'Must be a number' })
-  readonly companyId: number;
+  // @ApiProperty({ example: 1, description: "Company ID" })
+  // @IsNotEmpty({ message: 'CompanyId required !' })
+  // @IsNumber({}, { message: 'Must be a number' })
+  // readonly companyId: number;
 }
