@@ -1,10 +1,11 @@
 import {MigrationInterface, QueryRunner, Table, TableForeignKey} from "typeorm";
 
-export class UserTagCreate1710276130233 implements MigrationInterface {
+export class CreateUserTasks1710338527136 implements MigrationInterface {
+    name = 'CreateUserTasksTable1710338527136';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(new Table({
-            name: 'UserTags',
+            name: 'UserTasks',
             columns: [
                 {
                     name: 'id',
@@ -16,10 +17,12 @@ export class UserTagCreate1710276130233 implements MigrationInterface {
                 {
                     name: 'userId',
                     type: 'int',
+                    isNullable: false,
                 },
                 {
-                    name: 'tagId',
+                    name: 'taskId',
                     type: 'int',
+                    isNullable: false,
                 },
                 {
                     name: 'createdAt',
@@ -34,23 +37,23 @@ export class UserTagCreate1710276130233 implements MigrationInterface {
             ],
         }), true);
 
-        await queryRunner.createForeignKey('UserTags', new TableForeignKey({
+        await queryRunner.createForeignKey('UserTasks', new TableForeignKey({
             columnNames: ['userId'],
             referencedColumnNames: ['id'],
             referencedTableName: 'Users',
             onDelete: 'CASCADE',
         }));
 
-        await queryRunner.createForeignKey('UserTags', new TableForeignKey({
-            columnNames: ['tagId'],
+        await queryRunner.createForeignKey('UserTasks', new TableForeignKey({
+            columnNames: ['taskId'],
             referencedColumnNames: ['id'],
-            referencedTableName: 'Tags',
+            referencedTableName: 'Tasks',
             onDelete: 'CASCADE',
         }));
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable('UserTags');
+        await queryRunner.dropTable('UserTasks');
     }
 
 }
