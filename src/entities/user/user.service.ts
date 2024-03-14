@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import _ from "underscore";
 
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import { CreateUserDto } from '@src/entities/user/dto/create-user.dto';
@@ -15,10 +16,6 @@ export class UserService {
     private userRepository: Repository<User>,
     @InjectEntityManager() private readonly entityManager: EntityManager,
   ) {}
-
-  async findById(id: number): Promise<User> {
-    return await this.userRepository.findOne({ where: { id } });
-  }
 
   async createUser(dto: CreateUserDto): Promise<User> {
     try {
@@ -42,5 +39,22 @@ export class UserService {
 
   async findAll() {
     return await this.userRepository.find();
+  }
+
+  async getUserById(id: number): Promise<User> {
+    return await this.userRepository.findOne({where: { id }});
+  }
+
+  async getOneUser(findQuery): Promise<User> {
+    return await this.userRepository.findOne({
+      where: findQuery,
+      relations: ['tags', 'company'],
+    });
+  }
+
+  getUserData(user: User) {
+    const data: any = _.pick(user, ['id', 'name', 'phone', 'type', 'tags', 'tasks', 'hasOnboard', 'companyId', 'company']);
+    data.tags = data.tags.map(tag => tag.name);
+    return data;
   }
 }
