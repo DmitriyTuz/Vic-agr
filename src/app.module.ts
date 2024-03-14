@@ -9,6 +9,8 @@ import {TaskModule} from "@src/entities/task/task.module";
 import { LocationModule } from './entities/location/location.module';
 import { CompleteTaskModule } from './entities/complete-task/complete-task.module';
 import { ReportTaskModule } from './entities/report-task/report-task.module';
+import { AccountModule } from './account/account.module';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -21,7 +23,9 @@ import { ReportTaskModule } from './entities/report-task/report-task.module';
     TaskModule,
     LocationModule,
     CompleteTaskModule,
-    ReportTaskModule
+    ReportTaskModule,
+    AccountModule,
+    AuthModule
   ],
   controllers: [],
   providers: [],
