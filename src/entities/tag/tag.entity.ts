@@ -1,7 +1,8 @@
-import {Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, ManyToOne} from 'typeorm';
+import {Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, ManyToOne, JoinTable} from 'typeorm';
 import {ApiProperty} from "@nestjs/swagger";
 import {User} from "@src/entities/user/user.entity";
 import {Company} from "@src/entities/company/company.entity";
+import {Task} from "@src/entities/task/task.entity";
 
 @Entity({ schema: 'public', name: 'Tag' })
 export class Tag {
@@ -18,5 +19,19 @@ export class Tag {
 
   @ManyToOne(() => Company, (company) => company.tags)
   company: Company;
+
+  @ManyToMany(() => Task, task => task.tags)
+  @JoinTable({
+    name: 'TaskTags',
+    joinColumn: {
+      name: 'taskId',
+      referencedColumnName: 'id'
+    },
+    inverseJoinColumn: {
+      name: 'tagId',
+      referencedColumnName: 'id'
+    }
+  })
+  tasks: Task[];
 
 }

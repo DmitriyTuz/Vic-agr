@@ -1,8 +1,12 @@
 import {Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, JoinTable, ManyToOne} from 'typeorm';
 import {ApiProperty} from "@nestjs/swagger";
+
 import {Tag} from "@src/entities/tag/tag.entity";
 import {Company} from "@src/entities/company/company.entity";
 import {Payment} from "@src/entities/payment/payment.entity";
+import {Task} from "@src/entities/task/task.entity";
+import {CompleteTask} from "@src/entities/complete-task/complete-task.entity";
+import {ReportTask} from "@src/entities/report-task/report-task.entity";
 
 @Entity({ schema: 'public', name: 'User' })
 export class User {
@@ -48,4 +52,27 @@ export class User {
 
   @OneToMany(() => Payment, (payment) => payment.user)
   payments: Payment[];
+
+  @OneToMany(() => Task, task => task.creator)
+  createdTasks: Task[];
+
+  @ManyToMany(() => Task)
+  @JoinTable({
+    name: 'UserTasks',
+    joinColumn: {
+      name: 'userId',
+      referencedColumnName: 'id'
+    },
+    inverseJoinColumn: {
+      name: 'taskId',
+      referencedColumnName: 'id'
+    }
+  })
+  tasks: Task[];
+
+  @OneToMany(() => CompleteTask, completeTask => completeTask.user)
+  completeInfo: CompleteTask[];
+
+  @OneToMany(() => ReportTask, reportTask => reportTask.user)
+  reportInfo: ReportTask[];
 }

@@ -2,9 +2,9 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../user/user.entity';
 import { Tag } from '../tag/tag.entity';
-// import { MapLocation } from '../locations/locations.entity';
-// import { Payment } from '../payment/payment.entity';
-// import { Task } from '../tasks/tasks.entity';
+import {Task} from "@src/entities/task/task.entity";
+import {MapLocation} from "@src/entities/location/location.entity";
+
 
 @Entity({ schema: 'public', name: 'Company' })
 export class Company {
@@ -47,9 +47,9 @@ export class Company {
   @OneToMany(() => Tag, tag => tag.company)
   tags: Tag[];
 
-  // @OneToMany(() => MapLocation, location => location.company)
-  // locations: MapLocation[];
-  //
-  // @OneToMany(() => Task, task => task.company)
-  // tasks: Task[];
+  @OneToMany(() => MapLocation, location => location.company)
+  locations: MapLocation[];
+
+  @OneToMany(() => Task, task => task.company)
+  tasks: Task[];
 }
