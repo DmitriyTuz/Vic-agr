@@ -1,17 +1,19 @@
 import { Module } from '@nestjs/common';
 import {TypeormModule} from "@src/typeorm/typeorm.module";
 
-import {UsersModule} from "@src/entities/users/users.module";
-import {TagsModule} from "@src/entities/tags/tags.module";
-import {CompaniesModule} from "@src/entities/companies/companies.module";
+import {UserModule} from "@src/entities/user/user.module";
+import {TagModule} from "@src/entities/tag/tag.module";
+import {CompanyModule} from "@src/entities/company/company.module";
+import { PaymentModule } from './entities/payment/payment.module';
 
 
 @Module({
   imports: [
     TypeormModule,
-    UsersModule,
-    TagsModule,
-    CompaniesModule
+    UserModule,
+    TagModule,
+    CompanyModule,
+    PaymentModule
   ],
   controllers: [],
   providers: [],

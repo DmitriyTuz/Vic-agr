@@ -1,7 +1,7 @@
 import {Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, ManyToOne} from 'typeorm';
 import {ApiProperty} from "@nestjs/swagger";
-import {User} from "@src/entities/users/users.entity";
-import {Company} from "@src/entities/companies/companies.entity";
+import {User} from "@src/entities/user/user.entity";
+import {Company} from "@src/entities/company/company.entity";
 
 @Entity({ schema: 'public', name: 'Tag' })
 export class Tag {

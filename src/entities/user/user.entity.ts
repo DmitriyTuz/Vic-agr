@@ -1,7 +1,8 @@
 import {Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, JoinTable, ManyToOne} from 'typeorm';
 import {ApiProperty} from "@nestjs/swagger";
-import {Tag} from "@src/entities/tags/tags.entity";
-import {Company} from "@src/entities/companies/companies.entity";
+import {Tag} from "@src/entities/tag/tag.entity";
+import {Company} from "@src/entities/company/company.entity";
+import {Payment} from "@src/entities/payment/payment.entity";
 
 @Entity({ schema: 'public', name: 'User' })
 export class User {
@@ -44,4 +45,7 @@ export class User {
 
   @ManyToOne(() => Company, (company) => company.users)
   company: Company;
+
+  @OneToMany(() => Payment, (payment) => payment.user)
+  payments: Payment[];
 }

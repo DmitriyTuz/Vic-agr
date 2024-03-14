@@ -3,12 +3,12 @@ import { EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
-import { CreateUserDto } from '@src/entities/users/dto/create-user.dto';
-import { User } from '@src/entities/users/users.entity';
+import { CreateUserDto } from '@src/entities/user/dto/create-user.dto';
+import { User } from '@src/entities/user/user.entity';
 
 @Injectable()
-export class UsersService {
-  private readonly logger = new Logger(UsersService.name);
+export class UserService {
+  private readonly logger = new Logger(UserService.name);
 
   constructor(
     @InjectRepository(User)
