@@ -1,6 +1,7 @@
 import {MigrationInterface, QueryRunner, Table, TableIndex} from "typeorm";
 
 export class CreateTags1710272772066 implements MigrationInterface {
+    name = 'CreateTags1710272772066';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(new Table({

@@ -2,9 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import {AppModule} from "@src/app.module";
 import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
+import {SeedsService} from "@src/seeds/seeds.service";
 
 async function start() {
   const app = await NestFactory.create(AppModule);
+
+  const seedsService = app.get(SeedsService);
+  await seedsService.seedData();
+  await app.close();
 
   const config = new DocumentBuilder()
       .setTitle("Vic_agr")

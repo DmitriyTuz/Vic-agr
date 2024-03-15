@@ -6,7 +6,7 @@ import {Task} from "@src/entities/task/task.entity";
 import {MapLocation} from "@src/entities/location/location.entity";
 
 
-@Entity({ schema: 'public', name: 'Company' })
+@Entity({ schema: 'public', name: 'Companies' })
 export class Company {
 
   @ApiProperty({ example: '1', description: 'Company unique id' })

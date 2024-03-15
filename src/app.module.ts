@@ -11,6 +11,7 @@ import { CompleteTaskModule } from './entities/complete-task/complete-task.modul
 import { ReportTaskModule } from './entities/report-task/report-task.module';
 import { AccountModule } from './account/account.module';
 import { AuthModule } from './auth/auth.module';
+import { SeedsModule } from './seeds/seeds.module';
 
 
 @Module({
@@ -25,7 +26,8 @@ import { AuthModule } from './auth/auth.module';
     CompleteTaskModule,
     ReportTaskModule,
     AccountModule,
-    AuthModule
+    AuthModule,
+    SeedsModule
   ],
   controllers: [],
   providers: [],

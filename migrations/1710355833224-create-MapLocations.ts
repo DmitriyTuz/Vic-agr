@@ -1,7 +1,7 @@
 import {MigrationInterface, QueryRunner, Table, TableIndex} from "typeorm";
 
 export class CreateMapLocations1710355833224 implements MigrationInterface {
-    name = 'CreateMapLocationsTable1710355833224';
+    name = 'CreateMapLocations1710355833224';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(new Table({

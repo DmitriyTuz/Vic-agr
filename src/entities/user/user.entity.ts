@@ -8,7 +8,7 @@ import {Task} from "@src/entities/task/task.entity";
 import {CompleteTask} from "@src/entities/complete-task/complete-task.entity";
 import {ReportTask} from "@src/entities/report-task/report-task.entity";
 
-@Entity({ schema: 'public', name: 'User' })
+@Entity({ schema: 'public', name: 'Users' })
 export class User {
   @PrimaryGeneratedColumn()
   @ApiProperty({example: '1', description: 'User unique id'})
@@ -30,8 +30,8 @@ export class User {
   @ApiProperty({example: 'WORKER', description: "User role"})
   type: string;
 
-  // @Column()
-  // companyId: number;
+  @Column()
+  companyId: number;
 
   @ManyToMany(() => Tag)
   @JoinTable({

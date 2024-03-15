@@ -1,7 +1,7 @@
 import {MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex} from "typeorm";
 
 export class CreateReportTasks1710354559996 implements MigrationInterface {
-    name = 'CreateReportTasksTable1710354559996';
+    name = 'CreateReportTasks1710354559996';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(new Table({

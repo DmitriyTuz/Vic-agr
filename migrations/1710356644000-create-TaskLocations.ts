@@ -1,7 +1,7 @@
 import {MigrationInterface, QueryRunner, Table, TableForeignKey} from "typeorm";
 
 export class CreateTaskLocations1710356644000 implements MigrationInterface {
-    name = 'CreateTaskLocationsTable1710356644000';
+    name = 'CreateTaskLocations1710356644000';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(new Table({
