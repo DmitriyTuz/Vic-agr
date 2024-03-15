@@ -1,7 +1,7 @@
 import {MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex} from "typeorm";
 
 export class CreateCompleteTasks1710355054851 implements MigrationInterface {
-    name = 'CreateCompleteTasksTable1710355054851';
+    name = 'CreateCompleteTasks1710355054851';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(new Table({

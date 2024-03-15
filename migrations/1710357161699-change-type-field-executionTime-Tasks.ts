@@ -1,7 +1,7 @@
 import {MigrationInterface, QueryRunner, TableColumn} from "typeorm";
 
 export class ChangeTypeFieldExecutionTimeTasks1710357161699 implements MigrationInterface {
-    name = 'ChangeTaskExecutionTimeColumnType1710357161699';
+    name = 'ChangeTypeFieldExecutionTimeTasks1710357161699';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.changeColumn('Tasks', 'executionTime', new TableColumn({

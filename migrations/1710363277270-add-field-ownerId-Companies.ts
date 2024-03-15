@@ -7,6 +7,7 @@ export class AddFieldOwnerIdCompanies1710363277270 implements MigrationInterface
         await queryRunner.addColumn('Companies', new TableColumn({
             name: 'ownerId',
             type: 'integer',
+            isNullable: true
         }));
 
         await queryRunner.createIndex('Companies', new TableIndex({

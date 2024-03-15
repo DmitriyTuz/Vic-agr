@@ -40,6 +40,7 @@ export class CreateCompany1710360763327 implements MigrationInterface {
                 {
                     name: 'trialAt',
                     type: 'timestamp',
+                    isNullable: true,
                 },
                 {
                     name: 'createdAt',

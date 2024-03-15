@@ -2,6 +2,7 @@ import {MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex} fro
 import {TaskStatuses} from "@lib/constants";
 
 export class CreateTasks1710329640180 implements MigrationInterface {
+    name = 'CreateTasks1710329640180';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(new Table({
