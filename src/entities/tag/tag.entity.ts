@@ -4,7 +4,7 @@ import {User} from "@src/entities/user/user.entity";
 import {Company} from "@src/entities/company/company.entity";
 import {Task} from "@src/entities/task/task.entity";
 
-@Entity({ schema: 'public', name: 'Tag' })
+@Entity({ schema: 'public', name: 'Tags' })
 export class Tag {
   @PrimaryGeneratedColumn()
   @ApiProperty({example: '1', description: 'Tag unique id'})

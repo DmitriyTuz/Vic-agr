@@ -1,4 +1,4 @@
-import {HttpStatus, Injectable, Logger} from '@nestjs/common';
+import {HttpException, HttpStatus, Injectable, Logger} from '@nestjs/common';
 import {UserService} from "@src/entities/user/user.service";
 import {PaymentService} from "@src/entities/payment/payment.service";
 import {CustomHttpException} from "@src/exceptions/сustomHttp.exception";
@@ -11,13 +11,13 @@ export class AccountService {
   constructor(private usersService: UserService,
               private paymentService: PaymentService) {}
 
-  async getOne(currentUserId) {
+  async getOne(currentUserId: number) {
     try {
 
       const user = await this.usersService.getOneUser({id: currentUserId});
 
       if (!user) {
-        throw ({status: 404, message: '404-user-not-found', stack: new Error().stack});
+        throw new HttpException(`user-not-found`, HttpStatus.NOT_FOUND);
       }
 
       const payment = await this.paymentService.getOnePayment(user.id);

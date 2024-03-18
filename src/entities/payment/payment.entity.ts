@@ -2,7 +2,7 @@ import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn} from 'typ
 import {User} from "@src/entities/user/user.entity";
 
 
-@Entity({ schema: 'public', name: 'Payment' })
+@Entity({ schema: 'public', name: 'Payments' })
 export class Payment {
 
   @PrimaryGeneratedColumn()

@@ -3,13 +3,31 @@ import { Logger } from '@nestjs/common';
 import {AppModule} from "@src/app.module";
 import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
 import {SeedsService} from "@src/seeds/seeds.service";
+import {JwtStrategy} from "@src/auth/strategies/jwt.strategy";
+import * as passport from 'passport';
+import * as cookieParser from 'cookie-parser';
 
 async function start() {
+
   const app = await NestFactory.create(AppModule);
 
-  const seedsService = app.get(SeedsService);
-  await seedsService.seedData();
-  await app.close();
+  const seedDataFlag = process.env.SEED_DATA === 'true';
+  if (seedDataFlag) {
+    const seedsService = app.get(SeedsService);
+    await seedsService.seedData();
+  }
+
+  app.use(cookieParser());
+
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
+
+  app.use(passport.initialize());
+
+  const jwtStrategy = app.get(JwtStrategy);
+  passport.use(jwtStrategy);
 
   const config = new DocumentBuilder()
       .setTitle("Vic_agr")
