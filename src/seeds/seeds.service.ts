@@ -52,6 +52,7 @@ import { Repository } from 'typeorm';
 import { Company } from '@src/entities/company/company.entity';
 import {UserTypes} from "@lib/constants";
 import {User} from "@src/entities/user/user.entity";
+import {UserService} from "@src/entities/user/user.service";
 
 @Injectable()
 export class SeedsService {
@@ -62,6 +63,7 @@ export class SeedsService {
       private readonly companyRepository: Repository<Company>,
       @InjectRepository(User)
       private readonly userRepository: Repository<User>,
+      private readonly userService: UserService
   ) {}
 
   enableSeeding(): void {
@@ -71,9 +73,18 @@ export class SeedsService {
   async seedData() {
 
     const companiesData: any[] = [
-      { logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg', name: 'Company One' },
-      { logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg', name: 'Company Two' },
-      { logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg', name: 'Company Three' },
+      {
+        logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg',
+        name: 'Company One'
+      },
+      {
+        logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg',
+        name: 'Company Two'
+      },
+      {
+        logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg',
+        name: 'Company Three'
+      },
     ];
 
     for (const companyData of companiesData) {
@@ -120,7 +131,7 @@ export class SeedsService {
     ];
 
     for (const userData of usersData) {
-      const user = await this.userRepository.create(userData);
+      const user = await this.userService.createUser(userData);
       await this.userRepository.save(user);
     }
 

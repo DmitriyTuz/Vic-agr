@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import _ from "underscore";
+import * as bcrypt from "bcryptjs";
 
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import { CreateUserDto } from '@src/entities/user/dto/create-user.dto';
@@ -24,7 +25,9 @@ export class UserService {
         throw new HttpException(`User with phone ${currentUser.phone} already exists`, HttpStatus.FOUND);
       }
 
-      const userForCreate = this.userRepository.create(dto);
+      const hashPassword = await bcrypt.hash(dto.password, 5);
+
+      const userForCreate = this.userRepository.create({... dto, password: hashPassword});
 
       let user = await this.userRepository.save(userForCreate);
 
@@ -56,5 +59,9 @@ export class UserService {
     const data: any = _.pick(user, ['id', 'name', 'phone', 'type', 'tags', 'tasks', 'hasOnboard', 'companyId', 'company']);
     data.tags = data.tags.map(tag => tag.name);
     return data;
+  }
+
+  async findByPhone(phone: string) {
+    return await this.userRepository.findOne({where: {phone}});
   }
 }

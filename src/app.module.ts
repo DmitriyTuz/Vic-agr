@@ -12,10 +12,14 @@ import { ReportTaskModule } from './entities/report-task/report-task.module';
 import { AccountModule } from './account/account.module';
 import { AuthModule } from './auth/auth.module';
 import { SeedsModule } from './seeds/seeds.module';
+import {ConfigModule} from "@nestjs/config";
 
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),
     TypeormModule,
     UserModule,
     TagModule,
