@@ -30,6 +30,9 @@ export class User {
   @ApiProperty({example: 'WORKER', description: "User role"})
   type: string;
 
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  lastActive: Date;
+
   @Column()
   companyId: number;
 

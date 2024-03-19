@@ -64,4 +64,9 @@ export class UserService {
   async findByPhone(phone: string) {
     return await this.userRepository.findOne({where: {phone}});
   }
+
+  async updateUser(user: User): Promise<User> {
+    return await this.userRepository.save(user);
+  }
+
 }

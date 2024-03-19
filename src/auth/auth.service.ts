@@ -4,7 +4,6 @@ import * as bcrypt from "bcryptjs";
 import { JwtService } from "@nestjs/jwt";
 
 import {User} from "@src/entities/user/user.entity";
-import {CreateUserDto} from "@src/entities/user/dto/create-user.dto";
 import {CustomHttpException} from "@src/exceptions/сustomHttp.exception";
 import {ConfigService} from "@nestjs/config";
 import {UserService} from "@src/entities/user/user.service";
@@ -21,14 +20,16 @@ export class AuthService {
       private configService: ConfigService
   ) {}
 
-  async login(reqBody, req: Request, res: Response) {
+  async login(reqBody: LoginUserDto, req: Request, res: Response) {
     try {
 
-      reqBody.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-      const user = await this.validateUser(reqBody);
+      req.body.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      const user: User = await this.validateUser(reqBody);
       const token = await this.generateToken(user)
-      // res.cookie('AuthorizationToken', token.token, { maxAge: process.env.JWT_EXPIRED_TIME, httpOnly: true });
       res.cookie('AuthorizationToken', token.token, { maxAge: this.configService.get('JWT_EXPIRED_TIME'), httpOnly: true });
+
+      user.lastActive = new Date();
+      await this.userService.updateUser(user);
 
       const responseData = {
         success: true,
@@ -52,7 +53,7 @@ export class AuthService {
       return user;
     }
     throw new HttpException(
-        "Incorrect phone or password",
+        "Incorrect-phone-or-password",
         HttpStatus.UNAUTHORIZED
     );
   }
