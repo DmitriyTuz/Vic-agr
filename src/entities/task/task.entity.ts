@@ -1,18 +1,17 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
-import {TaskStatuses} from "@lib/constants";
+import { TaskStatuses } from '@lib/constants';
 
-import {Company} from "@src/entities/company/company.entity";
-import {User} from "@src/entities/user/user.entity";
-import {Tag} from "@src/entities/tag/tag.entity";
-import {MapLocation} from "@src/entities/location/location.entity";
-import {CompleteTask} from "@src/entities/complete-task/complete-task.entity";
-import {ReportTask} from "@src/entities/report-task/report-task.entity";
+import { Company } from '@src/entities/company/company.entity';
+import { User } from '@src/entities/user/user.entity';
+import { Tag } from '@src/entities/tag/tag.entity';
+import { MapLocation } from '@src/entities/location/location.entity';
+import { CompleteTask } from '@src/entities/complete-task/complete-task.entity';
+import { ReportTask } from '@src/entities/report-task/report-task.entity';
 
 @Entity({ schema: 'public', name: 'Task' })
 export class Task {
-
   @PrimaryGeneratedColumn()
   @ApiProperty({ example: '1', description: 'Task unique identifier' })
   id: number;
@@ -53,31 +52,31 @@ export class Task {
   @ApiProperty({ example: 'Due date of the task', description: 'Task due date' })
   dueDate: Date;
 
-  @ManyToOne(() => User, user => user.createdTasks)
+  @ManyToOne(() => User, (user) => user.createdTasks)
   @ApiProperty({ example: '1', description: 'ID of the user who created the task' })
   creator: User;
 
-  @ManyToMany(() => User, user => user.tasks)
+  @ManyToMany(() => User, (user) => user.tasks)
   @ApiProperty({ type: () => User, isArray: true, description: 'Users assigned to the task' })
   workers: User[];
 
-  @ManyToOne(() => Company, company => company.tasks)
+  @ManyToOne(() => Company, (company) => company.tasks)
   @ApiProperty({ example: '1', description: 'ID of the company that owns the task' })
   company: Company;
 
-  @ManyToMany(() => Tag, tag => tag.tasks)
+  @ManyToMany(() => Tag, (tag) => tag.tasks)
   @ApiProperty({ type: () => Tag, isArray: true, description: 'Tags associated with the task' })
   tags: Tag[];
 
-  @ManyToMany(() => MapLocation, location => location.tasks)
+  @ManyToMany(() => MapLocation, (location) => location.tasks)
   @ApiProperty({ type: () => MapLocation, isArray: true, description: 'Map locations associated with the task' })
   mapLocations: MapLocation[];
 
-  @OneToMany(() => CompleteTask, completeTask => completeTask.task)
+  @OneToMany(() => CompleteTask, (completeTask) => completeTask.task)
   @ApiProperty({ type: () => CompleteTask, isArray: true, description: 'Complete task information' })
   completeInfo: CompleteTask[];
 
-  @OneToMany(() => ReportTask, reportTask => reportTask.task)
+  @OneToMany(() => ReportTask, (reportTask) => reportTask.task)
   @ApiProperty({ type: () => ReportTask, isArray: true, description: 'Report task information' })
   reportInfo: ReportTask[];
 }

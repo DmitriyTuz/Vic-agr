@@ -4,6 +4,6 @@ import { CompleteTaskService } from './complete-task.service';
 
 @Module({
   controllers: [CompleteTaskController],
-  providers: [CompleteTaskService]
+  providers: [CompleteTaskService],
 })
 export class CompleteTaskModule {}

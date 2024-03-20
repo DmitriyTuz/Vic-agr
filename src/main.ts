@@ -1,14 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
-import {AppModule} from "@src/app.module";
-import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
-import {SeedsService} from "@src/seeds/seeds.service";
-import {JwtStrategy} from "@src/auth/strategies/jwt.strategy";
+import { AppModule } from '@src/app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SeedsService } from '@src/seeds/seeds.service';
+import { JwtStrategy } from '@src/auth/strategies/jwt.strategy';
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 
 async function start() {
-
   const app = await NestFactory.create(AppModule);
 
   const seedDataFlag = process.env.SEED_DATA === 'true';
@@ -30,15 +29,14 @@ async function start() {
   passport.use(jwtStrategy);
 
   const config = new DocumentBuilder()
-      .setTitle("Vic_agr")
-      .setDescription("Documentation REST API")
-      .setVersion("0.0.1")
-      .addTag("D_TUZ")
-      .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-          'JWT')
-      .build();
+    .setTitle('Vic_agr')
+    .setDescription('Documentation REST API')
+    .setVersion('0.0.1')
+    .addTag('D_TUZ')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'JWT')
+    .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup("/api/docs", app, document);
+  SwaggerModule.setup('/api/docs', app, document);
 
   const logger = new Logger();
   await app.listen(5000, () => logger.log(`Application starting ...`));

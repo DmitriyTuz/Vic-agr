@@ -3,41 +3,35 @@ import { PassportStrategy } from '@nestjs/passport';
 
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { JwtPayload } from '@src/interfaces/jwt-payload.interface';
-import {UserService} from "@src/entities/user/user.service";
+import { UserService } from '@src/entities/user/user.service';
 import { Request } from 'express';
-import {ConfigService} from "@nestjs/config";
-
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor(
+  constructor(private userService: UserService, private configService: ConfigService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: configService.get('PRIVATE_KEY'),
+    });
+  }
 
-        private userService: UserService,
-        private configService: ConfigService
-        ) {
+  async validate(payload: JwtPayload) {
+    return this.userService.getUserById(payload.id);
+  }
 
-        super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: configService.get('PRIVATE_KEY'),
-        });
+  private getTokenFromCookie(req: Request): string | null {
+    if (req?.cookies) {
+      return req.cookies['AuthorizationToken'] || null;
     }
+    return null;
+  }
 
-    async validate(payload: JwtPayload) {
-        return this.userService.getUserById(payload.id);
+  authenticate(req: Request, options?: any): any {
+    const token = this.getTokenFromCookie(req);
+    if (token) {
+      req.headers['authorization'] = `Bearer ${token}`;
     }
-
-    private getTokenFromCookie(req: Request): string | null {
-        if (req?.cookies) {
-            return req.cookies['AuthorizationToken'] || null;
-        }
-        return null;
-    }
-
-    authenticate(req: Request, options?: any): any {
-        const token = this.getTokenFromCookie(req);
-        if (token) {
-            req.headers['authorization'] = `Bearer ${token}`;
-        }
-        return super.authenticate(req, options);
-    }
+    return super.authenticate(req, options);
+  }
 }

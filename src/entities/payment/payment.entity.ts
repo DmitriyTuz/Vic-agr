@@ -1,10 +1,8 @@
-import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn} from 'typeorm';
-import {User} from "@src/entities/user/user.entity";
-
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { User } from '@src/entities/user/user.entity';
 
 @Entity({ schema: 'public', name: 'Payments' })
 export class Payment {
-
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -38,7 +36,7 @@ export class Payment {
   @Column({ type: 'integer' })
   userId: number;
 
-  @ManyToOne(() => User, user => user.payments)
+  @ManyToOne(() => User, (user) => user.payments)
   @JoinColumn({ name: 'userId' })
   user: User;
 }

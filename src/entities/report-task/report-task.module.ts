@@ -4,6 +4,6 @@ import { ReportTaskService } from './report-task.service';
 
 @Module({
   controllers: [ReportTaskController],
-  providers: [ReportTaskService]
+  providers: [ReportTaskService],
 })
 export class ReportTaskModule {}
