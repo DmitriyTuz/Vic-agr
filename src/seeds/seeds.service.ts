@@ -50,20 +50,20 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Company } from '@src/entities/company/company.entity';
-import {UserTypes} from "@lib/constants";
-import {User} from "@src/entities/user/user.entity";
-import {UserService} from "@src/entities/user/user.service";
+import { UserTypes } from '@lib/constants';
+import { User } from '@src/entities/user/user.entity';
+import { UserService } from '@src/entities/user/user.service';
 
 @Injectable()
 export class SeedsService {
   private shouldSeed: boolean = false;
 
   constructor(
-      @InjectRepository(Company)
-      private readonly companyRepository: Repository<Company>,
-      @InjectRepository(User)
-      private readonly userRepository: Repository<User>,
-      private readonly userService: UserService
+    @InjectRepository(Company)
+    private readonly companyRepository: Repository<Company>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly userService: UserService,
   ) {}
 
   enableSeeding(): void {
@@ -71,19 +71,18 @@ export class SeedsService {
   }
 
   async seedData() {
-
     const companiesData: any[] = [
       {
         logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg',
-        name: 'Company One'
+        name: 'Company One',
       },
       {
         logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg',
-        name: 'Company Two'
+        name: 'Company Two',
       },
       {
         logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg',
-        name: 'Company Three'
+        name: 'Company Three',
       },
     ];
 
@@ -92,9 +91,9 @@ export class SeedsService {
       await this.companyRepository.save(company);
     }
 
-    const companyOne = await this.companyRepository.findOne({where: {name: 'Company One'}});
-    const companyTwo = await this.companyRepository.findOne({where: {name: 'Company Two'}});
-    const companyThree = await this.companyRepository.findOne({where: {name: 'Company Three'}});
+    const companyOne = await this.companyRepository.findOne({ where: { name: 'Company One' } });
+    const companyTwo = await this.companyRepository.findOne({ where: { name: 'Company Two' } });
+    const companyThree = await this.companyRepository.findOne({ where: { name: 'Company Three' } });
 
     console.log('!!! companyOne.id', companyOne.id);
     console.log('!!! companyTwo.id', companyTwo.id);
@@ -112,22 +111,22 @@ export class SeedsService {
         password: '12345678',
         phone: '+380982920503',
         type: UserTypes.ADMIN,
-        companyId: companyOne.id
+        companyId: companyOne.id,
       },
       {
         name: 'Alex',
         password: '12345678',
         phone: '+380636446032',
         type: UserTypes.ADMIN,
-        companyId: companyTwo.id
+        companyId: companyTwo.id,
       },
       {
         name: 'Svetlana',
         password: '12345678',
         phone: '+100000000001',
         type: UserTypes.ADMIN,
-        companyId: companyThree.id
-      }
+        companyId: companyThree.id,
+      },
     ];
 
     for (const userData of usersData) {
@@ -135,9 +134,6 @@ export class SeedsService {
       await this.userRepository.save(user);
     }
 
-
-
     process.exit(0);
   }
 }
-

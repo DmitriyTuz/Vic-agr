@@ -1,4 +1,3 @@
-
 import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
 
 @ValidatorConstraint({ name: 'IsPhone', async: false })

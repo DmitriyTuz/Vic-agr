@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import _ from "underscore";
-import * as bcrypt from "bcryptjs";
+import _ from 'underscore';
+import * as bcrypt from 'bcryptjs';
 
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import { CreateUserDto } from '@src/entities/user/dto/create-user.dto';
@@ -27,7 +27,7 @@ export class UserService {
 
       const hashPassword = await bcrypt.hash(dto.password, 5);
 
-      const userForCreate = this.userRepository.create({... dto, password: hashPassword});
+      const userForCreate = this.userRepository.create({ ...dto, password: hashPassword });
 
       let user = await this.userRepository.save(userForCreate);
 
@@ -45,7 +45,7 @@ export class UserService {
   }
 
   async getUserById(id: number): Promise<User> {
-    return await this.userRepository.findOne({where: { id }});
+    return await this.userRepository.findOne({ where: { id } });
   }
 
   async getOneUser(findQuery): Promise<User> {
@@ -56,17 +56,26 @@ export class UserService {
   }
 
   getUserData(user: User) {
-    const data: any = _.pick(user, ['id', 'name', 'phone', 'type', 'tags', 'tasks', 'hasOnboard', 'companyId', 'company']);
-    data.tags = data.tags.map(tag => tag.name);
+    const data: any = _.pick(user, [
+      'id',
+      'name',
+      'phone',
+      'type',
+      'tags',
+      'tasks',
+      'hasOnboard',
+      'companyId',
+      'company',
+    ]);
+    data.tags = data.tags.map((tag) => tag.name);
     return data;
   }
 
   async findByPhone(phone: string) {
-    return await this.userRepository.findOne({where: {phone}});
+    return await this.userRepository.findOne({ where: { phone } });
   }
 
   async updateUser(user: User): Promise<User> {
     return await this.userRepository.save(user);
   }
-
 }

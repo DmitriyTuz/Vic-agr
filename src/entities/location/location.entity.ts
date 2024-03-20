@@ -1,11 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
-import {Company} from "@src/entities/company/company.entity";
-import {Task} from "@src/entities/task/task.entity";
-
+import { Company } from '@src/entities/company/company.entity';
+import { Task } from '@src/entities/task/task.entity';
 
 @Entity({ schema: 'public', name: 'MapLocation' })
 export class MapLocation {
-
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -18,7 +16,7 @@ export class MapLocation {
   @Column({ type: 'decimal' })
   lng: number;
 
-  @ManyToOne(() => Company, company => company.locations)
+  @ManyToOne(() => Company, (company) => company.locations)
   company: Company;
 
   @ManyToMany(() => Task)
@@ -26,12 +24,12 @@ export class MapLocation {
     name: 'TaskLocations',
     joinColumn: {
       name: 'locationId',
-      referencedColumnName: 'id'
+      referencedColumnName: 'id',
     },
     inverseJoinColumn: {
       name: 'taskId',
-      referencedColumnName: 'id'
-    }
+      referencedColumnName: 'id',
+    },
   })
   tasks: Task[];
 }
