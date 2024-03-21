@@ -11,7 +11,10 @@ import { UserModule } from '@src/entities/user/user.module';
 @Module({
   controllers: [PaymentController],
   providers: [PaymentService],
-  imports: [TypeOrmModule.forFeature([Payment, Company, Plan]), UserModule, StripeModule],
+  imports: [
+    TypeOrmModule.forFeature([Payment, Company, Plan]),
+    UserModule,
+    StripeModule],
   exports: [PaymentService],
 })
 export class PaymentModule {}
