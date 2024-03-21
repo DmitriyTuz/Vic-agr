@@ -9,13 +9,11 @@ export class PaymentController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/api/payment/:id/create-subscribe')
-  // async createSubscribe(@Req() req: RequestWithUser, @Res() res: Response) {
   async createSubscribe(
     @Req() req: RequestWithUser,
     @Param('id') paymentId,
     @Body() body: { planType: string; agree: boolean },
   ) {
-    // const user = await this.userService.getOneUser({id: req.user.id});
     return this.paymentService.createSubscribe(req, paymentId, body);
   }
 }

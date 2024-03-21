@@ -14,7 +14,6 @@ import { Plan } from '@src/entities/plan/plan.entity';
 import { UserService } from '@src/entities/user/user.service';
 import { StripeService } from '@src/stripe/stripe.service';
 
-
 @Injectable()
 export class PaymentService {
   private readonly logger = new Logger(PaymentService.name);
@@ -52,9 +51,11 @@ export class PaymentService {
         }
       } else {
         paymentId = parseInt(paymentId, 10);
+
         if (!paymentId) {
           throw new HttpException(`Payment-ID-not-found.`, HttpStatus.NOT_FOUND);
         }
+
         const payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
 
         if (!payment) {
