@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, EntityMetadata, FindOneOptions, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import _ from 'underscore';
 import * as bcrypt from 'bcryptjs';
@@ -7,6 +7,7 @@ import * as bcrypt from 'bcryptjs';
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import { CreateUserDto } from '@src/entities/user/dto/create-user.dto';
 import { User } from '@src/entities/user/user.entity';
+import { HelperService } from '@src/helper/helper.service';
 
 @Injectable()
 export class UserService {
@@ -16,6 +17,7 @@ export class UserService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectEntityManager() private readonly entityManager: EntityManager,
+    private readonly helperService: HelperService,
   ) {}
 
   async createUser(dto: CreateUserDto): Promise<User> {
@@ -48,11 +50,32 @@ export class UserService {
     return await this.userRepository.findOne({ where: { id } });
   }
 
-  async getOneUser(findQuery): Promise<User> {
-    return await this.userRepository.findOne({
-      where: findQuery,
-      relations: ['tags', 'company'],
-    });
+  async getOneUser(findQuery: any): Promise<User> {
+    try {
+      const selectFields: string[] = await this.helperService.getEntityFields(this.userRepository, [], true, false);
+
+      const selectObject: { [key: string]: true } = {};
+      selectFields.forEach((field) => {
+        selectObject[field] = true;
+      });
+
+      const options: FindOneOptions<User> = {
+        select: {
+          ...selectObject,
+          tags: {
+            id: true,
+            name: true,
+          },
+        },
+        where: findQuery,
+        relations: ['tags', 'company'],
+      };
+
+      return await this.userRepository.findOne(options);
+    } catch (e) {
+      this.logger.error(`Error during get user: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
+    }
   }
 
   getUserData(user: User) {

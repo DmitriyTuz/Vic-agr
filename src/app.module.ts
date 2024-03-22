@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
 import { SeedsModule } from './seeds/seeds.module';
 import { ConfigModule } from '@nestjs/config';
 import { StripeModule } from './stripe/stripe.module';
+import { HelperModule } from './helper/helper.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { StripeModule } from './stripe/stripe.module';
     AuthModule,
     SeedsModule,
     StripeModule,
+    HelperModule,
   ],
   controllers: [],
   providers: [],

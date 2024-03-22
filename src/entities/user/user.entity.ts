@@ -1,4 +1,14 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, JoinTable, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { Tag } from '@src/entities/tag/tag.entity';
@@ -32,6 +42,14 @@ export class User {
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   lastActive: Date;
+
+  @CreateDateColumn()
+  @ApiProperty({ example: '2024-03-15T10:00:00.000Z', description: 'Timestamp when user was created' })
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  @ApiProperty({ example: '2024-03-15T12:00:00.000Z', description: 'Timestamp when user was last updated' })
+  updatedAt: Date;
 
   @Column()
   companyId: number;
