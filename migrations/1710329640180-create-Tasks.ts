@@ -18,7 +18,7 @@ export class CreateTasks1710329640180 implements MigrationInterface {
                 {
                     name: 'userId',
                     type: 'int',
-                    isNullable: false,
+                    isNullable: true,
                 },
                 {
                     name: 'title',

@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { EntityManager, EntityMetadata, FindOneOptions, Repository } from 'typeorm';
+import {EntityManager, EntityMetadata, FindOneOptions, In, Like, Repository} from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import _ from 'underscore';
 import * as bcrypt from 'bcryptjs';
@@ -8,6 +8,7 @@ import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import { CreateUserDto } from '@src/entities/user/dto/create-user.dto';
 import { User } from '@src/entities/user/user.entity';
 import { HelperService } from '@src/helper/helper.service';
+import {Task} from "@src/entities/task/task.entity";
 
 @Injectable()
 export class UserService {
@@ -19,6 +20,38 @@ export class UserService {
     @InjectEntityManager() private readonly entityManager: EntityManager,
     private readonly helperService: HelperService,
   ) {}
+
+  async getAllUsers(reqBody: any): Promise<User[]> {
+    const query: any = {
+      where: {},
+      relations: ['tags', 'tasks'],
+      order: { id: 'ASC' },
+    };
+
+    if (reqBody.companyId) {
+      if (!reqBody.ids?.includes(10000)) {
+        query.where.companyId = reqBody.companyId;
+      }
+    }
+
+    if (reqBody.ids?.length) {
+      query.where.id = In(reqBody.ids);
+    }
+
+    if (reqBody.type) {
+      query.where.type = reqBody.type;
+    }
+
+    if (reqBody.search) {
+      query.where.name = Like(`%${reqBody.search}%`);
+    }
+
+    if (reqBody.limit) {
+      query.take = reqBody.limit;
+    }
+
+    return await this.userRepository.find(query);
+  }
 
   async createUser(dto: CreateUserDto): Promise<User> {
     try {
@@ -100,5 +133,56 @@ export class UserService {
 
   async updateUser(user: User): Promise<User> {
     return await this.userRepository.save(user);
+  }
+
+  async getAllWorkers(tagOptions, currentUserId) {
+    try {
+      const user = await this.getOneUser({ id: currentUserId });
+
+      let { search, ids } = tagOptions;
+      const { companyId } = user;
+
+      if (typeof ids === 'string') {
+        ids = [ids];
+      }
+
+      const workers = await this.getWorkers({ search, ids, companyId });
+
+      const response = {
+        success: true,
+        data: { workers },
+      };
+
+      return response;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async getWorkers({ ids, search, companyId }) {
+    try {
+      let query = this.userRepository
+        .createQueryBuilder('user')
+        .select(['user.id', 'user.name'])
+        .orderBy('user.name', 'ASC')
+        .take(10);
+
+      if (companyId) {
+        query = query.where('user.companyId = :companyId', { companyId });
+      }
+
+      if (ids?.length) {
+        query = query.andWhere('user.id NOT IN (:...ids)', { ids });
+      }
+
+      if (search) {
+        query = query.andWhere('user.name ILIKE :search', { search: `%${search}%` });
+      }
+
+      const users = await query.getMany();
+      return users;
+    } catch (error) {
+      throw error;
+    }
   }
 }

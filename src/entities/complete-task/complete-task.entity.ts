@@ -4,7 +4,7 @@ import { Task } from '@src/entities/task/task.entity';
 import { User } from '@src/entities/user/user.entity';
 
 @Injectable()
-@Entity({ schema: 'public', name: 'Complete-task' })
+@Entity({ schema: 'public', name: 'CompleteTasks' })
 export class CompleteTask {
   @PrimaryGeneratedColumn()
   id: number;

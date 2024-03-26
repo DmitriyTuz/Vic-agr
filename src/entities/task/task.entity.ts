@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  ManyToMany,
+  JoinTable,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { TaskStatuses } from '@lib/constants';
@@ -10,11 +19,17 @@ import { MapLocation } from '@src/entities/location/location.entity';
 import { CompleteTask } from '@src/entities/complete-task/complete-task.entity';
 import { ReportTask } from '@src/entities/report-task/report-task.entity';
 
-@Entity({ schema: 'public', name: 'Task' })
+@Entity({ schema: 'public', name: 'Tasks' })
 export class Task {
   @PrimaryGeneratedColumn()
-  @ApiProperty({ example: '1', description: 'Task unique identifier' })
+  @ApiProperty({ example: '1', description: 'Task unique id' })
   id: number;
+
+  @Column({ nullable: true })
+  userId: number;
+
+  @Column({ nullable: true })
+  companyId: number;
 
   @Column({ type: 'varchar' })
   @ApiProperty({ example: 'Task 1', description: 'Task title' })
@@ -54,6 +69,7 @@ export class Task {
 
   @ManyToOne(() => User, (user) => user.createdTasks)
   @ApiProperty({ example: '1', description: 'ID of the user who created the task' })
+  @JoinColumn({ name: 'userId' })
   creator: User;
 
   @ManyToMany(() => User, (user) => user.tasks)
