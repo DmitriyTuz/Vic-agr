@@ -21,6 +21,31 @@ export class UserService {
     private readonly helperService: HelperService,
   ) {}
 
+  async getAll(reqBody, currentUserId, req) {
+    try {
+      const user = await this.getOneUser({id: currentUserId});
+      const {companyId} = user;
+
+      const {search, type} = req.query;
+
+      const users = await this.getAllUsers({search, type, companyId});
+      const returnedUsers = [];
+      for (const u of users) {
+        returnedUsers.push(this.getUserData(u));
+      }
+
+      const filterCounts = await this.getFilterCount(companyId);
+
+      return {
+        success: true,
+        data: {users: returnedUsers, filterCounts}
+      };
+
+    } catch (err) {
+      throw err;
+    }
+  }
+
   async getAllUsers(reqBody: any): Promise<User[]> {
     const query: any = {
       where: {},
@@ -51,6 +76,32 @@ export class UserService {
     }
 
     return await this.userRepository.find(query);
+  }
+
+  async getFilterCount(companyId) {
+    const users = await this.getAllUsers({companyId});
+    const groupUsers = _.groupBy(users, 'type');
+
+    const filterCounts = {
+      admins: 0,
+      managers: 0,
+      workers: 0,
+      all: 0
+    };
+
+    for (const type in groupUsers) {
+      filterCounts[`${type.toLowerCase()}s`] = groupUsers[type].length;
+    }
+
+    let all = 0
+
+    for (const type in filterCounts) {
+      all += filterCounts[type];
+    }
+
+    filterCounts.all = all;
+
+    return filterCounts;
   }
 
   async createUser(dto: CreateUserDto): Promise<User> {
@@ -185,4 +236,29 @@ export class UserService {
       throw error;
     }
   }
+
+  async updateOnboardUser(currentUserId) {
+    try {
+      const user = await this.getOneUser({id: currentUserId});
+
+      if (!user) {
+        throw ({status: 404, message: '404-user-not-found', stack: new Error().stack});
+      }
+
+      await this.updateOnboard(user);
+
+      return {
+        success: true,
+        notice: '200-user-has-been-removed-successfully',
+        userId: currentUserId
+      };
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async updateOnboard(user: User): Promise<void> {
+    await this.userRepository.update(user.id, { hasOnboard: true });
+  }
+
 }

@@ -62,11 +62,9 @@ export class TaskService {
   async getAllTasks(reqBody): Promise<Task[]> {
     const query: FindManyOptions<Task> = {
       where: {},
-      relations: ['reportInfo', 'completeInfo', 'creator', 'tags', 'mapLocations'],
+      relations: ['reportInfo', 'completeInfo', 'creator', 'tags', 'mapLocation'],
       order: { dueDate: 'ASC' },
     };
-
-
 
     if (reqBody.companyId) {
       query.where = { ...query.where, companyId: reqBody.companyId };

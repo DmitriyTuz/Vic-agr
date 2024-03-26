@@ -43,6 +43,9 @@ export class User {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   lastActive: Date;
 
+  @Column({ default: false })
+  hasOnboard: boolean;
+
   @CreateDateColumn()
   @ApiProperty({ example: '2024-03-15T10:00:00.000Z', description: 'Timestamp when user was created' })
   createdAt: Date;
