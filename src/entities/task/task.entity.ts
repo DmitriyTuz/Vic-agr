@@ -6,7 +6,7 @@ import {
   ManyToMany,
   JoinTable,
   OneToMany,
-  JoinColumn,
+  JoinColumn, CreateDateColumn, UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -63,6 +63,14 @@ export class Task {
   @ApiProperty({ example: 'Date when the task was completed', description: 'Task completed date' })
   completedAt: Date;
 
+  @CreateDateColumn()
+  @ApiProperty({ example: '2024-03-15T10:00:00.000Z', description: 'Timestamp when user was created' })
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  @ApiProperty({ example: '2024-03-15T12:00:00.000Z', description: 'Timestamp when user was last updated' })
+  updatedAt: Date;
+
   @Column({ type: 'date', nullable: true })
   @ApiProperty({ example: 'Due date of the task', description: 'Task due date' })
   dueDate: Date;
@@ -86,7 +94,7 @@ export class Task {
 
   @ManyToMany(() => MapLocation, (location) => location.tasks)
   @ApiProperty({ type: () => MapLocation, isArray: true, description: 'Map locations associated with the task' })
-  mapLocations: MapLocation[];
+  mapLocation: MapLocation[];
 
   @OneToMany(() => CompleteTask, (completeTask) => completeTask.task)
   @ApiProperty({ type: () => CompleteTask, isArray: true, description: 'Complete task information' })

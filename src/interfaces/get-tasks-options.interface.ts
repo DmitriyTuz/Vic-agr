@@ -3,7 +3,7 @@ export interface GetTasksOptionsInterface {
   status?: string;
   date?: Date;
   type?: string;
-  location?: string;
+  location?: object;
   tags?: string;
   companyId?: number;
   userId?: number;
