@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTabl
 import { Company } from '@src/entities/company/company.entity';
 import { Task } from '@src/entities/task/task.entity';
 
-@Entity({ schema: 'public', name: 'MapLocation' })
+@Entity({ schema: 'public', name: 'MapLocations' })
 export class MapLocation {
   @PrimaryGeneratedColumn()
   id: number;
@@ -19,7 +19,7 @@ export class MapLocation {
   @ManyToOne(() => Company, (company) => company.locations)
   company: Company;
 
-  @ManyToMany(() => Task)
+  @ManyToMany(() => Task, (task) => task.mapLocations)
   @JoinTable({
     name: 'TaskLocations',
     joinColumn: {

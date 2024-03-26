@@ -2,7 +2,7 @@ import { Controller, Get, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { TagService } from '@src/entities/tag/tag.service';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
-import { TagOptions } from '@src/interfaces/tag-options.interface';
+import { GetTagsOptions } from '@src/interfaces/get-tags-options.interface';
 
 @Controller()
 export class TagController {
@@ -10,7 +10,7 @@ export class TagController {
 
   @Get('/api/tags')
   @UseGuards(JwtAuthGuard)
-  async getAllTags(@Query() tagOptions: TagOptions, @Req() req: RequestWithUser) {
-    return this.tagService.getAllTags(tagOptions, req);
+  async getAllTags(@Query() reqQuery: GetTagsOptions, @Req() req: RequestWithUser) {
+    return this.tagService.getAllTags(reqQuery, req.user.id);
   }
 }

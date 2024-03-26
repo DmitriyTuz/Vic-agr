@@ -1,29 +1,31 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import _ from 'underscore';
 
-import { TagOptions } from '@src/interfaces/tag-options.interface';
-import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
+import { GetTagsOptions } from '@src/interfaces/get-tags-options.interface';
 
 import { Tag } from '@src/entities/tag/tag.entity';
 
 import { UserService } from '@src/entities/user/user.service';
+import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 
 @Injectable()
 export class TagService {
+  private readonly logger = new Logger(TagService.name);
+
   constructor(
     @InjectRepository(Tag)
     private tagRepository: Repository<Tag>,
     private userService: UserService,
   ) {}
 
-  async getAllTags(tagOptions: TagOptions, req: RequestWithUser) {
+  async getAllTags(reqQuery: GetTagsOptions, currentUserId) {
     try {
-      const user = await this.userService.getOneUser({ id: req.user.id });
+      const user = await this.userService.getOneUser({ id: currentUserId });
 
-      let { names, search } = tagOptions;
+      let { names, search } = reqQuery;
       const { companyId } = user;
 
       if (Array.isArray(names)) {
@@ -59,8 +61,9 @@ export class TagService {
       };
 
       return response;
-    } catch (err) {
-      throw err;
+    } catch (e) {
+      this.logger.error(`Error during get all tags: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
