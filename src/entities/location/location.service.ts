@@ -1,24 +1,23 @@
-import {HttpStatus, Injectable, Logger} from '@nestjs/common';
-import {UserService} from "@src/entities/user/user.service";
-import {InjectRepository} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
-import {MapLocation} from "@src/entities/location/location.entity";
-import {CustomHttpException} from "@src/exceptions/сustomHttp.exception";
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { UserService } from '@src/entities/user/user.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { MapLocation } from '@src/entities/location/location.entity';
+import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 
 @Injectable()
 export class LocationService {
-
   private readonly logger = new Logger(LocationService.name);
 
   constructor(
-      @InjectRepository(MapLocation)
-      private locationRepository: Repository<MapLocation>,
-      private userService: UserService) {}
+    @InjectRepository(MapLocation)
+    private locationRepository: Repository<MapLocation>,
+    private userService: UserService,
+  ) {}
 
   async getAll(currentUserId: number) {
     try {
-
-      const user = await this.userService.getOneUser({id: currentUserId});
+      const user = await this.userService.getOneUser({ id: currentUserId });
 
       // const locations = await this.getAllLocations({companyId: user.companyId});
       const locations = await this.getAllLocations(user.companyId);
@@ -28,10 +27,10 @@ export class LocationService {
       }));
       const response = {
         success: true,
-        data: {locations: returningLocations}
+        data: { locations: returningLocations },
       };
 
-      return response
+      return response;
     } catch (e) {
       this.logger.error(`Error during get all locations: ${e.message}`);
       throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
@@ -54,10 +53,9 @@ export class LocationService {
   // }
 
   async getAllLocations(companyId: number): Promise<MapLocation[]> {
-
     const query: any = {
       select: ['id', 'lat', 'lng'],
-      where: {}
+      where: {},
     };
 
     if (companyId) {

@@ -6,7 +6,9 @@ import {
   ManyToMany,
   JoinTable,
   OneToMany,
-  JoinColumn, CreateDateColumn, UpdateDateColumn,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 

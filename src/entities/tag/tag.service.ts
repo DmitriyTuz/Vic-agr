@@ -1,15 +1,16 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import {FindManyOptions, In, Like, Not, Repository} from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import _ from 'underscore';
 
-import { GetTagsOptions } from '@src/interfaces/get-tags-options.interface';
+import { GetTagsOptionsInterface } from '@src/interfaces/get-tags-options.interface';
 
 import { Tag } from '@src/entities/tag/tag.entity';
 
 import { UserService } from '@src/entities/user/user.service';
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
+import {User} from "@src/entities/user/user.entity";
 
 @Injectable()
 export class TagService {
@@ -21,35 +22,15 @@ export class TagService {
     private userService: UserService,
   ) {}
 
-  async getAllTags(reqQuery: GetTagsOptions, currentUserId) {
+  async getAll(reqQuery: GetTagsOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { tags: Tag[]; } }> {
     try {
-      const user = await this.userService.getOneUser({ id: currentUserId });
+      const user: User = await this.userService.getOneUser({ id: currentUserId });
 
       let { names, search } = reqQuery;
       const { companyId } = user;
 
-      if (Array.isArray(names)) {
-        names = names.map((name) => name.toLowerCase());
-      } else if (typeof names === 'string') {
-        names = [names.toLowerCase()];
-      }
-
-      const query: any = {
-        select: ['id', 'name'],
-        order: { name: 'ASC' },
-        where: {},
-      };
-
-      if (companyId) {
-        query.where.companyId = companyId;
-      }
-
-      query.take = 10;
-      query.where.name = names && names.length > 0 ? { $notIn: names } : {};
-      query.where.name = { $like: `%${search}%` };
-
-      let tags = await this.tagRepository.find(query);
-      const returnedTags = [];
+      const tags: Tag[] = await this.getAllTags({names, action: 'GetAll', search, companyId});
+      const returnedTags: Tag[] = [];
 
       for (const t of tags) {
         returnedTags.push(await this.getTagData(t));
@@ -65,6 +46,38 @@ export class TagService {
       this.logger.error(`Error during get all tags: ${e.message}`);
       throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
+  }
+
+  async getAllTags(options: GetTagsOptionsInterface): Promise<Tag[]> {
+    const query: FindManyOptions<Tag> = {
+      select: ['id', 'name'],
+      order: { name: 'ASC' },
+      where: {},
+    };
+
+    if (options.companyId) {
+      query.where = { ...(query.where || {}), companyId: options.companyId };
+      console.log('!!! 1 options.companyId = ', options.companyId)
+    }
+
+    if (options.action === 'GetAll') {
+      if (options.names?.length) {
+        // if (options.names && options.names.length > 0) {
+
+        if (Array.isArray(options.names)) {
+          options.names = options.names.map((name) => name.toLowerCase());
+        } else if (typeof options.names === 'string') {
+          options.names = [options.names.toLowerCase()];
+        }
+        query.where = { ...(query.where || {}), name: Not(In(options.names)) };
+        query.where = { ...(query.where || {}), name: Like(`%${options.search}%`) };
+      }
+
+      query.take = 10;
+      console.log('!!! 2 options.names = ', options.names)
+    }
+
+    return this.tagRepository.find(query);
   }
 
   async getTagData(tag) {
@@ -86,4 +99,5 @@ export class TagService {
       return '';
     }
   }
+
 }

@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import {EntityManager, EntityMetadata, FindOneOptions, In, Like, Repository} from 'typeorm';
+import { EntityManager, EntityMetadata, FindOneOptions, In, Like, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import _ from 'underscore';
 import * as bcrypt from 'bcryptjs';
@@ -8,7 +8,21 @@ import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import { CreateUserDto } from '@src/entities/user/dto/create-user.dto';
 import { User } from '@src/entities/user/user.entity';
 import { HelperService } from '@src/helper/helper.service';
-import {Task} from "@src/entities/task/task.entity";
+import { Task } from '@src/entities/task/task.entity';
+import { Company } from '@src/entities/company/company.entity';
+import {GetUsersOptionsInterface} from "@src/interfaces/get-users-options.interface";
+
+type UserDataType = {
+  id: number;
+  name: string;
+  phone: string;
+  type: string;
+  tasks: Task[];
+  hasOnboard: boolean;
+  companyId: number;
+  company: Company;
+  tags: string[];
+};
 
 @Injectable()
 export class UserService {
@@ -23,12 +37,12 @@ export class UserService {
 
   async getAll(reqBody, currentUserId, req) {
     try {
-      const user = await this.getOneUser({id: currentUserId});
-      const {companyId} = user;
+      const user = await this.getOneUser({ id: currentUserId });
+      const { companyId } = user;
 
-      const {search, type} = req.query;
+      const { search, type } = req.query;
 
-      const users = await this.getAllUsers({search, type, companyId});
+      const users = await this.getAllUsers({ search, type, companyId });
       const returnedUsers = [];
       for (const u of users) {
         returnedUsers.push(this.getUserData(u));
@@ -38,9 +52,8 @@ export class UserService {
 
       return {
         success: true,
-        data: {users: returnedUsers, filterCounts}
+        data: { users: returnedUsers, filterCounts },
       };
-
     } catch (e) {
       this.logger.error(`Error during get all users: ${e.message}`);
       throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
@@ -80,21 +93,21 @@ export class UserService {
   }
 
   async getFilterCount(companyId) {
-    const users = await this.getAllUsers({companyId});
+    const users = await this.getAllUsers({ companyId });
     const groupUsers = _.groupBy(users, 'type');
 
     const filterCounts = {
       admins: 0,
       managers: 0,
       workers: 0,
-      all: 0
+      all: 0,
     };
 
     for (const type in groupUsers) {
       filterCounts[`${type.toLowerCase()}s`] = groupUsers[type].length;
     }
 
-    let all = 0
+    let all = 0;
 
     for (const type in filterCounts) {
       all += filterCounts[type];
@@ -135,16 +148,17 @@ export class UserService {
     return await this.userRepository.findOne({ where: { id } });
   }
 
-  async getOneUser(findQuery: any): Promise<User> {
+  async getOneUser(findQuery: GetUsersOptionsInterface): Promise<User> {
     try {
       const selectFields: string[] = await this.helperService.getEntityFields(this.userRepository, [], true, false);
+      const selectObject: Record<string, true> = {};
+      // const selectObject: { [key: string]: true } = {};
 
-      const selectObject: { [key: string]: true } = {};
       selectFields.forEach((field) => {
         selectObject[field] = true;
       });
 
-      const options: FindOneOptions<User> = {
+      const query: FindOneOptions<User> = {
         select: {
           ...selectObject,
           tags: {
@@ -156,27 +170,44 @@ export class UserService {
         relations: ['tags', 'company'],
       };
 
-      return await this.userRepository.findOne(options);
+      return await this.userRepository.findOne(query);
     } catch (e) {
       this.logger.error(`Error during get user: ${e.message}`);
       throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
-  getUserData(user: User) {
-    const data: any = _.pick(user, [
-      'id',
-      'name',
-      'phone',
-      'type',
-      'tags',
-      'tasks',
-      'hasOnboard',
-      'companyId',
-      'company',
-    ]);
-    data.tags = data.tags.map((tag) => tag.name);
-    return data;
+  // getUserData(user: User) {
+  //   const data: any = _.pick(user, [
+  //     'id',
+  //     'name',
+  //     'phone',
+  //     'type',
+  //     'tags',
+  //     'tasks',
+  //     'hasOnboard',
+  //     'companyId',
+  //     'company',
+  //   ]);
+  //   data.tags = data.tags.map((tag) => tag.name);
+  //   return data;
+  // }
+
+  getUserData(user: User): UserDataType {
+    const { id, name, phone, type, tags, tasks, hasOnboard, companyId, company } = user;
+    const tagNames = tags.map((tag) => tag.name);
+
+    return {
+      id,
+      name,
+      phone,
+      type,
+      tags: tagNames,
+      tasks,
+      hasOnboard,
+      companyId,
+      company,
+    };
   }
 
   async findByPhone(phone: string) {
@@ -214,10 +245,10 @@ export class UserService {
 
   async getWorkers({ ids, search, companyId }) {
     let query = this.userRepository
-        .createQueryBuilder('user')
-        .select(['user.id', 'user.name'])
-        .orderBy('user.name', 'ASC')
-        .take(10);
+      .createQueryBuilder('user')
+      .select(['user.id', 'user.name'])
+      .orderBy('user.name', 'ASC')
+      .take(10);
 
     if (companyId) {
       query = query.where('user.companyId = :companyId', { companyId });
@@ -237,10 +268,10 @@ export class UserService {
 
   async updateOnboardUser(currentUserId) {
     try {
-      const user = await this.getOneUser({id: currentUserId});
+      const user = await this.getOneUser({ id: currentUserId });
 
       if (!user) {
-        throw ({status: 404, message: '404-user-not-found', stack: new Error().stack});
+        throw { status: 404, message: '404-user-not-found', stack: new Error().stack };
       }
 
       await this.updateOnboard(user);
@@ -248,7 +279,7 @@ export class UserService {
       return {
         success: true,
         notice: '200-user-has-been-removed-successfully',
-        userId: currentUserId
+        userId: currentUserId,
       };
     } catch (e) {
       this.logger.error(`Error during update onboard user: ${e.message}`);
@@ -259,5 +290,4 @@ export class UserService {
   async updateOnboard(user: User): Promise<void> {
     await this.userRepository.update(user.id, { hasOnboard: true });
   }
-
 }

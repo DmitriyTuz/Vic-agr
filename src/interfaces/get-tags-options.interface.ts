@@ -1,4 +1,4 @@
-export interface GetTagsOptions {
+export interface GetTagsOptionsInterface {
   names?: string[] | string | undefined;
   action?: string;
   search?: string;

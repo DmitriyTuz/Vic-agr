@@ -1,10 +1,14 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { EntityMetadata, Repository } from 'typeorm';
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
+
+interface ColumnMetadata {
+  propertyName: string;
+}
 
 @Injectable()
 export class HelperService {
-  private readonly logger = new Logger(HelperService.name);
+  private readonly logger: Logger = new Logger(HelperService.name);
 
   async getEntityFields(
     entityRepository: Repository<any>,
@@ -13,12 +17,11 @@ export class HelperService {
     isAttributes: boolean,
   ): Promise<string[]> {
     try {
-      const entityMetadata = entityRepository.metadata;
-      let attributes: string[] = [];
-      const columns = entityMetadata.columns;
+      const entityMetadata: EntityMetadata = entityRepository.metadata;
+      const columns: ColumnMetadata[] = entityMetadata.columns;
 
       let activeFields: string[] = [];
-      const notUpdatedFields = ['id', 'createdAt', 'updatedAt'];
+      const notUpdatedFields: string[] = ['id', 'createdAt', 'updatedAt'];
 
       if (!allFields) {
         activeFields = activeFields.concat(notUpdatedFields);
@@ -26,14 +29,18 @@ export class HelperService {
 
       activeFields = activeFields.concat(unnecessaryFields);
 
-      for (const column of columns) {
-        if (!activeFields.includes(column.propertyName)) {
-          attributes.push(column.propertyName);
-        }
-      }
+      const attributes: string[] = columns
+        .filter((column) => !activeFields.includes(column.propertyName))
+        .map((column) => column.propertyName);
+
+      // for (const column of columns) {
+      //   if (!activeFields.includes(column.propertyName)) {
+      //     attributes.push(column.propertyName);
+      //   }
+      // }
 
       if (isAttributes) {
-        const datesList = ['completedAt', 'createdAt', 'updatedAt', 'registrationDate', 'lastActive'];
+        const datesList: string[] = ['completedAt', 'createdAt', 'updatedAt', 'registrationDate', 'lastActive'];
         attributes.forEach((attr, index) => {
           if (datesList.includes(attr)) {
             attributes[index] = `${attr} * 1000`;
