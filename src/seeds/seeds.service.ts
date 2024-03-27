@@ -7,7 +7,7 @@ import { User } from '@src/entities/user/user.entity';
 import { UserService } from '@src/entities/user/user.service';
 import { Tag } from '@src/entities/tag/tag.entity';
 import { Task } from '@src/entities/task/task.entity';
-import {TaskService} from "@src/entities/task/task.service";
+import { TaskService } from '@src/entities/task/task.service';
 
 @Injectable()
 export class SeedsService {
@@ -173,16 +173,21 @@ export class SeedsService {
       await this.taskRepository.save(task);
     }
 
-    const task = await this.taskRepository.findOne({ where: { status: TaskStatuses.WAITING, companyId: Michael.companyId } });
-    const workers = await this.userRepository.find({ where: { type: UserTypes.WORKER, companyId: Michael.companyId }, select: ['id'] });
-    const workersIds = workers.map(w => w.id);
+    const task = await this.taskRepository.findOne({
+      where: { status: TaskStatuses.WAITING, companyId: Michael.companyId },
+    });
+    const workers = await this.userRepository.find({
+      where: { type: UserTypes.WORKER, companyId: Michael.companyId },
+      select: ['id'],
+    });
+    const workersIds = workers.map((w) => w.id);
 
-    const tags = ['admin', 'manager']
+    const tags = ['admin', 'manager'];
     const mapLocations = [
-      {lat: 20, lng: 10},
-      {lat: 27, lng: 11},
-      {lat: 27, lng: 10},
-    ]
+      { lat: 20, lng: 10 },
+      { lat: 27, lng: 11 },
+      { lat: 27, lng: 10 },
+    ];
 
     await this.taskService.checkUsersInTask(task, workersIds);
 

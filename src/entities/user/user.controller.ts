@@ -1,4 +1,16 @@
-import {Body, Controller, Get, HttpException, Patch, Post, Query, Req, Res, UseGuards, UsePipes} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  Patch,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+  UsePipes,
+} from '@nestjs/common';
 import { UserService } from '@src/entities/user/user.service';
 import { CreateUserDto } from '@src/entities/user/dto/create-user.dto';
 import { User } from '@src/entities/user/user.entity';
@@ -7,7 +19,7 @@ import { ValidationPipe } from '@src/pipes/validation.pipe';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { WorkerTagsOptions } from '@src/interfaces/worker-tags-options.interface';
 import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
-import {UsersOptions} from "@src/interfaces/get-users-options.interface";
+import { GetUsersOptionsInterface } from '@src/interfaces/get-users-options.interface';
 
 @ApiTags('Users')
 @Controller()
@@ -24,7 +36,7 @@ export class UserController {
 
   @Get('/api/users')
   @UseGuards(JwtAuthGuard)
-  getAll(@Body() reqBody: UsersOptions, @Req() req: RequestWithUser) {
+  getAll(@Body() reqBody: GetUsersOptionsInterface, @Req() req: RequestWithUser) {
     return this.userService.getAll(reqBody, req.user.id, req);
   }
 

@@ -1,16 +1,16 @@
-import {HttpStatus, Injectable, Logger} from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 
 import { GetTasksOptionsInterface } from '@src/interfaces/get-tasks-options.interface';
 import { Task } from '@src/entities/task/task.entity';
 import { TaskStatuses, TaskTypes, UserTypes } from '@lib/constants';
-import {FindManyOptions, In, Not, Repository} from 'typeorm';
+import { FindManyOptions, In, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import _ from 'underscore';
 import * as moment from 'moment';
 import { UserService } from '@src/entities/user/user.service';
-import {User} from "@src/entities/user/user.entity";
-import {CustomHttpException} from "@src/exceptions/сustomHttp.exception";
+import { User } from '@src/entities/user/user.entity';
+import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 
 @Injectable()
 export class TaskService {
@@ -181,18 +181,20 @@ export class TaskService {
   }
 
   async checkUsersInTask(task: Task, usersIds: number[]) {
-    const newUsers = usersIds?.length ? await this.userRepository.find({
-      where: {
-        companyId: task.companyId,
-        id: In(usersIds)
-      }
-    }) : [];
+    const newUsers = usersIds?.length
+      ? await this.userRepository.find({
+          where: {
+            companyId: task.companyId,
+            id: In(usersIds),
+          },
+        })
+      : [];
 
     if (newUsers.length !== usersIds.length) {
       throw { status: 422, message: `422-assigned-user-not-found`, stack: new Error().stack };
     }
 
-    let taskUsersIds = task?.workers?.map(u => u.id) || [];
+    let taskUsersIds = task?.workers?.map((u) => u.id) || [];
 
     for (const u of newUsers) {
       if (!taskUsersIds.includes(u.id)) {
@@ -206,7 +208,7 @@ export class TaskService {
 
     if (taskUsersIds.length) {
       for (const userId of taskUsersIds) {
-        const userIndex = task.workers.findIndex(u => u.id === userId);
+        const userIndex = task.workers.findIndex((u) => u.id === userId);
         if (userIndex !== -1) {
           task.workers.splice(userIndex, 1);
         }

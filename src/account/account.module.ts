@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { AccountController } from './account.controller';
-import { AccountService } from './account.service';
+import { AccountService } from '@src/account/account.service';
+import { AccountController } from '@src/account/account.controller';
 import { UserModule } from '@src/entities/user/user.module';
 import { PaymentModule } from '@src/entities/payment/payment.module';
 
