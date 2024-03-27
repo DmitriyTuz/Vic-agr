@@ -18,7 +18,7 @@ export class HelperService {
       const columns = entityMetadata.columns;
 
       let activeFields: string[] = [];
-      const notUpdatedFields = ['createdAt', 'updatedAt'];
+      const notUpdatedFields = ['id', 'createdAt', 'updatedAt'];
 
       if (!allFields) {
         activeFields = activeFields.concat(notUpdatedFields);

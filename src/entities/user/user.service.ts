@@ -41,8 +41,9 @@ export class UserService {
         data: {users: returnedUsers, filterCounts}
       };
 
-    } catch (err) {
-      throw err;
+    } catch (e) {
+      this.logger.error(`Error during get all users: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
@@ -205,36 +206,33 @@ export class UserService {
       };
 
       return response;
-    } catch (err) {
-      throw err;
+    } catch (e) {
+      this.logger.error(`Error during get all workers: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
   async getWorkers({ ids, search, companyId }) {
-    try {
-      let query = this.userRepository
+    let query = this.userRepository
         .createQueryBuilder('user')
         .select(['user.id', 'user.name'])
         .orderBy('user.name', 'ASC')
         .take(10);
 
-      if (companyId) {
-        query = query.where('user.companyId = :companyId', { companyId });
-      }
-
-      if (ids?.length) {
-        query = query.andWhere('user.id NOT IN (:...ids)', { ids });
-      }
-
-      if (search) {
-        query = query.andWhere('user.name ILIKE :search', { search: `%${search}%` });
-      }
-
-      const users = await query.getMany();
-      return users;
-    } catch (error) {
-      throw error;
+    if (companyId) {
+      query = query.where('user.companyId = :companyId', { companyId });
     }
+
+    if (ids?.length) {
+      query = query.andWhere('user.id NOT IN (:...ids)', { ids });
+    }
+
+    if (search) {
+      query = query.andWhere('user.name ILIKE :search', { search: `%${search}%` });
+    }
+
+    const users = await query.getMany();
+    return users;
   }
 
   async updateOnboardUser(currentUserId) {
@@ -252,8 +250,9 @@ export class UserService {
         notice: '200-user-has-been-removed-successfully',
         userId: currentUserId
       };
-    } catch (err) {
-      throw err;
+    } catch (e) {
+      this.logger.error(`Error during update onboard user: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import {HttpStatus, Injectable, Logger} from '@nestjs/common';
 
 import { GetTasksOptionsInterface } from '@src/interfaces/get-tasks-options.interface';
 import { Task } from '@src/entities/task/task.entity';
@@ -10,9 +10,12 @@ import _ from 'underscore';
 import * as moment from 'moment';
 import { UserService } from '@src/entities/user/user.service';
 import {User} from "@src/entities/user/user.entity";
+import {CustomHttpException} from "@src/exceptions/сustomHttp.exception";
 
 @Injectable()
 export class TaskService {
+  private readonly logger = new Logger(TaskService.name);
+
   constructor(
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
@@ -54,8 +57,9 @@ export class TaskService {
         success: true,
         data: { tasks: returnedTasks, filterCounts },
       };
-    } catch (err) {
-      throw err;
+    } catch (e) {
+      this.logger.error(`Error during get all tasks: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
