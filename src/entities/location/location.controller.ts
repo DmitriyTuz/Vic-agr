@@ -6,8 +6,7 @@ import {RequestWithUser} from "@src/interfaces/add-field-user-to-Request.interfa
 @Controller()
 export class LocationController {
 
-  constructor(private locationService: LocationService,
-              ) {}
+  constructor(private locationService: LocationService) {}
 
   @Get('/api/locations')
   @UseGuards(JwtAuthGuard)
