@@ -1,4 +1,4 @@
-export interface GetFilterCountResponseInterface {
+export interface GetFilterCountUsersResponseInterface {
   admins: number;
   managers: number;
   workers: number;
