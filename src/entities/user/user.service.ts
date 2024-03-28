@@ -21,7 +21,8 @@ import { Task } from '@src/entities/task/task.entity';
 import { Company } from '@src/entities/company/company.entity';
 import {GetUsersOptionsInterface} from "@src/interfaces/get-users-options.interface";
 import {Tag} from "@src/entities/tag/tag.entity";
-import {GetFilterCountResponseInterface} from "@src/interfaces/get-filterCount-response.interface";
+import {GetFilterCountUsersResponseInterface} from "@src/interfaces/get-filterCountUsers-response.interface";
+import {UserDataInterface} from "@src/interfaces/user-data.interface";
 
 
 type UserDataType = {
@@ -47,7 +48,7 @@ export class UserService {
     private readonly helperService: HelperService,
   ) {}
 
-  async getAll(reqQuery: GetUsersOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { users: UserDataType[], filterCounts: GetFilterCountResponseInterface; } }> {
+  async getAll(reqQuery: GetUsersOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { users: UserDataInterface[], filterCounts: GetFilterCountUsersResponseInterface; } }> {
     try {
       const user: User = await this.getOneUser({ id: currentUserId });
       const { companyId } = user;
@@ -55,12 +56,12 @@ export class UserService {
       const { search, type } = reqQuery;
 
       const users: User[] = await this.getAllUsers({ search, type, companyId });
-      const returnedUsers: UserDataType[] = [];
+      const returnedUsers: UserDataInterface[] = [];
       for (const u of users) {
         returnedUsers.push(this.getUserData(u));
       }
 
-      const filterCounts: GetFilterCountResponseInterface = await this.getFilterCountUsers(companyId);
+      const filterCounts: GetFilterCountUsersResponseInterface = await this.getFilterCountUsers(companyId);
 
       return {
         success: true,
@@ -107,11 +108,11 @@ export class UserService {
     return await this.userRepository.find(query);
   }
 
-  async getFilterCountUsers(companyId: number): Promise<GetFilterCountResponseInterface> {
+  async getFilterCountUsers(companyId: number): Promise<GetFilterCountUsersResponseInterface> {
     const users: User[] = await this.getAllUsers({ companyId });
     const groupUsers: _.Dictionary<User[]> = _.groupBy(users, 'type');
 
-    const filterCounts: GetFilterCountResponseInterface = {
+    const filterCounts: GetFilterCountUsersResponseInterface = {
       admins: 0,
       managers: 0,
       workers: 0,
@@ -203,6 +204,14 @@ export class UserService {
     }
   }
 
+  getUserData(user: User): UserDataInterface {
+    const data: Partial<UserDataInterface> = _.pick(user, ['id', 'name', 'phone', 'type', 'tags', 'tasks', 'hasOnboard', 'companyId', 'company']);
+    data.tags = data.tags as string[];
+    // data.tags = data.tags.map((tag: { name: string }) => tag.name);
+    // data.tags = data.tags.map((tag: any) => tag.name);
+    return data as UserDataInterface;
+  }
+
   // getUserData(user: User) {
   //   const data: any = _.pick(user, [
   //     'id',
@@ -219,22 +228,22 @@ export class UserService {
   //   return data;
   // }
 
-  getUserData(user: User): UserDataType {
-    const { id, name, phone, type, tags, tasks, hasOnboard, companyId, company } = user;
-    const tagNames = tags.map((tag) => tag.name);
-
-    return {
-      id,
-      name,
-      phone,
-      type,
-      tags: tagNames,
-      tasks,
-      hasOnboard,
-      companyId,
-      company,
-    };
-  }
+  // getUserData(user: User): UserDataType {
+  //   const { id, name, phone, type, tags, tasks, hasOnboard, companyId, company } = user;
+  //   const tagNames = tags.map((tag) => tag.name);
+  //
+  //   return {
+  //     id,
+  //     name,
+  //     phone,
+  //     type,
+  //     tags: tagNames,
+  //     tasks,
+  //     hasOnboard,
+  //     companyId,
+  //     company,
+  //   };
+  // }
 
   async findByPhone(phone: string) {
     return await this.userRepository.findOne({ where: { phone } });
