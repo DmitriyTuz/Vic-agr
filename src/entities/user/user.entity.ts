@@ -80,7 +80,7 @@ export class User {
   @OneToMany(() => Task, (task) => task.creator)
   createdTasks: Task[];
 
-  @ManyToMany(() => Task)
+  @ManyToMany(() => Task, (task) => task.workers)
   @JoinTable({
     name: 'UserTasks',
     joinColumn: {

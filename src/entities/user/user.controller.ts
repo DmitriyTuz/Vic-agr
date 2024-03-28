@@ -17,7 +17,6 @@ import { User } from '@src/entities/user/user.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ValidationPipe } from '@src/pipes/validation.pipe';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
-import { WorkerTagsOptions } from '@src/interfaces/worker-tags-options.interface';
 import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
 import { GetUsersOptionsInterface } from '@src/interfaces/get-users-options.interface';
 
@@ -36,8 +35,8 @@ export class UserController {
 
   @Get('/api/users')
   @UseGuards(JwtAuthGuard)
-  getAll(@Body() reqBody: GetUsersOptionsInterface, @Req() req: RequestWithUser) {
-    return this.userService.getAll(reqBody, req.user.id, req);
+  getAll(@Query() reqQuery: GetUsersOptionsInterface, @Req() req: RequestWithUser) {
+    return this.userService.getAll(reqQuery, req.user.id);
   }
 
   @Get('get-all-users')
@@ -48,8 +47,8 @@ export class UserController {
 
   @Get('/api/worker-tags')
   @UseGuards(JwtAuthGuard)
-  async getAllWorkers(@Query() workerOptions: WorkerTagsOptions, @Req() req: RequestWithUser) {
-    return this.userService.getAllWorkers(workerOptions, req.user.id);
+  async getWorkers(@Query() workerOptions: GetUsersOptionsInterface, @Req() req: RequestWithUser) {
+    return this.userService.getWorkers(workerOptions, req.user.id);
   }
 
   @Patch('api/users/onboard')

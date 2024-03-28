@@ -55,7 +55,7 @@ export class SeedsService {
     // const companyTwo = await this.companyRepository.findOne({ where: { name: 'Company Two' } });
     // const companyThree = await this.companyRepository.findOne({ where: { name: 'Company Three' } });
     //
-    // const usersData: any[] = [
+    // const usersAdminData: any[] = [
     //   {
     //     name: 'Super Admin',
     //     password: '12345678',
@@ -85,7 +85,7 @@ export class SeedsService {
     //   },
     // ];
     //
-    // for (const userData of usersData) {
+    // for (const userData of usersAdminData) {
     //   const user = await this.userService.createUser(userData);
     //   await this.userRepository.save(user);
     // }
@@ -116,80 +116,116 @@ export class SeedsService {
     //   await this.tagRepository.save(tag);
     // }
 
-    const tasksData = [
+    // const tasksData = [
+    //   {
+    //     userId: Michael.id,
+    //     title: 'Test Task 1',
+    //     type: TaskTypes.LOW,
+    //     executionTime: 8,
+    //     comment:
+    //       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris',
+    //     mediaInfo: [],
+    //     documentsInfo: [],
+    //     status: TaskStatuses.ACTIVE,
+    //     companyId: Michael.companyId,
+    //   },
+    //   {
+    //     userId: Michael.id,
+    //     title: 'Test Task 2',
+    //     type: TaskTypes.HIGH,
+    //     executionTime: 10,
+    //     comment:
+    //       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris',
+    //     mediaInfo: [],
+    //     documentsInfo: [],
+    //     status: TaskStatuses.ACTIVE,
+    //     companyId: Michael.companyId,
+    //   },
+    //   {
+    //     userId: Michael.id,
+    //     title: 'Test Task 3',
+    //     type: TaskTypes.MEDIUM,
+    //     executionTime: 13,
+    //     comment:
+    //       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris',
+    //     mediaInfo: [],
+    //     documentsInfo: [],
+    //     completedAt: new Date(),
+    //     status: TaskStatuses.COMPLETED,
+    //     companyId: Michael.companyId,
+    //   },
+    //   {
+    //     userId: Michael.id,
+    //     title: 'Test Task 4',
+    //     type: TaskTypes.LOW,
+    //     executionTime: 13,
+    //     comment:
+    //       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris',
+    //     mediaInfo: [],
+    //     documentsInfo: [],
+    //     status: TaskStatuses.WAITING,
+    //     companyId: Michael.companyId,
+    //   },
+    // ];
+    //
+    // for (const taskData of tasksData) {
+    //   const task = await this.taskRepository.create(taskData);
+    //   await this.taskRepository.save(task);
+    // }
+    //
+    // const task = await this.taskRepository.findOne({
+    //   where: { status: TaskStatuses.WAITING, companyId: Michael.companyId },
+    // });
+    // const workers = await this.userRepository.find({
+    //   where: { type: UserTypes.WORKER, companyId: Michael.companyId },
+    //   select: ['id'],
+    // });
+    // const workersIds = workers.map((w) => w.id);
+    //
+    // const tags = ['admin', 'manager'];
+    // const mapLocations = [
+    //   { lat: 20, lng: 10 },
+    //   { lat: 27, lng: 11 },
+    //   { lat: 27, lng: 10 },
+    // ];
+    //
+    // await this.taskService.checkUsersInTask(task, workersIds);
+
+    const usersData: any[] = [
       {
-        userId: Michael.id,
-        title: 'Test Task 1',
-        type: TaskTypes.LOW,
-        executionTime: 8,
-        comment:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris',
-        mediaInfo: [],
-        documentsInfo: [],
-        status: TaskStatuses.ACTIVE,
-        companyId: Michael.companyId,
+        name: 'User 1',
+        password: '12345678',
+        phone: '+100000000100',
+        type: UserTypes.MANAGER,
+        companyId: Michael.companyId
       },
       {
-        userId: Michael.id,
-        title: 'Test Task 2',
-        type: TaskTypes.HIGH,
-        executionTime: 10,
-        comment:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris',
-        mediaInfo: [],
-        documentsInfo: [],
-        status: TaskStatuses.ACTIVE,
-        companyId: Michael.companyId,
+        name: 'User 2',
+        password: '12345678',
+        phone: '+100000000200',
+        type: UserTypes.WORKER,
+        companyId: Michael.companyId
       },
       {
-        userId: Michael.id,
-        title: 'Test Task 3',
-        type: TaskTypes.MEDIUM,
-        executionTime: 13,
-        comment:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris',
-        mediaInfo: [],
-        documentsInfo: [],
-        completedAt: new Date(),
-        status: TaskStatuses.COMPLETED,
-        companyId: Michael.companyId,
+        name: 'User 3',
+        password: '12345678',
+        phone: '+100000000300',
+        type: UserTypes.MANAGER,
+        companyId: Michael.companyId
       },
       {
-        userId: Michael.id,
-        title: 'Test Task 4',
-        type: TaskTypes.LOW,
-        executionTime: 13,
-        comment:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris',
-        mediaInfo: [],
-        documentsInfo: [],
-        status: TaskStatuses.WAITING,
-        companyId: Michael.companyId,
-      },
+        name: 'User 4',
+        password: '12345678',
+        phone: '+100000000400',
+        type: UserTypes.WORKER,
+        companyId: Michael.companyId
+      }
     ];
 
-    for (const taskData of tasksData) {
-      const task = await this.taskRepository.create(taskData);
-      await this.taskRepository.save(task);
+    for (const userData of usersData) {
+      const user = await this.userService.createUser(userData);
+      await this.userRepository.save(user);
     }
-
-    const task = await this.taskRepository.findOne({
-      where: { status: TaskStatuses.WAITING, companyId: Michael.companyId },
-    });
-    const workers = await this.userRepository.find({
-      where: { type: UserTypes.WORKER, companyId: Michael.companyId },
-      select: ['id'],
-    });
-    const workersIds = workers.map((w) => w.id);
-
-    const tags = ['admin', 'manager'];
-    const mapLocations = [
-      { lat: 20, lng: 10 },
-      { lat: 27, lng: 11 },
-      { lat: 27, lng: 10 },
-    ];
-
-    await this.taskService.checkUsersInTask(task, workersIds);
 
     process.exit(0);
   }
