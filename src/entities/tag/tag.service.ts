@@ -57,12 +57,10 @@ export class TagService {
 
     if (options.companyId) {
       query.where = { ...(query.where || {}), companyId: options.companyId };
-      console.log('!!! 1 options.companyId = ', options.companyId)
     }
 
     if (options.action === 'GetAll') {
       if (options.names?.length) {
-        // if (options.names && options.names.length > 0) {
 
         if (Array.isArray(options.names)) {
           options.names = options.names.map((name) => name.toLowerCase());
@@ -74,7 +72,6 @@ export class TagService {
       }
 
       query.take = 10;
-      console.log('!!! 2 options.names = ', options.names)
     }
 
     return this.tagRepository.find(query);

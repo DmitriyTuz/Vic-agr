@@ -51,7 +51,7 @@ export class TaskService {
         return dateDiffA === 0 ? -1 : dateDiffB === 0 ? 1 : 0;
       });
 
-      const filterCounts = await this.getFilterCount(companyId, userId, status);
+      const filterCounts = await this.getFilterCountTasks(companyId, userId, status);
 
       return {
         success: true,
@@ -66,7 +66,7 @@ export class TaskService {
   async getAllTasks(reqBody): Promise<Task[]> {
     const query: FindManyOptions<Task> = {
       where: {},
-      relations: ['reportInfo', 'completeInfo', 'creator', 'tags', 'mapLocation'],
+      relations: ['reportInfo', 'completeInfo', 'creator', 'tags', 'mapLocation', 'workers'],
       order: { dueDate: 'ASC' },
     };
 
@@ -164,7 +164,7 @@ export class TaskService {
     return data;
   }
 
-  async getFilterCount(companyId, userId, status) {
+  async getFilterCountTasks(companyId, userId, status) {
     const tasks = await this.getAllTasks({ companyId, userId, status });
 
     const groupTasks = _.groupBy(tasks, 'type');

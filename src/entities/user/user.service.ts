@@ -1,5 +1,14 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { EntityManager, EntityMetadata, FindOneOptions, In, Like, Repository } from 'typeorm';
+import {
+  EntityManager,
+  EntityMetadata,
+  FindManyOptions,
+  FindOneOptions,
+  In,
+  Like, Not,
+  Repository,
+  SelectQueryBuilder
+} from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import _ from 'underscore';
 import * as bcrypt from 'bcryptjs';
@@ -11,6 +20,9 @@ import { HelperService } from '@src/helper/helper.service';
 import { Task } from '@src/entities/task/task.entity';
 import { Company } from '@src/entities/company/company.entity';
 import {GetUsersOptionsInterface} from "@src/interfaces/get-users-options.interface";
+import {Tag} from "@src/entities/tag/tag.entity";
+import {GetFilterCountResponseInterface} from "@src/interfaces/get-filterCount-response.interface";
+
 
 type UserDataType = {
   id: number;
@@ -35,20 +47,20 @@ export class UserService {
     private readonly helperService: HelperService,
   ) {}
 
-  async getAll(reqBody, currentUserId, req) {
+  async getAll(reqQuery: GetUsersOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { users: UserDataType[], filterCounts: GetFilterCountResponseInterface; } }> {
     try {
-      const user = await this.getOneUser({ id: currentUserId });
+      const user: User = await this.getOneUser({ id: currentUserId });
       const { companyId } = user;
 
-      const { search, type } = req.query;
+      const { search, type } = reqQuery;
 
-      const users = await this.getAllUsers({ search, type, companyId });
-      const returnedUsers = [];
+      const users: User[] = await this.getAllUsers({ search, type, companyId });
+      const returnedUsers: UserDataType[] = [];
       for (const u of users) {
         returnedUsers.push(this.getUserData(u));
       }
 
-      const filterCounts = await this.getFilterCount(companyId);
+      const filterCounts: GetFilterCountResponseInterface = await this.getFilterCountUsers(companyId);
 
       return {
         success: true,
@@ -60,43 +72,46 @@ export class UserService {
     }
   }
 
-  async getAllUsers(reqBody: any): Promise<User[]> {
-    const query: any = {
+  async getAllUsers(options: GetUsersOptionsInterface): Promise<User[]> {
+    const query: FindManyOptions<User> = {
       where: {},
       relations: ['tags', 'tasks'],
       order: { id: 'ASC' },
     };
 
-    if (reqBody.companyId) {
-      if (!reqBody.ids?.includes(10000)) {
-        query.where.companyId = reqBody.companyId;
+    if (options.companyId) {
+      if (!options.ids?.includes(10000)) {
+        query.where = { ...(query.where || {}), companyId: options.companyId };
       }
     }
 
-    if (reqBody.ids?.length) {
-      query.where.id = In(reqBody.ids);
+    if (options.ids?.length) {
+      query.where = { ...(query.where || {}), id: In(options.ids) };
+      // query.where.id = In(options.ids);
     }
 
-    if (reqBody.type) {
-      query.where.type = reqBody.type;
+    if (options.type) {
+      query.where = { ...(query.where || {}), type: options.type };
+      // query.where.type = options.type;
     }
 
-    if (reqBody.search) {
-      query.where.name = Like(`%${reqBody.search}%`);
+    if (options.search) {
+      query.where = { ...(query.where || {}), name: Like(`%${options.search}%`) };
+      // query.where.name = Like(`%${options.search}%`);
     }
 
-    if (reqBody.limit) {
-      query.take = reqBody.limit;
+    if (options.limit) {
+      query.take = options.limit;
     }
 
     return await this.userRepository.find(query);
   }
 
-  async getFilterCount(companyId) {
-    const users = await this.getAllUsers({ companyId });
-    const groupUsers = _.groupBy(users, 'type');
+  async getFilterCountUsers(companyId: number): Promise<GetFilterCountResponseInterface> {
+    const users: User[] = await this.getAllUsers({ companyId });
+    const groupUsers: _.Dictionary<User[]> = _.groupBy(users, 'type');
 
-    const filterCounts = {
+    const filterCounts: GetFilterCountResponseInterface = {
       admins: 0,
       managers: 0,
       workers: 0,
@@ -104,14 +119,25 @@ export class UserService {
     };
 
     for (const type in groupUsers) {
-      filterCounts[`${type.toLowerCase()}s`] = groupUsers[type].length;
+      if (_.has(groupUsers, type)) {
+        const userGroup: User[] = groupUsers[type];
+        filterCounts[`${type.toLowerCase()}s`] = userGroup.length;
+      }
     }
 
-    let all = 0;
+    // for (const type in groupUsers) {
+    //   filterCounts[`${type.toLowerCase()}s`] = groupUsers[type].length;
+    // }
 
-    for (const type in filterCounts) {
-      all += filterCounts[type];
-    }
+    let all: number = 0;
+
+    _.each(filterCounts, (count) => {
+      all += count;
+    });
+
+    // for (const type in filterCounts) {
+    //   all += filterCounts[type];
+    // }
 
     filterCounts.all = all;
 
@@ -218,57 +244,56 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  async getAllWorkers(tagOptions, currentUserId) {
+  async getWorkers(workerOptions: GetUsersOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { workers: User[]; } }> {
     try {
-      const user = await this.getOneUser({ id: currentUserId });
+      const user: User = await this.getOneUser({ id: currentUserId });
 
-      let { search, ids } = tagOptions;
+      let { search, ids } = workerOptions;
       const { companyId } = user;
 
       if (typeof ids === 'string') {
         ids = [ids];
       }
 
-      const workers = await this.getWorkers({ search, ids, companyId });
+      const workers: User[] = await this.getAllWorkers({ search, ids, companyId });
 
-      const response = {
+      return {
         success: true,
         data: { workers },
       };
 
-      return response;
     } catch (e) {
       this.logger.error(`Error during get all workers: ${e.message}`);
       throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
-  async getWorkers({ ids, search, companyId }) {
-    let query = this.userRepository
+  async getAllWorkers(options: GetUsersOptionsInterface): Promise<User[]> {
+    let query: SelectQueryBuilder<User> = this.userRepository
       .createQueryBuilder('user')
       .select(['user.id', 'user.name'])
       .orderBy('user.name', 'ASC')
       .take(10);
 
-    if (companyId) {
-      query = query.where('user.companyId = :companyId', { companyId });
+    if (options.companyId) {
+      query = query.where('user.companyId = :companyId', { companyId: options.companyId });
     }
 
-    if (ids?.length) {
-      query = query.andWhere('user.id NOT IN (:...ids)', { ids });
+    if (options.ids?.length) {
+      query = query.andWhere('user.id NOT IN (:...ids)', { ids: options.ids });
     }
 
-    if (search) {
-      query = query.andWhere('user.name ILIKE :search', { search: `%${search}%` });
+    if (options.search) {
+      query = query.andWhere('user.name ILIKE :search', { search: `%${options.search}%` });
     }
 
-    const users = await query.getMany();
+    const users: User[] = await query.getMany();
     return users;
   }
 
-  async updateOnboardUser(currentUserId) {
+  async updateOnboardUser(currentUserId: number): Promise<{ success: boolean; notice: string; userId: number; }>  {
     try {
-      const user = await this.getOneUser({ id: currentUserId });
+      const user: User = await this.getOneUser({ id: currentUserId });
 
       if (!user) {
         throw { status: 404, message: '404-user-not-found', stack: new Error().stack };

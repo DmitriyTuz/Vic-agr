@@ -1,9 +1,12 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { UserService } from '@src/entities/user/user.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {FindManyOptions, Repository} from 'typeorm';
 import { MapLocation } from '@src/entities/location/location.entity';
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
+import {User} from "@src/entities/user/user.entity";
+import {Tag} from "@src/entities/tag/tag.entity";
+import {GetLocationsOptionsInterface} from "@src/interfaces/get-locations-options.interface";
 
 @Injectable()
 export class LocationService {
@@ -15,54 +18,36 @@ export class LocationService {
     private userService: UserService,
   ) {}
 
-  async getAll(currentUserId: number) {
+  async getAll(currentUserId: number): Promise<{ success: boolean; data: { locations: {lat: number, lng: number}[]; } }> {
     try {
-      const user = await this.userService.getOneUser({ id: currentUserId });
+      const user: User = await this.userService.getOneUser({ id: currentUserId });
 
-      // const locations = await this.getAllLocations({companyId: user.companyId});
-      const locations = await this.getAllLocations(user.companyId);
-      const returningLocations = locations.map((location) => ({
+      const locations: MapLocation[] = await this.getAllLocations({companyId: user.companyId});
+      const returnedLocations: {lat: number, lng: number}[] = locations.map((location) => ({
         lat: +location.lat,
         lng: +location.lng,
       }));
-      const response = {
+      return  {
         success: true,
-        data: { locations: returningLocations },
+        data: { locations: returnedLocations },
       };
 
-      return response;
     } catch (e) {
       this.logger.error(`Error during get all locations: ${e.message}`);
       throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
-  // async getAllLocations(options: { companyId: number }): Promise<MapLocation[]> {
-  //   const { companyId } = options;
-  //   const query: any = {
-  //     select: ['id', 'lat', 'lng'],
-  //     where: {}
-  //   };
-  //
-  //   if (companyId) {
-  //     query.where.companyId = companyId;
-  //   }
-  //
-  //   const locations = await this.locationRepository.find(query);
-  //   return locations;
-  // }
-
-  async getAllLocations(companyId: number): Promise<MapLocation[]> {
-    const query: any = {
+  async getAllLocations(options: GetLocationsOptionsInterface): Promise<MapLocation[]> {
+    const query: FindManyOptions<MapLocation> = {
       select: ['id', 'lat', 'lng'],
       where: {},
     };
 
-    if (companyId) {
-      query.where.companyId = companyId;
+    if (options.companyId) {
+      query.where = { ...(query.where || {}), companyId: options.companyId };
     }
 
-    const locations = await this.locationRepository.find(query);
-    return locations;
+    return  await this.locationRepository.find(query);
   }
 }
