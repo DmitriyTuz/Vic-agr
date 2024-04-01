@@ -12,8 +12,12 @@ import { UserService } from '@src/entities/user/user.service';
 import { User } from '@src/entities/user/user.entity';
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import {GetFilterCountTasksResponseInterface} from "@src/interfaces/get-filterCountTasks-response.interface";
-import {UserDataInterface} from "@src/interfaces/user-data.interface";
 import {TaskDataInterface} from "@src/interfaces/task-data.interface";
+import {HelperService} from "@src/helper/helper.service";
+
+interface CustomFindManyOptions<Task> extends FindManyOptions<Task> {
+  relations?: string[];
+}
 
 
 @Injectable()
@@ -26,6 +30,7 @@ export class TaskService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private userService: UserService,
+    private helperService: HelperService,
   ) {}
 
   async getAll(reqBody: GetTasksOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { tasks: TaskDataInterface[], filterCounts: GetFilterCountTasksResponseInterface; } }> {
@@ -67,12 +72,28 @@ export class TaskService {
     }
   }
 
-  async getAllTasks(options: GetTasksOptionsInterface): Promise<Task[]> {
-    const query: FindManyOptions<Task> = {
+  async getAllTasks(options: GetTasksOptionsInterface, isDatesInMs: boolean = false): Promise<Task[]> {
+    // const selectFields: string[] = await this.helperService.getEntityFields(this.taskRepository, [], true, false);
+    // const selectObject: Record<string, true> = {};
+    // // const selectObject: { [key: string]: true } = {};
+    //
+    // selectFields.forEach((field) => {
+    //   selectObject[field] = true;
+    // });
+
+    const query: CustomFindManyOptions<Task> = {
+      // select: selectObject,
       where: {},
       relations: ['reportInfo', 'completeInfo', 'creator', 'tags', 'mapLocation', 'workers'],
       order: { dueDate: 'ASC' },
     };
+
+    // const query: FindManyOptions<Task> = {
+    //   select: selectObject,
+    //   where: {},
+    //   relations: ['reportInfo', 'completeInfo', 'creator', 'tags', 'mapLocation', 'workers'],
+    //   order: { dueDate: 'ASC' },
+    // };
 
     if (options.companyId) {
       query.where = { ...query.where, companyId: options.companyId };
@@ -102,7 +123,65 @@ export class TaskService {
       query.where = { ...query.where, ...mapLocationQuery };
     }
 
-    return await this.taskRepository.find(query);
+    let tasks: Task[] = await this.taskRepository.find(query);
+    // return await this.taskRepository.find(query);
+
+    if (isDatesInMs) {
+      const datesList: string[] = ['completedAt', 'createdAt', 'updatedAt', 'registrationDate', 'lastActive'];
+
+      for (const dateField of datesList) {
+        if (tasks[0]?.[dateField] instanceof Date) {
+          for (const task of tasks) {
+            task[dateField] = task[dateField].getTime();
+          }
+        }
+      }
+
+      for (const relation of query.relations) {
+        if (tasks[0]?.[relation]) {
+          for (const task of tasks) {
+            const relatedEntity = task[relation];
+            if (relatedEntity instanceof Array) {
+              for (const entity of relatedEntity) {
+                for (const dateField of datesList) {
+                  if (entity[dateField] instanceof Date) {
+                    entity[dateField] = entity[dateField].getTime();
+                  }
+                }
+              }
+            } else {
+              for (const dateField of datesList) {
+                if (relatedEntity[dateField] instanceof Date) {
+                  relatedEntity[dateField] = relatedEntity[dateField].getTime();
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // if (isDatesInMs) {
+    //   const datesList: string[] = ['completedAt', 'createdAt', 'updatedAt', 'registrationDate', 'lastActive'];
+    //
+    //   for (const relation of query.relations) {
+    //     if (tasks[0]?.[relation]) {
+    //       console.log('!!! tasks[0]?.[relation] = ', tasks[0]?.[relation])
+    //       for (const task of tasks) {
+    //         const relatedEntity = task[relation];
+    //         if (relatedEntity) {
+    //           for (const dateField of datesList) {
+    //             if (relatedEntity[dateField] instanceof Date) {
+    //               relatedEntity[dateField] = relatedEntity[dateField].getTime();
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+
+    return tasks;
   }
 
   // getTaskData(task) {
@@ -186,10 +265,27 @@ export class TaskService {
       'completedAt',
       'dueDate',
     ]);
-    data.createdAt = data.createdAt ? parseInt(data.createdAt.toString(), 10) : null;
-    data.updatedAt = data.updatedAt ? parseInt(data.updatedAt.toString(), 10) : null;
-    data.completedAt = data.completedAt ? parseInt(data.completedAt.toString(), 10) : null;
-    data.dueDate = data.dueDate ? parseInt(data.dueDate.toString(), 10) : null;
+
+    console.log('!!! data.createdAt = ', data.createdAt);
+    // console.log('!!! parseInt(data.createdAt.toString() = ', parseInt(data.createdAt.toString(), 10));
+
+    // const datesList: string[] = ['completedAt', 'createdAt', 'updatedAt', 'registrationDate', 'lastActive'];
+    //
+    // for (const dateField of datesList) {
+    //   if (data[dateField] !== null && data[dateField] !== undefined) {
+    //     data[dateField] = new Date(data[dateField]).getTime();
+    //   }
+    // }
+
+    // data.createdAt = data.createdAt ? new Date(data.createdAt).getTime() : null;
+    // data.updatedAt = data.updatedAt ? data.updatedAt : null;
+    // data.completedAt = data.completedAt ? data.completedAt : null;
+    // data.dueDate = data.dueDate ? data.dueDate : null;
+
+    // data.createdAt = data.createdAt ? parseInt(data.createdAt.toString(), 10) : null;
+    // data.updatedAt = data.updatedAt ? parseInt(data.updatedAt.toString(), 10) : null;
+    // data.completedAt = data.completedAt ? parseInt(data.completedAt.toString(), 10) : null;
+    // data.dueDate = data.dueDate ? parseInt(data.dueDate.toString(), 10) : null;
 
     if (task?.completeInfo?.length) {
       data.completeInfo = task.completeInfo.map((c: any) => ({

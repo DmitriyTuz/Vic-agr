@@ -29,9 +29,22 @@ export class HelperService {
 
       activeFields = activeFields.concat(unnecessaryFields);
 
-      const attributes: string[] = columns
+      let attributes: string[] = columns
         .filter((column) => !activeFields.includes(column.propertyName))
         .map((column) => column.propertyName);
+
+      if (isAttributes) {
+        const datesList: string[] = ['completedAt', 'createdAt', 'updatedAt', 'registrationDate', 'lastActive'];
+
+        attributes = attributes.map((attr) => {
+          if (datesList.includes(attr)) {
+            return `${attr} * 1000`;
+          }
+          return attr;
+        });
+      }
+
+      // console.log('!!! attributes = ', attributes);
 
       // for (const column of columns) {
       //   if (!activeFields.includes(column.propertyName)) {
@@ -39,14 +52,26 @@ export class HelperService {
       //   }
       // }
 
-      if (isAttributes) {
-        const datesList: string[] = ['completedAt', 'createdAt', 'updatedAt', 'registrationDate', 'lastActive'];
-        attributes.forEach((attr, index) => {
-          if (datesList.includes(attr)) {
-            attributes[index] = `${attr} * 1000`;
-          }
-        });
-      }
+
+
+      // if (isAttributes) {
+      //   const datesList: string[] = ['completedAt', 'createdAt', 'updatedAt', 'registrationDate', 'lastActive'];
+      //   attributes.forEach((attr, index) => {
+      //     if (datesList.includes(attr)) {
+      //       attributes[index] = `${attr} * 1000`;
+      //     }
+      //   });
+      // }
+
+      // if (isAttributes) {
+      //   const datesList: string[] = ['completedAt', 'createdAt', 'updatedAt', 'registrationDate', 'lastActive'];
+      //   attributes = attributes.map((attr) => {
+      //     if (datesList.includes(attr)) {
+      //       return `${attr} * 1000`;
+      //     }
+      //     return attr;
+      //   });
+      // }
 
       return attributes;
     } catch (e) {
