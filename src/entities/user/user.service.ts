@@ -1,28 +1,20 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import {
-  EntityManager,
-  EntityMetadata,
-  FindManyOptions,
-  FindOneOptions,
-  In,
-  Like, Not,
-  Repository,
-  SelectQueryBuilder
-} from 'typeorm';
-import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import {HttpException, HttpStatus, Injectable, Logger} from '@nestjs/common';
+import {EntityManager, FindManyOptions, FindOneOptions, In, Like, Repository, SelectQueryBuilder} from 'typeorm';
+import {InjectEntityManager, InjectRepository} from '@nestjs/typeorm';
 import _ from 'underscore';
 import * as bcrypt from 'bcryptjs';
 
-import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
-import { CreateUserDto } from '@src/entities/user/dto/create-user.dto';
-import { User } from '@src/entities/user/user.entity';
-import { HelperService } from '@src/helper/helper.service';
-import { Task } from '@src/entities/task/task.entity';
-import { Company } from '@src/entities/company/company.entity';
+import {CustomHttpException} from '@src/exceptions/сustomHttp.exception';
+import {CreateUserDto} from '@src/entities/user/dto/create-user.dto';
+import {User} from '@src/entities/user/user.entity';
+import {HelperService} from '@src/helper/helper.service';
+import {Task} from '@src/entities/task/task.entity';
+import {Company} from '@src/entities/company/company.entity';
 import {GetUsersOptionsInterface} from "@src/interfaces/get-users-options.interface";
-import {Tag} from "@src/entities/tag/tag.entity";
 import {GetFilterCountUsersResponseInterface} from "@src/interfaces/get-filterCountUsers-response.interface";
 import {UserDataInterface} from "@src/interfaces/user-data.interface";
+import {PasswordService} from "@src/password/password.service";
+import {TwilioService} from "@src/twilio/twilio.service";
 
 
 type UserDataType = {
@@ -46,6 +38,8 @@ export class UserService {
     private userRepository: Repository<User>,
     @InjectEntityManager() private readonly entityManager: EntityManager,
     private readonly helperService: HelperService,
+    private readonly passwordService: PasswordService,
+    private readonly twilioService: TwilioService
   ) {}
 
   async getAll(reqQuery: GetUsersOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { users: UserDataInterface[], filterCounts: GetFilterCountUsersResponseInterface; } }> {
@@ -145,22 +139,58 @@ export class UserService {
     return filterCounts;
   }
 
-  async createUser(dto: CreateUserDto): Promise<User> {
+  async create(dto: CreateUserDto, currentUserId: number): Promise <{ success: boolean, notice: string, data: {user: UserDataInterface}, smsMessage: string }>  {
     try {
-      const currentUser = await this.userRepository.findOne({ where: { phone: dto.phone } });
+      const admin: User = await this.getOneUser({id: currentUserId});
+      const {companyId} = admin;
+
+      dto.companyId = companyId;
+
+      const {user, message} = await this.createUser(dto);
+      // await this.tagService.checkTags(user, tags);
+
+      const returnedUser: User = await this.getOneUser({id: user.id, companyId});
+
+      return {
+        success: true,
+        notice: '200-user-has-been-created-successfully',
+        data: {user: this.getUserData(returnedUser)},
+        smsMessage: message
+      }
+
+    } catch (e) {
+      this.logger.error(`Error during user creation by admin: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
+    }
+  }
+
+  async createUser(dto: CreateUserDto): Promise <{ user: User, message: string }>{
+    try {
+
+      const currentUser: User = await this.userRepository.findOne({ where: { phone: dto.phone } });
       if (currentUser) {
         throw new HttpException(`User with phone ${currentUser.phone} already exists`, HttpStatus.FOUND);
       }
 
-      const hashPassword = await bcrypt.hash(dto.password, 5);
+      let password: string;
 
-      const userForCreate = this.userRepository.create({ ...dto, password: hashPassword });
+      if (!dto.password) {
+        password = this.passwordService.createPassword()
 
-      let user = await this.userRepository.save(userForCreate);
+      } else { password = dto.password }
+
+      const hashPassword: string = await bcrypt.hash(password, 5);
+
+      const userForCreate: CreateUserDto = this.userRepository.create({ ...dto, password: hashPassword });
+
+      let user: User = await this.userRepository.save(userForCreate);
+
+      const message: string = await this.twilioService.sendSMS(dto.phone, password);
 
       this.logger.log(`User created: ${user.name}`);
 
-      return user;
+      return { user, message }
+
     } catch (e) {
       this.logger.error(`Error during user creation: ${e.message}`);
       throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);

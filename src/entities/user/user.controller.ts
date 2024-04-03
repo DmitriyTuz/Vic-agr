@@ -25,12 +25,13 @@ import { GetUsersOptionsInterface } from '@src/interfaces/get-users-options.inte
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Post('create-user')
+  @Post('/api/users')
   @ApiOperation({ summary: 'User creation' })
   @ApiResponse({ status: 200, type: User })
   @UsePipes(ValidationPipe)
-  async createUser(@Body() dto: CreateUserDto): Promise<User> {
-    return await this.userService.createUser(dto);
+  @UseGuards(JwtAuthGuard)
+  async create(@Body() dto: CreateUserDto, @Req() req: RequestWithUser) {
+    return await this.userService.create(dto, req.user.id);
   }
 
   @Get('/api/users')
