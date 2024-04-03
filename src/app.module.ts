@@ -15,6 +15,8 @@ import { SeedsModule } from './seeds/seeds.module';
 import { ConfigModule } from '@nestjs/config';
 import { StripeModule } from './stripe/stripe.module';
 import { HelperModule } from './helper/helper.module';
+import { PasswordModule } from './password/password.module';
+import { TwilioModule } from './twilio/twilio.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { HelperModule } from './helper/helper.module';
     SeedsModule,
     StripeModule,
     HelperModule,
+    PasswordModule,
+    TwilioModule,
   ],
   controllers: [],
   providers: [],

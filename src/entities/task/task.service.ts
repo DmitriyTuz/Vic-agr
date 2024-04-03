@@ -45,7 +45,7 @@ export class TaskService {
       const { companyId } = user;
 
       const { status, date, type, location, tags } = reqBody;
-      const tasks: Task[] = await this.getAllTasks({ status, date, type, location, tags, companyId, userId });
+      const tasks: Task[] = await this.getAllTasks({ status, date, type, location, tags, companyId, userId }, true);
 
       let returnedTasks: TaskDataInterface[] = [];
 
@@ -83,6 +83,19 @@ export class TaskService {
 
     const query: CustomFindManyOptions<Task> = {
       // select: selectObject,
+      select: {
+        workers: {
+          id: true,
+          name: true,
+          phone: true,
+          type: true,
+          lastActive: true,
+          hasOnboard: false,
+          createdAt: true,
+          updatedAt: true,
+          companyId: true
+        }
+      },
       where: {},
       relations: ['reportInfo', 'completeInfo', 'creator', 'tags', 'mapLocation', 'workers'],
       order: { dueDate: 'ASC' },

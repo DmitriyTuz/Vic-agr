@@ -224,7 +224,7 @@ export class SeedsService {
 
     for (const userData of usersData) {
       const user = await this.userService.createUser(userData);
-      await this.userRepository.save(user);
+      await this.userRepository.save(user.user);
     }
 
     process.exit(0);
