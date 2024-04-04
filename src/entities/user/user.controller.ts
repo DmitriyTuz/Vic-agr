@@ -2,7 +2,7 @@ import {
   Body,
   Controller,
   Get,
-  HttpException,
+  HttpException, Param,
   Patch,
   Post,
   Query,
@@ -19,22 +19,23 @@ import { ValidationPipe } from '@src/pipes/validation.pipe';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
 import { GetUsersOptionsInterface } from '@src/interfaces/get-users-options.interface';
+import {UpdateUserDto} from "@src/entities/user/dto/update-user.dto";
 
 @ApiTags('Users')
-@Controller()
+@Controller('/api/users')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Post('/api/users')
+  @Post('/create-user')
   @ApiOperation({ summary: 'User creation' })
   @ApiResponse({ status: 200, type: User })
   @UsePipes(ValidationPipe)
   @UseGuards(JwtAuthGuard)
-  async create(@Body() dto: CreateUserDto, @Req() req: RequestWithUser) {
+  async create(@Body() dto: CreateUserDto & { tags?: string[] }, @Req() req: RequestWithUser) {
     return await this.userService.create(dto, req.user.id);
   }
 
-  @Get('/api/users')
+  @Get('/get-users')
   @UseGuards(JwtAuthGuard)
   getAll(@Query() reqQuery: GetUsersOptionsInterface, @Req() req: RequestWithUser) {
     return this.userService.getAll(reqQuery, req.user.id);
@@ -46,15 +47,21 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @Get('/api/worker-tags')
+  @Get('/worker-tags')
   @UseGuards(JwtAuthGuard)
   async getWorkers(@Query() workerOptions: GetUsersOptionsInterface, @Req() req: RequestWithUser) {
     return this.userService.getWorkers(workerOptions, req.user.id);
   }
 
-  @Patch('api/users/onboard')
+  @Patch('/onboard')
   @UseGuards(JwtAuthGuard)
   updateOnboardUser(@Req() req: RequestWithUser) {
     return this.userService.updateOnboardUser(req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('/:id')
+  update(@Param('id') id: number, @Body() dto: UpdateUserDto & { tags?: string[] }) {
+    return this.userService.update(id, dto);
   }
 }
