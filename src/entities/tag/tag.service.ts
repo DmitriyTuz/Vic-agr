@@ -8,7 +8,6 @@ import { GetTagsOptionsInterface } from '@src/interfaces/get-tags-options.interf
 
 import { Tag } from '@src/entities/tag/tag.entity';
 
-import { UserService } from '@src/entities/user/user.service';
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import {User} from "@src/entities/user/user.entity";
 
@@ -19,12 +18,14 @@ export class TagService {
   constructor(
     @InjectRepository(Tag)
     private tagRepository: Repository<Tag>,
-    private userService: UserService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    // private userService: UserService,
   ) {}
 
-  async getAll(reqQuery: GetTagsOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { tags: Tag[]; } }> {
+  async getAll(reqQuery: GetTagsOptionsInterface, user: User): Promise<{ success: boolean; data: { tags: Tag[]; } }> {
     try {
-      const user: User = await this.userService.getOneUser({ id: currentUserId });
+      // const user: User = await this.userService.getOneUser({ id: currentUserId });
 
       let { names, search } = reqQuery;
       const { companyId } = user;
@@ -96,5 +97,28 @@ export class TagService {
       return '';
     }
   }
+
+  async checkTags(user: User, tagNames: string[]): Promise<void> {
+    try {
+      const existingTags = await this.tagRepository.find({ where: { name: In(tagNames) } });
+
+      const existingTagNames = existingTags.map(tag => tag.name);
+
+      const newTagNames = tagNames.filter(tagName => !existingTagNames.includes(tagName));
+
+      const newTags = newTagNames.map(tagName => this.tagRepository.create({ name: tagName }));
+
+      if (newTags.length > 0) {
+        await this.tagRepository.save(newTags);
+      }
+
+      user.tags = [...existingTags, ...newTags];
+      await this.userRepository.save(user);
+
+    } catch (error) {
+      throw new Error(`Error while checking tags: ${error.message}`);
+    }
+  }
+
 
 }

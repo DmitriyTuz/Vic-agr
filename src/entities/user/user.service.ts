@@ -1,5 +1,14 @@
 import {HttpException, HttpStatus, Injectable, Logger} from '@nestjs/common';
-import {EntityManager, FindManyOptions, FindOneOptions, In, Like, Repository, SelectQueryBuilder} from 'typeorm';
+import {
+  DeepPartial,
+  EntityManager,
+  FindManyOptions,
+  FindOneOptions,
+  In,
+  Like,
+  Repository,
+  SelectQueryBuilder
+} from 'typeorm';
 import {InjectEntityManager, InjectRepository} from '@nestjs/typeorm';
 import _ from 'underscore';
 import * as bcrypt from 'bcryptjs';
@@ -15,6 +24,9 @@ import {GetFilterCountUsersResponseInterface} from "@src/interfaces/get-filterCo
 import {UserDataInterface} from "@src/interfaces/user-data.interface";
 import {PasswordService} from "@src/password/password.service";
 import {TwilioService} from "@src/twilio/twilio.service";
+import {Tag} from "@src/entities/tag/tag.entity";
+import {TagService} from "@src/entities/tag/tag.service";
+import {UpdateUserDto} from "@src/entities/user/dto/update-user.dto";
 
 
 type UserDataType = {
@@ -36,10 +48,13 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Tag)
+    private tagRepository: Repository<Tag>,
     @InjectEntityManager() private readonly entityManager: EntityManager,
     private readonly helperService: HelperService,
     private readonly passwordService: PasswordService,
-    private readonly twilioService: TwilioService
+    private readonly twilioService: TwilioService,
+    private readonly tagService: TagService,
   ) {}
 
   async getAll(reqQuery: GetUsersOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { users: UserDataInterface[], filterCounts: GetFilterCountUsersResponseInterface; } }> {
@@ -139,15 +154,17 @@ export class UserService {
     return filterCounts;
   }
 
-  async create(dto: CreateUserDto, currentUserId: number): Promise <{ success: boolean, notice: string, data: {user: UserDataInterface}, smsMessage: string }>  {
+  async create(dto: CreateUserDto & { tags?: string[] }, adminId: number): Promise <{ success: boolean, notice: string, data: {user: UserDataInterface}, smsMessage: string }>  {
     try {
-      const admin: User = await this.getOneUser({id: currentUserId});
+      const admin: User = await this.getOneUser({id: adminId});
       const {companyId} = admin;
 
       dto.companyId = companyId;
 
+      const {tags} = dto;
+
       const {user, message} = await this.createUser(dto);
-      // await this.tagService.checkTags(user, tags);
+      await this.tagService.checkTags(user, tags);
 
       const returnedUser: User = await this.getOneUser({id: user.id, companyId});
 
@@ -164,13 +181,15 @@ export class UserService {
     }
   }
 
-  async createUser(dto: CreateUserDto): Promise <{ user: User, message: string }>{
+  async createUser(dto: CreateUserDto): Promise <{ user: User, message: string }> {
     try {
 
       const currentUser: User = await this.userRepository.findOne({ where: { phone: dto.phone } });
       if (currentUser) {
         throw new HttpException(`User with phone ${currentUser.phone} already exists`, HttpStatus.FOUND);
       }
+
+      console.log('!!! dto = ', dto);
 
       let password: string;
 
@@ -181,7 +200,10 @@ export class UserService {
 
       const hashPassword: string = await bcrypt.hash(password, 5);
 
-      const userForCreate: CreateUserDto = this.userRepository.create({ ...dto, password: hashPassword });
+      const userForCreate: CreateUserDto = {
+        ...dto,
+        password: hashPassword,
+      };
 
       let user: User = await this.userRepository.save(userForCreate);
 
@@ -207,22 +229,22 @@ export class UserService {
 
   async getOneUser(findQuery: GetUsersOptionsInterface): Promise<User> {
     try {
-      const selectFields: string[] = await this.helperService.getEntityFields(this.userRepository, [], true, false);
-      const selectObject: Record<string, true> = {};
-      // const selectObject: { [key: string]: true } = {};
-
-      selectFields.forEach((field) => {
-        selectObject[field] = true;
-      });
+      // const selectFields: string[] = await this.helperService.getEntityFields(this.userRepository, [], true, false);
+      // const selectObject: Record<string, true> = {};
+      // // const selectObject: { [key: string]: true } = {};
+      //
+      // selectFields.forEach((field) => {
+      //   selectObject[field] = true;
+      // });
 
       const query: FindOneOptions<User> = {
-        select: {
-          ...selectObject,
-          tags: {
-            id: true,
-            name: true,
-          },
-        },
+        // select: {
+        //   ...selectObject,
+        //   tags: {
+        //     id: true,
+        //     name: true,
+        //   },
+        // },
         where: findQuery,
         relations: ['tags', 'company'],
       };
@@ -234,13 +256,12 @@ export class UserService {
     }
   }
 
-  getUserData(user: User): UserDataInterface {
-    const data: Partial<UserDataInterface> = _.pick(user, ['id', 'name', 'phone', 'type', 'tags', 'tasks', 'hasOnboard', 'companyId', 'company']);
-    data.tags = data.tags as string[];
-    // data.tags = data.tags.map((tag: { name: string }) => tag.name);
-    // data.tags = data.tags.map((tag: any) => tag.name);
-    return data as UserDataInterface;
-  }
+  // getUserData(user: User): UserDataInterface {
+  //   const data: Partial<UserDataInterface> = _.pick(user, ['id', 'name', 'phone', 'type', 'tags', 'tasks', 'hasOnboard', 'companyId', 'company']);
+  //   data.tags = data.tags.map((tag: any) => tag.name);
+  //
+  //   return data as UserDataInterface;
+  // }
 
   // getUserData(user: User) {
   //   const data: any = _.pick(user, [
@@ -258,29 +279,25 @@ export class UserService {
   //   return data;
   // }
 
-  // getUserData(user: User): UserDataType {
-  //   const { id, name, phone, type, tags, tasks, hasOnboard, companyId, company } = user;
-  //   const tagNames = tags.map((tag) => tag.name);
-  //
-  //   return {
-  //     id,
-  //     name,
-  //     phone,
-  //     type,
-  //     tags: tagNames,
-  //     tasks,
-  //     hasOnboard,
-  //     companyId,
-  //     company,
-  //   };
-  // }
+  getUserData(user: User): UserDataInterface {
+    const { id, name, phone, type, tags, tasks, hasOnboard, companyId, company } = user;
+    const tagNames = tags.map((tag: Tag) => tag.name);
+
+    return {
+      id,
+      name,
+      phone,
+      type,
+      tags: tagNames,
+      tasks,
+      hasOnboard,
+      companyId,
+      company,
+    };
+  }
 
   async findByPhone(phone: string) {
     return await this.userRepository.findOne({ where: { phone } });
-  }
-
-  async updateUser(user: User): Promise<User> {
-    return await this.userRepository.save(user);
   }
 
   async getWorkers(workerOptions: GetUsersOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { workers: User[]; } }> {
@@ -342,7 +359,7 @@ export class UserService {
 
       return {
         success: true,
-        notice: '200-user-has-been-removed-successfully',
+        notice: '200-user-has-been-updated-onboard-successfully',
         userId: currentUserId,
       };
     } catch (e) {
@@ -353,5 +370,37 @@ export class UserService {
 
   async updateOnboard(user: User): Promise<void> {
     await this.userRepository.update(user.id, { hasOnboard: true });
+  }
+
+  async update(id: number, dto: UpdateUserDto & { tags?: string[] }): Promise <{ success: boolean, notice: string, data: {user: UserDataInterface} }> {
+    try {
+      const user = await this.getOneUser({id});
+
+      if (!user) {
+        throw new HttpException('404-user-not-found', HttpStatus.NOT_FOUND);
+      }
+
+      await this.updateUser(user, dto);
+
+      const {tags} = dto;
+      await this.tagService.checkTags(user, tags);
+
+      const returnedUser = await this.getOneUser({id});
+
+      return {
+        success: true,
+        notice: '200-user-has-been-updated-successfully',
+        data: {user: this.getUserData(returnedUser)}
+      };
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async updateUser(user: User, dto: UpdateUserDto) {
+    console.log('!!! user.id = ', user.id);
+    console.log('!!! dto = ', dto);
+    return await this.userRepository.update(user.id, dto);
+    // return await this.userRepository.save(user);
   }
 }

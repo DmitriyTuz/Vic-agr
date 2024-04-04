@@ -8,6 +8,8 @@ import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '@src/entities/user/user.service';
 import { LoginUserDto } from '@src/auth/dto/login-user.dto';
+import {InjectRepository} from "@nestjs/typeorm";
+import {Repository} from "typeorm";
 
 interface TokenPayload {
   id: number;
@@ -21,7 +23,13 @@ interface TokenResponse {
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
-  constructor(private userService: UserService, private jwtService: JwtService, private configService: ConfigService) {}
+  constructor(
+      private userService: UserService,
+      private jwtService: JwtService,
+      private configService: ConfigService,
+      @InjectRepository(User)
+      private userRepository: Repository<User>
+  ) {}
 
   async login(reqBody: LoginUserDto, req: Request, res: Response): Promise<Response> {
     try {
@@ -34,7 +42,8 @@ export class AuthService {
       });
 
       user.lastActive = new Date();
-      await this.userService.updateUser(user);
+      await this.userRepository.save(user)
+      // await this.userService.updateUser(user);
 
       return res.json({success: true});
 
