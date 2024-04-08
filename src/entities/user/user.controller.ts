@@ -1,6 +1,6 @@
 import {
   Body,
-  Controller,
+  Controller, Delete,
   Get,
   HttpException, Param,
   Patch,
@@ -60,8 +60,14 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('/:id')
+  @Patch('/update-user/:id')
   update(@Param('id') id: number, @Body() dto: UpdateUserDto & { tags?: string[] }) {
     return this.userService.update(id, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('/delete-user/:id')
+  remove(@Param('id') id: number) {
+    return this.userService.remove(id);
   }
 }

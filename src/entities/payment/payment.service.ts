@@ -2,6 +2,8 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import * as moment from 'moment';
+
 import { PlanTypes } from '@lib/constants';
 
 import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
@@ -13,6 +15,10 @@ import { Plan } from '@src/entities/plan/plan.entity';
 
 import { UserService } from '@src/entities/user/user.service';
 import { StripeService } from '@src/stripe/stripe.service';
+import {User} from "@src/entities/user/user.entity";
+import {PaymentDataInterface} from "@src/interfaces/payment-data.interface";
+import {CreatePaymentDto} from "@src/entities/payment/dto/create-payment.dto";
+import {UserDataInterface} from "@src/interfaces/user-data.interface";
 
 @Injectable()
 export class PaymentService {
@@ -25,21 +31,82 @@ export class PaymentService {
     private companyRepository: Repository<Company>,
     @InjectRepository(Plan)
     private planRepository: Repository<Plan>,
-    private userService: UserService,
+    // private userService: UserService,
     private stripeService: StripeService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async getOnePayment(userId: number): Promise<Payment> {
     return this.paymentRepository.findOne({ where: { userId } });
   }
 
-  async createSubscribe(req: RequestWithUser, paymentId, body: { planType: string; agree: boolean }) {
+  async create(body: CreatePaymentDto, user: User): Promise <{ success: boolean, notice: string, data: {payment: Payment} }> {
     try {
-      const user = await this.userService.getOneUser({ id: req.user.id });
+      body.expiration = `${moment(body.exp_month, 'M').format('MM')}/${moment(body.exp_year, 'YYYY').format('YY')}`;
+
+      if (user.company.isSubscribe) {
+        throw new HttpException(`the-subscribe-still-active`, HttpStatus.UNPROCESSABLE_ENTITY);
+      }
+
+      let payment: Payment = await this.getOnePayment(user.id);
+
+      if (payment) {
+        await this.deletePayment(payment.id);
+      }
+
+      payment = await this.createPayment(user, body);
+
+      return {
+        success: true,
+        notice: 'The payment has been created',
+        data: {payment}
+      };
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  private async deletePayment(paymentId: number) {
+    const payment: Payment = await this.paymentRepository.findOne({select: ['id', 'subscriberId', 'userId'], where: {id: paymentId}});
+
+    if (!payment) {
+      throw ({status: 404, message: '404-payment-not-found', stack: new Error().stack});
+    }
+
+    await this.removeSubscribe(payment);
+    await this.paymentRepository.remove(payment);
+  }
+
+  private async createPayment(user: User, newPaymentInfo: CreatePaymentDto): Promise<CreatePaymentDto & Payment>{
+    // const requiredFields = ['number', 'token', 'cardType','expiration'];
+    // this.checkerService.checkRequiredFields(newPaymentInfo, requiredFields, false);
+
+    const {number, cardType, nameOnCard, expiration, token, agree} = newPaymentInfo;
+    const customer = await this.stripeService.customerCreate(token, user.phone, user.name);
+
+    const newPayment: CreatePaymentDto = {
+      userId: user.id,
+      number: number.toString(),
+      cardType,
+      nameOnCard,
+      expiration,
+      customerId: customer.id,
+      type: 'Stripe',
+      agree: !!agree
+    };
+
+    // return this.paymentRepository.create(newPayment);
+    return this.paymentRepository.save(newPayment);
+  }
+
+  async createSubscribe(paymentId: number, body: { planType: string; agree: boolean }, admin: User) {
+    try {
+      // const user = await this.userService.getOneUser({ id: req.user.id });
 
       const { planType, agree } = body;
 
-      const company = await this.companyRepository.findOne({ where: { id: user.companyId } });
+      const company: Company = await this.companyRepository.findOne({ where: { id: admin.companyId } });
 
       if (planType === PlanTypes.FREE) {
         if (company.isTrial) {
@@ -47,10 +114,10 @@ export class PaymentService {
         } else if (company.hasTrial) {
           throw new HttpException(`Your-trial-plan-has-expired.`, HttpStatus.PAYMENT_REQUIRED);
         } else {
-          await this.companyRepository.update(user.companyId, { isTrial: true, trialAt: new Date(), hasTrial: true });
+          await this.companyRepository.update(admin.companyId, { isTrial: true, trialAt: new Date(), hasTrial: true });
         }
       } else {
-        paymentId = parseInt(paymentId, 10);
+        // paymentId = parseInt(paymentId, 10);
 
         if (!paymentId) {
           throw new HttpException(`Payment-ID-not-found.`, HttpStatus.NOT_FOUND);
@@ -77,10 +144,10 @@ export class PaymentService {
             customer: payment.customerId,
             price: plan.stripeId,
           },
-          user,
+          admin,
         );
 
-        await this.companyRepository.update(user.companyId, { isSubscribe: true, isTrial: false, trialAt: null });
+        await this.companyRepository.update(admin.companyId, { isSubscribe: true, isTrial: false, trialAt: null });
         await this.paymentRepository.update(paymentId, {
           subscriberId: subscriber.id,
           paidAt: new Date(),
@@ -88,15 +155,37 @@ export class PaymentService {
         });
       }
 
-      const responseData = {
+      return  {
         success: true,
         notice: 'Subscribed',
       };
 
-      return responseData;
     } catch (e) {
       this.logger.error(`Error during subscribe creation: ${e.message}`);
       throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
+
+  async removeSubscribe(payment: Payment) {
+    const user: User = await this.userRepository.findOne({select: ['id', 'companyId'], where: {id: payment.userId}});
+    const company: Company = await this.companyRepository.findOne({select: ['id', 'isTrial'], where: {id: user.companyId}});
+
+    if (company.isTrial) {
+      await this.companyRepository.update({ id: user.companyId }, { isTrial: false });
+    } else if (payment?.subscriberId) {
+      await Promise.all([
+        this.stripeService.cancelSubscribe(payment.subscriberId),
+        this.companyRepository.update({ id: user.companyId }, { isSubscribe: false }),
+        this.paymentRepository.update({ id: payment.id }, { subscriberId: null })
+      ]);
+
+      console.log('The Subscribe has been cancelled successfully')
+    }
+
+    return  {
+      success: true,
+      notice: 'Subscribed'
+    }
+  }
+
 }
