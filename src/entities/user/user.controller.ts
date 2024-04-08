@@ -14,15 +14,17 @@ import {
 import { UserService } from '@src/entities/user/user.service';
 import { CreateUserDto } from '@src/entities/user/dto/create-user.dto';
 import { User } from '@src/entities/user/user.entity';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {ApiExtraModels, ApiOperation, ApiResponse, ApiTags} from '@nestjs/swagger';
 import { ValidationPipe } from '@src/pipes/validation.pipe';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
 import { GetUsersOptionsInterface } from '@src/interfaces/get-users-options.interface';
 import {UpdateUserDto} from "@src/entities/user/dto/update-user.dto";
+import {ReqBodyUserDto} from "@src/entities/user/dto/reqBody.user.dto";
 
 @ApiTags('Users')
 @Controller('/api/users')
+@ApiExtraModels(CreateUserDto)
 export class UserController {
   constructor(private userService: UserService) {}
 
@@ -31,7 +33,7 @@ export class UserController {
   @ApiResponse({ status: 200, type: User })
   @UsePipes(ValidationPipe)
   @UseGuards(JwtAuthGuard)
-  async create(@Body() dto: CreateUserDto & { tags?: string[] }, @Req() req: RequestWithUser) {
+  async create(@Body() dto: ReqBodyUserDto, @Req() req: RequestWithUser) {
     return await this.userService.create(dto, req.user.id);
   }
 

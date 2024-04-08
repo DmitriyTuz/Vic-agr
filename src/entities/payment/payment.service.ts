@@ -19,6 +19,7 @@ import {User} from "@src/entities/user/user.entity";
 import {PaymentDataInterface} from "@src/interfaces/payment-data.interface";
 import {CreatePaymentDto} from "@src/entities/payment/dto/create-payment.dto";
 import {UserDataInterface} from "@src/interfaces/user-data.interface";
+import {ReqBodyPaymentDto} from "@src/entities/payment/dto/reqBody.payment.dto";
 
 @Injectable()
 export class PaymentService {
@@ -41,7 +42,7 @@ export class PaymentService {
     return this.paymentRepository.findOne({ where: { userId } });
   }
 
-  async create(body: CreatePaymentDto, user: User): Promise <{ success: boolean, notice: string, data: {payment: Payment} }> {
+  async create(body: ReqBodyPaymentDto, user: User): Promise <{ success: boolean, notice: string, data: {payment: Payment} }> {
     try {
       body.expiration = `${moment(body.exp_month, 'M').format('MM')}/${moment(body.exp_year, 'YYYY').format('YY')}`;
 
@@ -78,7 +79,7 @@ export class PaymentService {
     await this.paymentRepository.remove(payment);
   }
 
-  private async createPayment(user: User, newPaymentInfo: CreatePaymentDto): Promise<CreatePaymentDto & Payment>{
+  private async createPayment(user: User, newPaymentInfo: ReqBodyPaymentDto): Promise<CreatePaymentDto & Payment>{
     // const requiredFields = ['number', 'token', 'cardType','expiration'];
     // this.checkerService.checkRequiredFields(newPaymentInfo, requiredFields, false);
 
@@ -96,7 +97,6 @@ export class PaymentService {
       agree: !!agree
     };
 
-    // return this.paymentRepository.create(newPayment);
     return this.paymentRepository.save(newPayment);
   }
 

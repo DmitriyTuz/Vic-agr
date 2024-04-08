@@ -3,10 +3,13 @@ import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { PaymentService } from '@src/entities/payment/payment.service';
 import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
 import {UserService} from "@src/entities/user/user.service";
-import {PaymentDataInterface} from "@src/interfaces/payment-data.interface";
+import {ReqBodyPaymentDto} from "@src/entities/payment/dto/reqBody.payment.dto";
 import {CreatePaymentDto} from "@src/entities/payment/dto/create-payment.dto";
+import {ApiExtraModels, ApiTags} from "@nestjs/swagger";
 
+@ApiTags('Payments')
 @Controller('/api/payment')
+@ApiExtraModels(CreatePaymentDto)
 export class PaymentController {
   constructor(
       private paymentService: PaymentService,
@@ -15,10 +18,9 @@ export class PaymentController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/create-payment')
-  // async create(@Req() req: Request, @Res() res: Response) {
   async create(
       @Req() req: RequestWithUser,
-      @Body() body: CreatePaymentDto
+      @Body() body: ReqBodyPaymentDto
   ) {
     const user = await this.userService.getOneUser({id: req.user.id});
     return this.paymentService.create(body, user);
