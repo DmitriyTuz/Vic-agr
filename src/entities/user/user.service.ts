@@ -7,7 +7,7 @@ import {
   In,
   Like,
   Repository,
-  SelectQueryBuilder
+  SelectQueryBuilder, UpdateResult
 } from 'typeorm';
 import {InjectEntityManager, InjectRepository} from '@nestjs/typeorm';
 import _ from 'underscore';
@@ -27,6 +27,9 @@ import {TwilioService} from "@src/twilio/twilio.service";
 import {Tag} from "@src/entities/tag/tag.entity";
 import {TagService} from "@src/entities/tag/tag.service";
 import {UpdateUserDto} from "@src/entities/user/dto/update-user.dto";
+import {Payment} from "@src/entities/payment/payment.entity";
+import {UserTypes} from "@lib/constants";
+import {PaymentService} from "@src/entities/payment/payment.service";
 
 
 type UserDataType = {
@@ -50,11 +53,14 @@ export class UserService {
     private userRepository: Repository<User>,
     @InjectRepository(Tag)
     private tagRepository: Repository<Tag>,
-    @InjectEntityManager() private readonly entityManager: EntityManager,
+    // @InjectEntityManager() private readonly entityManager: EntityManager,
     private readonly helperService: HelperService,
     private readonly passwordService: PasswordService,
     private readonly twilioService: TwilioService,
     private readonly tagService: TagService,
+    @InjectRepository(Payment)
+    private paymentRepository: Repository<Payment>,
+    private readonly paymentService: PaymentService,
   ) {}
 
   async getAll(reqQuery: GetUsersOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { users: UserDataInterface[], filterCounts: GetFilterCountUsersResponseInterface; } }> {
@@ -161,9 +167,9 @@ export class UserService {
 
       dto.companyId = companyId;
 
-      const {tags} = dto;
+      const {tags, ...userDto} = dto;
 
-      const {user, message} = await this.createUser(dto);
+      const {user, message} = await this.createUser(userDto);
       await this.tagService.checkTags(user, tags);
 
       const returnedUser: User = await this.getOneUser({id: user.id, companyId});
@@ -186,10 +192,8 @@ export class UserService {
 
       const currentUser: User = await this.userRepository.findOne({ where: { phone: dto.phone } });
       if (currentUser) {
-        throw new HttpException(`User with phone ${currentUser.phone} already exists`, HttpStatus.FOUND);
+        throw new HttpException(`user-with-phone- ${currentUser.phone} -already-exists`, HttpStatus.FOUND);
       }
-
-      console.log('!!! dto = ', dto);
 
       let password: string;
 
@@ -238,13 +242,6 @@ export class UserService {
       // });
 
       const query: FindOneOptions<User> = {
-        // select: {
-        //   ...selectObject,
-        //   tags: {
-        //     id: true,
-        //     name: true,
-        //   },
-        // },
         where: findQuery,
         relations: ['tags', 'company'],
       };
@@ -374,33 +371,60 @@ export class UserService {
 
   async update(id: number, dto: UpdateUserDto & { tags?: string[] }): Promise <{ success: boolean, notice: string, data: {user: UserDataInterface} }> {
     try {
-      const user = await this.getOneUser({id});
+      const user: User = await this.getOneUser({id});
 
       if (!user) {
         throw new HttpException('404-user-not-found', HttpStatus.NOT_FOUND);
       }
 
-      await this.updateUser(user, dto);
+      const {tags, ...userDto} = dto;
+      await this.updateUser(user, userDto);
 
-      const {tags} = dto;
-      await this.tagService.checkTags(user, tags);
+      const updatedUser: User = await this.getOneUser({id});
 
-      const returnedUser = await this.getOneUser({id});
+      await this.tagService.checkTags(updatedUser, tags);
+
+      const returnedUser: User = await this.getOneUser({id});
 
       return {
         success: true,
         notice: '200-user-has-been-updated-successfully',
         data: {user: this.getUserData(returnedUser)}
       };
-    } catch (err) {
-      throw err;
+    } catch (e) {
+      this.logger.error(`Error during update user: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
-  async updateUser(user: User, dto: UpdateUserDto) {
-    console.log('!!! user.id = ', user.id);
-    console.log('!!! dto = ', dto);
+  async updateUser(user: User, dto: UpdateUserDto): Promise<UpdateResult> {
     return await this.userRepository.update(user.id, dto);
-    // return await this.userRepository.save(user);
+  }
+
+  async remove(id: number) {
+    try {
+      const user = await this.getOneUser({id});
+
+      if (!user) {
+        throw ({status: 404, message: '404-user-not-found', stack: new Error().stack});
+      }
+
+      if (user.type === UserTypes.ADMIN && user.company.ownerId === user.id && user.company.isSubscribe) {
+        const payment = await this.paymentRepository.findOne({select: ['id', 'userId', 'subscriberId', 'customerId'], where: {userId: user.id}});
+        if (payment) {
+          await this.paymentService.removeSubscribe(payment);
+        }
+      }
+
+      await this.userRepository.remove(user);
+
+      return {
+        success: true,
+        notice: '200-user-has-been-removed-successfully',
+        userId: id
+      };
+    } catch (err) {
+      throw err;
+    }
   }
 }

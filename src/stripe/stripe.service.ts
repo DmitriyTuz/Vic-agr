@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 import credentials from '@lib/credentials';
 const stripe = new Stripe(credentials.config.STRIPE_SECRET_KEY);
 
+
 @Injectable()
 export class StripeService {
   async createSubscribers(data, user) {
@@ -15,5 +16,13 @@ export class StripeService {
     };
 
     return stripe.subscriptions.create(stripeQuery);
+  }
+
+  async cancelSubscribe(id) {
+    return stripe.subscriptions.cancel(id);
+  }
+
+  async customerCreate(token, phone, name) {
+    return stripe.customers.create({source: token, phone: phone, name: name});
   }
 }

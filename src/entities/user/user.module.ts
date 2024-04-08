@@ -9,18 +9,21 @@ import {PasswordModule} from "@src/password/password.module";
 import {TwilioModule} from "@src/twilio/twilio.module";
 import {Tag} from "@src/entities/tag/tag.entity";
 import {TagModule} from "@src/entities/tag/tag.module";
+import {Payment} from "@src/entities/payment/payment.entity";
+import {PaymentModule} from "@src/entities/payment/payment.module";
 
 
 @Module({
   controllers: [UserController],
   providers: [UserService],
   imports: [
-    TypeOrmModule.forFeature([User, Tag]),
+    TypeOrmModule.forFeature([User, Tag, Payment]),
     forwardRef(() => AuthModule),
     HelperModule,
     PasswordModule,
     TwilioModule,
-    forwardRef(() => TagModule)
+    forwardRef(() => TagModule),
+    forwardRef(() => PaymentModule),
   ],
   exports: [UserService],
 })
