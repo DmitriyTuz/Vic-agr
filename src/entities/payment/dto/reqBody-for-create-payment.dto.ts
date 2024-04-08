@@ -1,7 +1,7 @@
 import {IsBoolean, IsNotEmpty, IsNumber, IsString} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ReqBodyPaymentDto {
+export class ReqBodyForCreatePaymentDto {
   @ApiProperty({ example: 'false', description: 'Subscription agreement accepted' })
   @IsNotEmpty({ message: 'Agree required !' })
   @IsBoolean({ message: 'Must be a boolean' })
@@ -31,5 +31,4 @@ export class ReqBodyPaymentDto {
   readonly token: string;
 
   expiration?: string;
-
 }

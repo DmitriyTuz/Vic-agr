@@ -3,9 +3,10 @@ import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { PaymentService } from '@src/entities/payment/payment.service';
 import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
 import {UserService} from "@src/entities/user/user.service";
-import {ReqBodyPaymentDto} from "@src/entities/payment/dto/reqBody.payment.dto";
+import {ReqBodyForCreatePaymentDto} from "@src/entities/payment/dto/reqBody-for-create-payment.dto";
 import {CreatePaymentDto} from "@src/entities/payment/dto/create-payment.dto";
 import {ApiExtraModels, ApiTags} from "@nestjs/swagger";
+import {ReqBodyForCreateSubscribeDto} from "@src/entities/payment/dto/reqBody-for-create-subscribe.dto";
 
 @ApiTags('Payments')
 @Controller('/api/payment')
@@ -20,7 +21,7 @@ export class PaymentController {
   @Post('/create-payment')
   async create(
       @Req() req: RequestWithUser,
-      @Body() body: ReqBodyPaymentDto
+      @Body() body: ReqBodyForCreatePaymentDto
   ) {
     const user = await this.userService.getOneUser({id: req.user.id});
     return this.paymentService.create(body, user);
@@ -31,7 +32,8 @@ export class PaymentController {
   async createSubscribe(
     @Req() req: RequestWithUser,
     @Param('id') paymentId: number,
-    @Body() body: { planType: string; agree: boolean },
+    // @Body() body: { planType: string; agree: boolean },
+    @Body() body: ReqBodyForCreateSubscribeDto,
   ) {
     const user = await this.userService.getOneUser({ id: req.user.id });
     return this.paymentService.createSubscribe(paymentId, body, user);

@@ -32,5 +32,4 @@ export class CreatePaymentDto {
   @IsNotEmpty({ message: 'Agree required !' })
   @IsBoolean({ message: 'Must be a boolean' })
   readonly agree: boolean;
-
 }
