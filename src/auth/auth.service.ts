@@ -10,6 +10,12 @@ import { UserService } from '@src/entities/user/user.service';
 import { LoginUserDto } from '@src/auth/dto/login-user.dto';
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
+import {UserTypes} from "@lib/constants";
+import {SignUpUserDto} from "@src/auth/dto/signUp-user.dto";
+import {CompanyService} from "@src/entities/company/company.service";
+import {Company} from "@src/entities/company/company.entity";
+import {CreateCompanyDto} from "@src/entities/company/dto/create-company.dto";
+import {CreateUserDto} from "@src/entities/user/dto/create-user.dto";
 
 interface TokenPayload {
   id: number;
@@ -28,7 +34,10 @@ export class AuthService {
       private jwtService: JwtService,
       private configService: ConfigService,
       @InjectRepository(User)
-      private userRepository: Repository<User>
+      private userRepository: Repository<User>,
+      private companyService: CompanyService,
+      @InjectRepository(Company)
+      private companyRepository: Repository<Company>,
   ) {}
 
   async login(reqBody: LoginUserDto, req: Request, res: Response): Promise<Response> {
@@ -74,7 +83,6 @@ export class AuthService {
 
     const token: string = this.jwtService.sign(payload, { secret: secretKey, expiresIn });
     return token;
-    // return { token };
   }
 
   async logout(req: Request, res: Response) {
@@ -85,6 +93,45 @@ export class AuthService {
       return res.status(200).send({success: true});
     } catch (e) {
       this.logger.error(`Error during user logout: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
+    }
+  }
+
+  async signUp(reqBody: SignUpUserDto, req: Request, res: Response) {
+    try {
+      req.body.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+      const { logo, companyName, phone, name, password } = reqBody;
+
+      const newCompany: CreateCompanyDto = {
+        name: companyName,
+        logo
+      }
+
+      const company = await this.companyService.createCompany(newCompany);
+
+      const newUser: CreateUserDto = {
+        phone,
+        name,
+        type: UserTypes.ADMIN,
+        password,
+        companyId: company.id
+      }
+
+      const { user } = await this.userService.createUser(newUser);
+
+      company.ownerId = user.id;
+      await this.companyRepository.save(company)
+
+      const token: string = await this.generateToken(user);
+      res.cookie('AuthorizationToken', token, {
+        maxAge: this.configService.get('JWT_EXPIRED_TIME'),
+        httpOnly: true,
+      });
+
+      return res.json({success: true})
+    } catch (e) {
+      this.logger.error(`Error during user signIn: ${e.message}`);
       throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }

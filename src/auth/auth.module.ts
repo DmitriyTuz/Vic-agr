@@ -7,7 +7,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from '@src/auth/strategies/jwt.strategy';
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {User} from "@src/entities/user/user.entity";
-import {Tag} from "@src/entities/tag/tag.entity";
+import {CompanyModule} from "@src/entities/company/company.module";
+import {Company} from "@src/entities/company/company.entity";
 
 @Module({
   controllers: [AuthController],
@@ -22,7 +23,8 @@ import {Tag} from "@src/entities/tag/tag.entity";
       // },
     }),
     PassportModule,
-    TypeOrmModule.forFeature([User])
+    TypeOrmModule.forFeature([User, Company]),
+    CompanyModule
   ],
   exports: [AuthService, JwtModule],
 })

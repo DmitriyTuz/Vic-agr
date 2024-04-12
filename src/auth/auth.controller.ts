@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { LoginUserDto } from '@src/auth/dto/login-user.dto';
 import {ValidationPipe} from "@src/pipes/validation.pipe";
 import {JwtAuthGuard} from "@src/auth/jwt-auth.guard";
+import {SignUpUserDto} from "@src/auth/dto/signUp-user.dto";
 
 @Controller('auth')
 export class AuthController {
@@ -19,5 +20,11 @@ export class AuthController {
   @Get('/logout')
   logout(@Req() req: Request, @Res() res: Response) {
     return this.authService.logout(req, res);
+  }
+
+  @UsePipes(ValidationPipe)
+  @Post('/sign-up')
+  signUp(@Body() reqBody: SignUpUserDto, @Req() req: Request, @Res() res: Response) {
+    return this.authService.signUp(reqBody, req, res);
   }
 }

@@ -205,12 +205,12 @@ export class UserService {
 
       const hashPassword: string = await bcrypt.hash(password, 5);
 
-      const userForCreate: CreateUserDto = {
+      const newUser: CreateUserDto = {
         ...dto,
         password: hashPassword,
       };
 
-      let user: User = await this.userRepository.save(userForCreate);
+      let user: User = await this.userRepository.save(newUser);
 
       const message: string = await this.twilioService.sendSMS(dto.phone, password);
 
