@@ -9,7 +9,7 @@ import {ApiExtraModels, ApiTags} from "@nestjs/swagger";
 import {ReqBodyForCreateSubscribeDto} from "@src/entities/payment/dto/reqBody-for-create-subscribe.dto";
 
 @ApiTags('Payments')
-@Controller('/api/payment')
+@Controller('payment')
 @ApiExtraModels(CreatePaymentDto)
 export class PaymentController {
   constructor(
@@ -38,5 +38,7 @@ export class PaymentController {
     const user = await this.userService.getOneUser({ id: req.user.id });
     return this.paymentService.createSubscribe(paymentId, body, user);
   }
+
+
 
 }

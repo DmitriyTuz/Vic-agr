@@ -23,7 +23,7 @@ import {UpdateUserDto} from "@src/entities/user/dto/update-user.dto";
 import {ReqBodyUserDto} from "@src/entities/user/dto/reqBody.user.dto";
 
 @ApiTags('Users')
-@Controller('/api/users')
+@Controller('users')
 @ApiExtraModels(CreateUserDto)
 export class UserController {
   constructor(private userService: UserService) {}

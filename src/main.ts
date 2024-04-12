@@ -10,6 +10,8 @@ import * as cookieParser from 'cookie-parser';
 async function start() {
   const app = await NestFactory.create(AppModule);
 
+  app.setGlobalPrefix('api/');
+
   const seedDataFlag = process.env.SEED_DATA === 'true';
   if (seedDataFlag) {
     const seedsService = app.get(SeedsService);
