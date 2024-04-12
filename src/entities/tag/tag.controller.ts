@@ -6,7 +6,7 @@ import { GetTagsOptionsInterface } from '@src/interfaces/get-tags-options.interf
 import {User} from "@src/entities/user/user.entity";
 import {UserService} from "@src/entities/user/user.service";
 
-@Controller('/api/tags')
+@Controller('tags')
 export class TagController {
   constructor(
       private tagService: TagService,

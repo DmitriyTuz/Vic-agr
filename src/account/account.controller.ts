@@ -7,7 +7,7 @@ import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.inter
 export class AccountController {
   constructor(private accountService: AccountService) {}
 
-  @Get('/api/account')
+  @Get('account')
   @UseGuards(JwtAuthGuard)
   async getOne(@Req() req: RequestWithUser) {
     return await this.accountService.getOne(req.user.id);

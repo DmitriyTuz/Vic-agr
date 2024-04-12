@@ -29,7 +29,4 @@ export class CreateUserDto {
   // @IsNotEmpty({ message: 'CompanyId required !' })
   // @IsNumber({}, { message: 'Must be a number' })
   companyId: number;
-
-  // @ApiProperty({ example: ['tag1', 'tag2'], description: 'User tags' })
-  // readonly tags?: string[];
 }
