@@ -379,4 +379,50 @@ export class TaskService {
 
     await this.taskRepository.save(task);
   }
+
+  // async create(req, res) {
+  //   try {
+  //     const user = await this.userService.getOneUser({id: req.user.id});
+  //     const {companyId} = user;
+  //
+  //     const {tags, workers, mapLocation} = req.body;
+  //     req.body.companyId = companyId;
+  //
+  //     const task = await this.createTask(req.user.id, req.body);
+  //
+  //     await this.tagService.checkTags(task, tags);
+  //     await this.userService.checkUsers(task, workers);
+  //     await this.locationService.checkLocations(task, mapLocation);
+  //
+  //     const findQuery: any = {id: task.id};
+  //     if (companyId) {
+  //       findQuery.companyId = companyId;
+  //     }
+  //     const returnedTask = await this.getOneTask(findQuery);
+  //
+  //     return res.status(200).send({
+  //       success: true,
+  //       notice: '200-task-has-been-created-successfully',
+  //       data: {task: this.getTaskData(returnedTask)}
+  //     })
+  //
+  //   } catch (err) {
+  //     throw err;
+  //   }
+  // }
+  //
+  // private async createTask(userId, taskData) {
+  //   const requiredFields = ['title', 'type', 'companyId', 'dueDate'];
+  //   this.checkerService.checkRequiredFields(taskData, requiredFields, false);
+  //   const {title, type} = taskData;
+  //
+  //   this.checkerService.checkName({title});
+  //   this.checkerService.checkType(type, 'Task');
+  //
+  //   const createdFields = ['title', 'type', 'executionTime', 'comment', 'mediaInfo', 'documentsInfo', 'companyId', 'dueDate'];
+  //   const newTask = this.helperService.getModelData(createdFields, taskData);
+  //   newTask.userId = userId;
+  //
+  //   return Task.create(newTask);
+  // }
 }

@@ -12,4 +12,10 @@ export class TaskController {
   getAll(@Body() reqBody: GetTasksOptionsInterface, @Req() req) {
     return this.taskService.getAll(reqBody, req.user.id);
   }
+
+  // @Post('/api/tasks/create')
+  // @UseGuards(JwtAuthGuard)
+  // create(@Req() req: Request, @Res() res: Response) {
+  //   return this.taskService.create(req, res);
+  // }
 }

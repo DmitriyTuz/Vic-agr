@@ -98,7 +98,7 @@ export class TagService {
     }
   }
 
-  async checkTags(user: User, tagNames: string[]): Promise<void> {
+  async checkTags(entity, tagNames: string[]): Promise<void> {
     try {
       const existingTags = await this.tagRepository.find({ where: { name: In(tagNames) } });
 
@@ -112,13 +112,35 @@ export class TagService {
         await this.tagRepository.save(newTags);
       }
 
-      user.tags = [...existingTags, ...newTags];
-      await this.userRepository.save(user);
+      entity.tags = [...existingTags, ...newTags];
+      await this.userRepository.save(entity);
 
     } catch (error) {
       throw new Error(`Error while checking tags: ${error.message}`);
     }
   }
+
+  // async checkTags(user: User, tagNames: string[]): Promise<void> {
+  //   try {
+  //     const existingTags = await this.tagRepository.find({ where: { name: In(tagNames) } });
+  //
+  //     const existingTagNames = existingTags.map(tag => tag.name);
+  //
+  //     const newTagNames = tagNames.filter(tagName => !existingTagNames.includes(tagName));
+  //
+  //     const newTags = newTagNames.map(tagName => this.tagRepository.create({ name: tagName }));
+  //
+  //     if (newTags.length > 0) {
+  //       await this.tagRepository.save(newTags);
+  //     }
+  //
+  //     user.tags = [...existingTags, ...newTags];
+  //     await this.userRepository.save(user);
+  //
+  //   } catch (error) {
+  //     throw new Error(`Error while checking tags: ${error.message}`);
+  //   }
+  // }
 
 
 }
