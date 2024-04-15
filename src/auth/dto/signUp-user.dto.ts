@@ -18,6 +18,7 @@ export class SignUpUserDto {
   @ApiProperty({ example: 'User1', description: 'User name' })
   @IsNotEmpty({ message: 'User name required !' })
   @IsString({ message: 'Must be a string' })
+  @Length(3, 256, { message: 'Must be at least 2 characters' })
   readonly name: string;
 
   @ApiProperty({ example: 'Company1', description: 'Company name' })
