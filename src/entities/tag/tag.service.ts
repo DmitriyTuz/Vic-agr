@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import {FindManyOptions, In, Like, Not, Repository} from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import {EntityManager, FindManyOptions, In, Like, Not, Repository} from 'typeorm';
+import {InjectEntityManager, InjectRepository} from '@nestjs/typeorm';
 
 import _ from 'underscore';
 
@@ -10,6 +10,7 @@ import { Tag } from '@src/entities/tag/tag.entity';
 
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import {User} from "@src/entities/user/user.entity";
+import {Task} from "@src/entities/task/task.entity";
 
 @Injectable()
 export class TagService {
@@ -21,6 +22,9 @@ export class TagService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     // private userService: UserService,
+    @InjectRepository(Task)
+    private taskRepository: Repository<Task>,
+    @InjectEntityManager() private readonly entityManager: EntityManager
   ) {}
 
   async getAll(reqQuery: GetTagsOptionsInterface, user: User): Promise<{ success: boolean; data: { tags: Tag[]; } }> {
@@ -101,11 +105,8 @@ export class TagService {
   async checkTags(entity, tagNames: string[]): Promise<void> {
     try {
       const existingTags = await this.tagRepository.find({ where: { name: In(tagNames) } });
-
       const existingTagNames = existingTags.map(tag => tag.name);
-
       const newTagNames = tagNames.filter(tagName => !existingTagNames.includes(tagName));
-
       const newTags = newTagNames.map(tagName => this.tagRepository.create({ name: tagName }));
 
       if (newTags.length > 0) {
@@ -113,7 +114,30 @@ export class TagService {
       }
 
       entity.tags = [...existingTags, ...newTags];
-      await this.userRepository.save(entity);
+
+      await this.entityManager.save(entity);
+      // await this.userRepository.save(entity);
+
+    } catch (error) {
+      throw new Error(`Error while checking tags: ${error.message}`);
+    }
+  }
+
+  async checkTagsForTask(task: Task, tagNames: string[]): Promise<void> {
+    try {
+      const existingTags = await this.tagRepository.find({ where: { name: In(tagNames) } });
+      const existingTagNames = existingTags.map(tag => tag.name);
+      const newTagNames = tagNames.filter(tagName => !existingTagNames.includes(tagName));
+      const newTags = newTagNames.map(tagName => this.tagRepository.create({ name: tagName }));
+
+      if (newTags.length > 0) {
+        await this.tagRepository.save(newTags);
+      }
+
+      task.tags = [...existingTags, ...newTags];
+
+      await this.taskRepository.save(task);
+      // await this.userRepository.save(entity);
 
     } catch (error) {
       throw new Error(`Error while checking tags: ${error.message}`);

@@ -61,6 +61,9 @@ export class UserService {
     @InjectRepository(Payment)
     private paymentRepository: Repository<Payment>,
     private readonly paymentService: PaymentService,
+    @InjectEntityManager() private readonly entityManager: EntityManager,
+    @InjectRepository(Task)
+    private taskRepository: Repository<Task>,
   ) {}
 
   async getAll(reqQuery: GetUsersOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { users: UserDataInterface[], filterCounts: GetFilterCountUsersResponseInterface; } }> {
@@ -426,5 +429,22 @@ export class UserService {
     } catch (err) {
       throw err;
     }
+  }
+
+
+  async checkUsersForTask(task: Task, userIds: number[]) {
+    const existingUsers = await this.userRepository.find({ where: { id: In(userIds) } });
+    const existingUserIds = existingUsers.map(user => user.id);
+    const newUserIds = userIds.filter(userId => !existingUserIds.includes(userId));
+    const newUsers = newUserIds.map(userId => this.userRepository.create({ id: userId }));
+
+    if (newUsers.length > 0) {
+      await this.userRepository.save(newUsers);
+    }
+
+    task.workers = [...existingUsers, ...newUsers];
+
+    await this.taskRepository.save(task);
+    // await this.entityManager.save(task);
   }
 }

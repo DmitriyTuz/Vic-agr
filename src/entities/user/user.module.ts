@@ -11,13 +11,14 @@ import {Tag} from "@src/entities/tag/tag.entity";
 import {TagModule} from "@src/entities/tag/tag.module";
 import {Payment} from "@src/entities/payment/payment.entity";
 import {PaymentModule} from "@src/entities/payment/payment.module";
+import {Task} from "@src/entities/task/task.entity";
 
 
 @Module({
   controllers: [UserController],
   providers: [UserService],
   imports: [
-    TypeOrmModule.forFeature([User, Tag, Payment]),
+    TypeOrmModule.forFeature([User, Tag, Payment, Task]),
     forwardRef(() => AuthModule),
     HelperModule,
     PasswordModule,

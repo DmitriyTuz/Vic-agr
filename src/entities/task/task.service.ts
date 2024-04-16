@@ -14,6 +14,9 @@ import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import {GetFilterCountTasksResponseInterface} from "@src/interfaces/get-filterCountTasks-response.interface";
 import {TaskDataInterface} from "@src/interfaces/task-data.interface";
 import {HelperService} from "@src/helper/helper.service";
+import {TagService} from "@src/entities/tag/tag.service";
+import {CreateUserDto} from "@src/entities/user/dto/create-user.dto";
+import {CreateTaskDto} from "@src/entities/task/dto/create-task.dto";
 
 interface CustomFindManyOptions<Task> extends FindManyOptions<Task> {
   relations?: string[];
@@ -31,6 +34,7 @@ export class TaskService {
     private userRepository: Repository<User>,
     private userService: UserService,
     private helperService: HelperService,
+    private tagService: TagService,
   ) {}
 
   async getAll(reqBody: GetTasksOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { tasks: TaskDataInterface[], filterCounts: GetFilterCountTasksResponseInterface; } }> {
@@ -380,49 +384,83 @@ export class TaskService {
     await this.taskRepository.save(task);
   }
 
-  // async create(req, res) {
-  //   try {
-  //     const user = await this.userService.getOneUser({id: req.user.id});
-  //     const {companyId} = user;
-  //
-  //     const {tags, workers, mapLocation} = req.body;
-  //     req.body.companyId = companyId;
-  //
-  //     const task = await this.createTask(req.user.id, req.body);
-  //
-  //     await this.tagService.checkTags(task, tags);
-  //     await this.userService.checkUsers(task, workers);
-  //     await this.locationService.checkLocations(task, mapLocation);
-  //
-  //     const findQuery: any = {id: task.id};
-  //     if (companyId) {
-  //       findQuery.companyId = companyId;
-  //     }
-  //     const returnedTask = await this.getOneTask(findQuery);
-  //
-  //     return res.status(200).send({
-  //       success: true,
-  //       notice: '200-task-has-been-created-successfully',
-  //       data: {task: this.getTaskData(returnedTask)}
-  //     })
-  //
-  //   } catch (err) {
-  //     throw err;
-  //   }
-  // }
-  //
-  // private async createTask(userId, taskData) {
-  //   const requiredFields = ['title', 'type', 'companyId', 'dueDate'];
-  //   this.checkerService.checkRequiredFields(taskData, requiredFields, false);
-  //   const {title, type} = taskData;
-  //
-  //   this.checkerService.checkName({title});
-  //   this.checkerService.checkType(type, 'Task');
-  //
-  //   const createdFields = ['title', 'type', 'executionTime', 'comment', 'mediaInfo', 'documentsInfo', 'companyId', 'dueDate'];
-  //   const newTask = this.helperService.getModelData(createdFields, taskData);
-  //   newTask.userId = userId;
-  //
-  //   return Task.create(newTask);
-  // }
+  async create(req) {
+    try {
+      const user = await this.userService.getOneUser({id: req.user.id});
+      const {companyId} = user;
+
+      const {tags, workers, mapLocation} = req.body;
+      req.body.companyId = companyId;
+
+      const task = await this.createTask(req.user.id, req.body);
+
+      await this.tagService.checkTagsForTask(task, tags);
+      // await this.tagService.checkTags(task, tags);
+
+      await this.userService.checkUsersForTask(task, workers);
+
+      // await this.locationService.checkLocations(task, mapLocation);
+
+      const findQuery: any = {id: task.id};
+      if (companyId) {
+        findQuery.companyId = companyId;
+      }
+      const returnedTask = await this.getOneTask(findQuery);
+
+      return {
+        success: true,
+        notice: '200-task-has-been-created-successfully',
+        data: {task: this.getTaskData(returnedTask)}
+      }
+
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  private async createTask(userId, taskData): Promise<Task> {
+    // const requiredFields = ['title', 'type', 'companyId', 'dueDate'];
+
+    // const {title, type} = taskData;
+
+    // this.checkerService.checkName({title});
+    // this.checkerService.checkType(type, 'Task');
+
+    const {title, type, executionTime, comment, mediaInfo, documentsInfo, companyId, dueDate} = taskData
+
+    const newTask: CreateTaskDto = {
+      title,
+      type,
+      executionTime,
+      comment,
+      mediaInfo,
+      documentsInfo,
+      companyId,
+      dueDate,
+      userId
+    }
+
+    // const createdFields = ['title', 'type', 'executionTime', 'comment', 'mediaInfo', 'documentsInfo', 'companyId', 'dueDate'];
+    // const newTask: CreateUserDto = this.helperService.getModelData(createdFields, taskData);
+    // newTask.userId = userId;
+
+    return this.taskRepository.save(newTask);
+    // return this.taskRepository.create(newTask);
+  }
+
+  async getOneTask(findQuery: any): Promise<Task> {
+    return this.taskRepository.findOne({
+      where: findQuery,
+      relations: [
+        'reportInfo',
+        'reportInfo.user',
+        'completeInfo',
+        'completeInfo.user',
+        'creator',
+        'tags',
+        'workers',
+        'mapLocation',
+      ],
+    });
+  }
 }
