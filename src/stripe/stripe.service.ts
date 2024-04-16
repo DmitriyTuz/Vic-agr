@@ -3,11 +3,18 @@ import { Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
 import credentials from '@lib/credentials';
 const stripe = new Stripe(credentials.config.STRIPE_SECRET_KEY);
+import * as _ from 'underscore';
+import {User} from "@src/entities/user/user.entity";
 
+interface SubscriptionData {
+  customer: string;
+  price: string;
+}
 
 @Injectable()
 export class StripeService {
-  async createSubscribers(data, user) {
+
+  async createSubscribers(data: SubscriptionData, user: User) {
     // cus_Ja3GHQVWon6AFB, price_1Iwt9l285d61s2cI8Z2BSUCY
     const { customer, price } = data;
     const stripeQuery = {
@@ -15,7 +22,9 @@ export class StripeService {
       items: [{ price }],
     };
 
-    return stripe.subscriptions.create(stripeQuery);
+    const sub = await stripe.subscriptions.create(stripeQuery);
+    console.log('!!! sub = ', sub)
+    return sub
   }
 
   async cancelSubscribe(id) {
@@ -25,4 +34,18 @@ export class StripeService {
   async customerCreate(token, phone, name) {
     return stripe.customers.create({source: token, phone: phone, name: name});
   }
+
+  // https://stripe.com/docs/api/plans/create
+  async createPlan(data) {
+    // 2000, USD, month, prod_HKL5XT1MkHHBkE
+    let plansData = _.pick(data, ['amount', 'currency', 'interval', 'product', 'active']);
+    return stripe.plans.create(plansData);
+  };
+
+  // https://stripe.com/docs/api/products/create
+  async createProduct(name) {
+    return stripe.products.create({
+      name: name,
+    });
+  };
 }

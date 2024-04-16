@@ -34,16 +34,16 @@ export class Tag {
   company: Company;
 
   @ManyToMany(() => Task, (task) => task.tags)
-  @JoinTable({
-    name: 'TaskTags',
-    joinColumn: {
-      name: 'taskId',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'tagId',
-      referencedColumnName: 'id',
-    },
-  })
+  // @JoinTable({
+  //   name: 'TaskTags',
+  //   joinColumn: {
+  //     name: 'taskId',
+  //     referencedColumnName: 'id',
+  //   },
+  //   inverseJoinColumn: {
+  //     name: 'tagId',
+  //     referencedColumnName: 'id',
+  //   },
+  // })
   tasks: Task[];
 }

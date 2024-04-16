@@ -54,7 +54,6 @@ export class UserService {
     private userRepository: Repository<User>,
     @InjectRepository(Tag)
     private tagRepository: Repository<Tag>,
-    // @InjectEntityManager() private readonly entityManager: EntityManager,
     private readonly helperService: HelperService,
     private readonly passwordService: PasswordService,
     private readonly twilioService: TwilioService,
@@ -62,6 +61,9 @@ export class UserService {
     @InjectRepository(Payment)
     private paymentRepository: Repository<Payment>,
     private readonly paymentService: PaymentService,
+    @InjectEntityManager() private readonly entityManager: EntityManager,
+    @InjectRepository(Task)
+    private taskRepository: Repository<Task>,
   ) {}
 
   async getAll(reqQuery: GetUsersOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { users: UserDataInterface[], filterCounts: GetFilterCountUsersResponseInterface; } }> {
@@ -402,12 +404,12 @@ export class UserService {
     return await this.userRepository.update(user.id, dto);
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<{success: boolean, notice: string, userId: number}> {
     try {
-      const user = await this.getOneUser({id});
+      const user: User = await this.getOneUser({id});
 
       if (!user) {
-        throw ({status: 404, message: '404-user-not-found', stack: new Error().stack});
+        throw new HttpException(`user-not-found`, HttpStatus.NOT_FOUND);
       }
 
       if (user.type === UserTypes.ADMIN && user.company.ownerId === user.id && user.company.isSubscribe) {
@@ -427,5 +429,22 @@ export class UserService {
     } catch (err) {
       throw err;
     }
+  }
+
+
+  async checkUsersForTask(task: Task, userIds: number[]) {
+    const existingUsers = await this.userRepository.find({ where: { id: In(userIds) } });
+    const existingUserIds = existingUsers.map(user => user.id);
+    const newUserIds = userIds.filter(userId => !existingUserIds.includes(userId));
+    const newUsers = newUserIds.map(userId => this.userRepository.create({ id: userId }));
+
+    if (newUsers.length > 0) {
+      await this.userRepository.save(newUsers);
+    }
+
+    task.workers = [...existingUsers, ...newUsers];
+
+    await this.taskRepository.save(task);
+    // await this.entityManager.save(task);
   }
 }

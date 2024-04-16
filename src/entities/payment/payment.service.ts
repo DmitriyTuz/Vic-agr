@@ -116,11 +116,13 @@ export class PaymentService {
       } else {
         // paymentId = parseInt(paymentId, 10);
 
+        console.log('!!! paymentId = ', paymentId);
+
         if (!paymentId) {
           throw new HttpException(`Payment-ID-not-found.`, HttpStatus.NOT_FOUND);
         }
 
-        const payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
+        const payment: Payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
 
         if (!payment) {
           throw new HttpException(`Payment-not-found.`, HttpStatus.NOT_FOUND);
@@ -130,7 +132,7 @@ export class PaymentService {
           throw new HttpException(`Please-confirm-the-agreement.`, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
-        const plan = await this.planRepository.findOne({ where: { name: planType } });
+        const plan: Plan = await this.planRepository.findOne({ where: { name: planType } });
 
         if (!plan) {
           throw new HttpException(`Plan-not-found.`, HttpStatus.NOT_FOUND);
@@ -163,7 +165,7 @@ export class PaymentService {
     }
   }
 
-  async removeSubscribe(payment: Payment) {
+  async removeSubscribe(payment: Payment): Promise<{ success: boolean, notice: string }> {
     const user: User = await this.userRepository.findOne({select: ['id', 'companyId'], where: {id: payment.userId}});
     const company: Company = await this.companyRepository.findOne({select: ['id', 'isTrial'], where: {id: user.companyId}});
 

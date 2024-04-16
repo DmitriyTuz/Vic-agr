@@ -90,8 +90,20 @@ export class Task {
   @ApiProperty({ example: '1', description: 'ID of the company that owns the task' })
   company: Company;
 
-  @ManyToMany(() => Tag, (tag) => tag.tasks)
+  @ManyToMany(() => Tag)
+  // @ManyToMany(() => Tag, (tag) => tag.tasks)
   @ApiProperty({ type: () => Tag, isArray: true, description: 'Tags associated with the task' })
+  @JoinTable({
+    name: 'TaskTags',
+    joinColumn: {
+      name: 'taskId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'tagId',
+      referencedColumnName: 'id',
+    },
+  })
   tags: Tag[];
 
   @ManyToMany(() => MapLocation, (location) => location.tasks)

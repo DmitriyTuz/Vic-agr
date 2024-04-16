@@ -85,7 +85,7 @@ export class AuthService {
     return token;
   }
 
-  async logout(req: Request, res: Response) {
+  async logout(req: Request, res: Response): Promise<Response<Record<string, any>>> {
     try {
       delete req.headers.authorization;
       res.clearCookie('AuthorizationToken');
@@ -97,7 +97,7 @@ export class AuthService {
     }
   }
 
-  async signUp(reqBody: SignUpUserDto, req: Request, res: Response) {
+  async signUp(reqBody: SignUpUserDto, req: Request, res: Response): Promise<Response<Record<string, any>>> {
     try {
       req.body.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 

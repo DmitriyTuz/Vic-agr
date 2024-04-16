@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { EntityMetadata, Repository } from 'typeorm';
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
+import _ from 'underscore';
 
 interface ColumnMetadata {
   propertyName: string;
@@ -77,6 +78,14 @@ export class HelperService {
     } catch (e) {
       this.logger.error(`Error during get entity fields: ${e.message}`);
       throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
+    }
+  }
+
+  getModelData(modelFields, modelData) {
+    try {
+      return _.pick(modelData, ...modelFields);
+    } catch (err) {
+      throw (err);
     }
   }
 }
