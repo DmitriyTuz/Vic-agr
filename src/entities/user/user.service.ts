@@ -377,7 +377,7 @@ export class UserService {
       const user: User = await this.getOneUser({id});
 
       if (!user) {
-        throw new HttpException('404-user-not-found', HttpStatus.NOT_FOUND);
+        throw new HttpException('user-not-found', HttpStatus.NOT_FOUND);
       }
 
       const {tags, ...userDto} = dto;
