@@ -1,4 +1,4 @@
-import {Body, Controller, Param, Patch, Post, Req, Res, UseGuards, UsePipes} from '@nestjs/common';
+import {Body, Controller, Param, Patch, Post, Put, Req, Res, UseGuards, UsePipes} from '@nestjs/common';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { GetTasksOptionsInterface } from '@src/interfaces/get-tasks-options.interface';
 import { TaskService } from '@src/entities/task/task.service';
@@ -6,6 +6,7 @@ import {RequestWithUser} from "@src/interfaces/add-field-user-to-Request.interfa
 import {ValidationPipe} from "@src/pipes/validation.pipe";
 import {ReqBodyTaskDto} from "@src/entities/task/dto/reqBody.task.dto";
 import {ReqBodyUpdateTaskDto} from "@src/entities/task/dto/reqBody.update-task.dto";
+import {ReqBodyCompleteTaskDto} from "@src/entities/complete-task/dto/reqBody.complete-task.dto";
 
 @Controller('tasks')
 export class TaskController {
@@ -25,9 +26,16 @@ export class TaskController {
   }
 
   @Patch('/:id/update-task')
+  @UsePipes(ValidationPipe)
   @UseGuards(JwtAuthGuard)
-  update(@Body() reqBody: ReqBodyUpdateTaskDto, @Req() req: RequestWithUser, @Param('id') id: number) {
-    return this.taskService.update(reqBody, req.user.id, id);
+  update(@Body() reqBody: ReqBodyUpdateTaskDto, @Req() req: RequestWithUser, @Param('id') taskId: number) {
+    return this.taskService.update(reqBody, req.user.id, taskId);
   }
 
+  @Put('/:id/complete-task')
+  @UsePipes(ValidationPipe)
+  @UseGuards(JwtAuthGuard)
+  complete(@Body() reqBody: ReqBodyCompleteTaskDto, @Req() req: RequestWithUser, @Param('id') taskId: number) {
+    return this.taskService.complete(reqBody, req.user.id, taskId);
+  }
 }

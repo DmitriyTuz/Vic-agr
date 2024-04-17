@@ -7,7 +7,7 @@ import {
   JoinTable,
   ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn,
+  UpdateDateColumn, JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -95,6 +95,7 @@ export class User {
   tasks: Task[];
 
   @OneToMany(() => CompleteTask, (completeTask) => completeTask.user)
+  @JoinColumn({ name: 'userId' })
   completeInfo: CompleteTask[];
 
   @OneToMany(() => ReportTask, (reportTask) => reportTask.user)

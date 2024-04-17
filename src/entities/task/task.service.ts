@@ -15,16 +15,17 @@ import {GetFilterCountTasksResponseInterface} from "@src/interfaces/get-filterCo
 import {TaskDataInterface} from "@src/interfaces/task-data.interface";
 import {HelperService} from "@src/helper/helper.service";
 import {TagService} from "@src/entities/tag/tag.service";
-import {CreateUserDto} from "@src/entities/user/dto/create-user.dto";
 import {CreateTaskDto} from "@src/entities/task/dto/create-task.dto";
 import {ReqBodyTaskDto} from "@src/entities/task/dto/reqBody.task.dto";
 import {UpdateTaskDto} from "@src/entities/task/dto/update-task.dto";
 import {ReqBodyUpdateTaskDto} from "@src/entities/task/dto/reqBody.update-task.dto";
+import {CompleteTask} from "@src/entities/complete-task/complete-task.entity";
+import {CompleteTask_createDto} from "@src/entities/complete-task/dto/complete-task_create.dto";
+import {ReqBodyCompleteTaskDto} from "@src/entities/complete-task/dto/reqBody.complete-task.dto";
 
 interface CustomFindManyOptions<Task> extends FindManyOptions<Task> {
   relations?: string[];
 }
-
 
 @Injectable()
 export class TaskService {
@@ -38,6 +39,8 @@ export class TaskService {
     private userService: UserService,
     private helperService: HelperService,
     private tagService: TagService,
+    @InjectRepository(CompleteTask)
+    private completeTaskRepository: Repository<CompleteTask>,
   ) {}
 
   async getAll(reqBody: GetTasksOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { tasks: TaskDataInterface[], filterCounts: GetFilterCountTasksResponseInterface; } }> {
@@ -266,7 +269,6 @@ export class TaskService {
       'dueDate',
     ]);
 
-    console.log('!!! data.createdAt = ', data.createdAt);
     // console.log('!!! parseInt(data.createdAt.toString() = ', parseInt(data.createdAt.toString(), 10));
 
     // const datesList: string[] = ['completedAt', 'createdAt', 'updatedAt', 'registrationDate', 'lastActive'];
@@ -356,8 +358,9 @@ export class TaskService {
         data: {task: this.getTaskData(returnedTask)}
       }
 
-    } catch (err) {
-      throw err;
+    } catch (e) {
+      this.logger.error(`Error during create task: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
@@ -398,16 +401,14 @@ export class TaskService {
 
   async update(body: ReqBodyUpdateTaskDto, adminId: number, taskId: number): Promise<{ success: boolean, notice: string, data: {task: TaskDataInterface} }> {
     try {
-      const user = await this.userService.getOneUser({id: adminId});
+      const user: User = await this.userService.getOneUser({id: adminId});
       const {companyId} = user;
 
-      // const {tags, workers, mapLocation} = body;
-
       if (!taskId) {
-        throw ({status: 404, message: '404-task-id-not-found', stack: new Error().stack});
+        throw new HttpException('task-id-not-found', HttpStatus.NOT_FOUND);
       }
 
-      const findQuery: any = {id: taskId};
+      const findQuery: Record <string, any> = {id: taskId};
       if (companyId) {
         findQuery.companyId = companyId;
       }
@@ -436,8 +437,9 @@ export class TaskService {
         data: {task: this.getTaskData(returnedTask)}
       };
 
-    } catch (err) {
-      throw err;
+    } catch (e) {
+      this.logger.error(`Error during update task: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
@@ -447,5 +449,57 @@ export class TaskService {
       dataUpdateTask.status = TaskStatuses.ACTIVE;
     }
     return await this.taskRepository.update(task.id, dataUpdateTask);
+  }
+
+  async complete(body: ReqBodyCompleteTaskDto, adminId: number, taskId: number): Promise<{ success: boolean, notice: string }> {
+    try {
+      if (!taskId) {
+        throw new HttpException('task-id-not-found', HttpStatus.NOT_FOUND);
+      }
+
+      const task: Task = await this.getOneTask({id: taskId});
+
+      if (!task) {
+        throw new HttpException('task-not-found', HttpStatus.NOT_FOUND);
+      }
+
+      await this.completeTask(adminId, task, body);
+
+      return {
+        success: true,
+        notice: '200-task-has-been-completed-successfully',
+      };
+
+    } catch (e) {
+      this.logger.error(`Error during complete task: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
+    }
+  }
+
+  private async completeTask(userId: number, task: Task, completeData: ReqBodyCompleteTaskDto): Promise<CompleteTask> {
+    TaskService.checkTaskStatus(task.status, 'complete');
+
+    const {timeLog, comment, mediaInfo} = completeData;
+
+    const newCompleteData: CompleteTask_createDto = {
+      userId,
+      taskId: task.id,
+      timeLog,
+      comment,
+      mediaInfo
+    }
+
+    const completeInfo: CompleteTask_createDto & CompleteTask = await this.completeTaskRepository.save(newCompleteData);
+    await this.taskRepository.update(task.id, {completedAt: new Date(), status: TaskStatuses.COMPLETED});
+    return completeInfo;
+  }
+
+  private static checkTaskStatus(status: string, action: string): void {
+    if (action === 'start' && status !== TaskStatuses.WAITING) {
+      throw new HttpException('task-already-started', HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+    if (['report', 'complete'].includes(action) && status !== TaskStatuses.ACTIVE) {
+      throw new HttpException(`task-${status === TaskStatuses.WAITING ? "didn't-start-yet" : 'already'}${status !== TaskStatuses.WAITING ? '-' + status.toLowerCase() : ''}`, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
   }
 }
