@@ -12,6 +12,7 @@ import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import {User} from "@src/entities/user/user.entity";
 import {Task} from "@src/entities/task/task.entity";
 
+
 @Injectable()
 export class TagService {
   private readonly logger = new Logger(TagService.name);
@@ -102,69 +103,38 @@ export class TagService {
     }
   }
 
-  async checkTags(entity, tagNames: string[]): Promise<void> {
+  async checkTagsForUser(user: User, tagNames: string[]): Promise<void> {
     try {
-      const existingTags = await this.tagRepository.find({ where: { name: In(tagNames) } });
-      const existingTagNames = existingTags.map(tag => tag.name);
-      const newTagNames = tagNames.filter(tagName => !existingTagNames.includes(tagName));
-      const newTags = newTagNames.map(tagName => this.tagRepository.create({ name: tagName }));
+      await this.checkTags(user, tagNames)
+      await this.userRepository.save(user);
 
-      if (newTags.length > 0) {
-        await this.tagRepository.save(newTags);
-      }
-
-      entity.tags = [...existingTags, ...newTags];
-
-      await this.entityManager.save(entity);
-      // await this.userRepository.save(entity);
-
-    } catch (error) {
-      throw new Error(`Error while checking tags: ${error.message}`);
+    } catch (e) {
+      this.logger.error(`Error while checking tags: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
   async checkTagsForTask(task: Task, tagNames: string[]): Promise<void> {
     try {
-      const existingTags = await this.tagRepository.find({ where: { name: In(tagNames) } });
-      const existingTagNames = existingTags.map(tag => tag.name);
-      const newTagNames = tagNames.filter(tagName => !existingTagNames.includes(tagName));
-      const newTags = newTagNames.map(tagName => this.tagRepository.create({ name: tagName }));
-
-      if (newTags.length > 0) {
-        await this.tagRepository.save(newTags);
-      }
-
-      task.tags = [...existingTags, ...newTags];
-
+      await this.checkTags(task, tagNames)
       await this.taskRepository.save(task);
-      // await this.userRepository.save(entity);
 
-    } catch (error) {
-      throw new Error(`Error while checking tags: ${error.message}`);
+    } catch (e) {
+      this.logger.error(`Error while checking tags for tasks: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
-  // async checkTags(user: User, tagNames: string[]): Promise<void> {
-  //   try {
-  //     const existingTags = await this.tagRepository.find({ where: { name: In(tagNames) } });
-  //
-  //     const existingTagNames = existingTags.map(tag => tag.name);
-  //
-  //     const newTagNames = tagNames.filter(tagName => !existingTagNames.includes(tagName));
-  //
-  //     const newTags = newTagNames.map(tagName => this.tagRepository.create({ name: tagName }));
-  //
-  //     if (newTags.length > 0) {
-  //       await this.tagRepository.save(newTags);
-  //     }
-  //
-  //     user.tags = [...existingTags, ...newTags];
-  //     await this.userRepository.save(user);
-  //
-  //   } catch (error) {
-  //     throw new Error(`Error while checking tags: ${error.message}`);
-  //   }
-  // }
+  async checkTags(entity: any, tagNames: string[]): Promise<void> {
+    const existingTags: Tag[] = await this.tagRepository.find({ where: { name: In(tagNames) } });
+    const existingTagNames: string[] = existingTags.map(tag => tag.name);
+    const newTagNames: string[] = tagNames.filter(tagName => !existingTagNames.includes(tagName));
+    const newTags: Tag[] = newTagNames.map(tagName => this.tagRepository.create({ name: tagName }));
 
+    if (newTags.length > 0) {
+      await this.tagRepository.save(newTags);
+    }
 
+    entity.tags = [...existingTags, ...newTags];
+  }
 }

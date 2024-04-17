@@ -81,11 +81,4 @@ export class HelperService {
     }
   }
 
-  getModelData(modelFields, modelData) {
-    try {
-      return _.pick(modelData, ...modelFields);
-    } catch (err) {
-      throw (err);
-    }
-  }
 }
