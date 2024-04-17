@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {HttpException, HttpStatus, Injectable, Logger} from '@nestjs/common';
 
 import { GetTasksOptionsInterface } from '@src/interfaces/get-tasks-options.interface';
 import { Task } from '@src/entities/task/task.entity';
@@ -17,6 +17,9 @@ import {HelperService} from "@src/helper/helper.service";
 import {TagService} from "@src/entities/tag/tag.service";
 import {CreateUserDto} from "@src/entities/user/dto/create-user.dto";
 import {CreateTaskDto} from "@src/entities/task/dto/create-task.dto";
+import {ReqBodyTaskDto} from "@src/entities/task/dto/reqBody.task.dto";
+import {UpdateTaskDto} from "@src/entities/task/dto/update-task.dto";
+import {ReqBodyUpdateTaskDto} from "@src/entities/task/dto/reqBody.update-task.dto";
 
 interface CustomFindManyOptions<Task> extends FindManyOptions<Task> {
   relations?: string[];
@@ -178,26 +181,6 @@ export class TaskService {
       }
     }
 
-    // if (isDatesInMs) {
-    //   const datesList: string[] = ['completedAt', 'createdAt', 'updatedAt', 'registrationDate', 'lastActive'];
-    //
-    //   for (const relation of query.relations) {
-    //     if (tasks[0]?.[relation]) {
-    //       console.log('!!! tasks[0]?.[relation] = ', tasks[0]?.[relation])
-    //       for (const task of tasks) {
-    //         const relatedEntity = task[relation];
-    //         if (relatedEntity) {
-    //           for (const dateField of datesList) {
-    //             if (relatedEntity[dateField] instanceof Date) {
-    //               relatedEntity[dateField] = relatedEntity[dateField].getTime();
-    //             }
-    //           }
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
-
     return tasks;
   }
 
@@ -346,66 +329,26 @@ export class TaskService {
     return filterCounts;
   }
 
-  async checkUsersInTask(task: Task, usersIds: number[]) {
-    const newUsers = usersIds?.length
-      ? await this.userRepository.find({
-          where: {
-            companyId: task.companyId,
-            id: In(usersIds),
-          },
-        })
-      : [];
-
-    if (newUsers.length !== usersIds.length) {
-      throw { status: 422, message: `422-assigned-user-not-found`, stack: new Error().stack };
-    }
-
-    let taskUsersIds = task?.workers?.map((u) => u.id) || [];
-
-    for (const u of newUsers) {
-      if (!taskUsersIds.includes(u.id)) {
-        task.workers.push(u);
-      }
-      if (taskUsersIds.includes(u.id)) {
-        const index = taskUsersIds.indexOf(u.id);
-        taskUsersIds.splice(index, 1);
-      }
-    }
-
-    if (taskUsersIds.length) {
-      for (const userId of taskUsersIds) {
-        const userIndex = task.workers.findIndex((u) => u.id === userId);
-        if (userIndex !== -1) {
-          task.workers.splice(userIndex, 1);
-        }
-      }
-    }
-
-    await this.taskRepository.save(task);
-  }
-
-  async create(req) {
+  async create(body: ReqBodyTaskDto, adminId: number): Promise<{ success: boolean, notice: string, data: {task: TaskDataInterface} }> {
     try {
-      const user = await this.userService.getOneUser({id: req.user.id});
+      const user: User = await this.userService.getOneUser({id: adminId});
       const {companyId} = user;
 
-      const {tags, workers, mapLocation} = req.body;
-      req.body.companyId = companyId;
+      const {tags, workers, mapLocation} = body
+      body.companyId = companyId;
 
-      const task = await this.createTask(req.user.id, req.body);
+      const task: Task = await this.createTask(adminId, body);
 
       await this.tagService.checkTagsForTask(task, tags);
-      // await this.tagService.checkTags(task, tags);
-
       await this.userService.checkUsersForTask(task, workers);
 
       // await this.locationService.checkLocations(task, mapLocation);
 
-      const findQuery: any = {id: task.id};
+      const findQuery: Record<string, any> = {id: task.id};
       if (companyId) {
         findQuery.companyId = companyId;
       }
-      const returnedTask = await this.getOneTask(findQuery);
+      const returnedTask: Task = await this.getOneTask(findQuery);
 
       return {
         success: true,
@@ -418,13 +361,7 @@ export class TaskService {
     }
   }
 
-  private async createTask(userId, taskData): Promise<Task> {
-    // const requiredFields = ['title', 'type', 'companyId', 'dueDate'];
-
-    // const {title, type} = taskData;
-
-    // this.checkerService.checkName({title});
-    // this.checkerService.checkType(type, 'Task');
+  private async createTask(userId: number, taskData: ReqBodyTaskDto): Promise<Task> {
 
     const {title, type, executionTime, comment, mediaInfo, documentsInfo, companyId, dueDate} = taskData
 
@@ -440,12 +377,7 @@ export class TaskService {
       userId
     }
 
-    // const createdFields = ['title', 'type', 'executionTime', 'comment', 'mediaInfo', 'documentsInfo', 'companyId', 'dueDate'];
-    // const newTask: CreateUserDto = this.helperService.getModelData(createdFields, taskData);
-    // newTask.userId = userId;
-
     return this.taskRepository.save(newTask);
-    // return this.taskRepository.create(newTask);
   }
 
   async getOneTask(findQuery: any): Promise<Task> {
@@ -462,5 +394,58 @@ export class TaskService {
         'mapLocation',
       ],
     });
+  }
+
+  async update(body: ReqBodyUpdateTaskDto, adminId: number, taskId: number): Promise<{ success: boolean, notice: string, data: {task: TaskDataInterface} }> {
+    try {
+      const user = await this.userService.getOneUser({id: adminId});
+      const {companyId} = user;
+
+      // const {tags, workers, mapLocation} = body;
+
+      if (!taskId) {
+        throw ({status: 404, message: '404-task-id-not-found', stack: new Error().stack});
+      }
+
+      const findQuery: any = {id: taskId};
+      if (companyId) {
+        findQuery.companyId = companyId;
+      }
+
+      const task: Task = await this.getOneTask(findQuery);
+
+      if (!task) {
+        throw new HttpException('task-not-found', HttpStatus.NOT_FOUND);
+      }
+
+      const {tags, workers, mapLocation, ...dataUpdateTask} = body;
+
+      await this.updateTask(task, dataUpdateTask);
+
+      const updatedTask: Task = await this.getOneTask(findQuery);
+
+      await this.tagService.checkTagsForTask(updatedTask, tags);
+      await this.userService.checkUsersForTask(updatedTask, workers);
+      // await this.locationService.checkLocations(task, mapLocation);
+
+      const returnedTask: Task = await this.getOneTask(findQuery);
+
+      return {
+        success: true,
+        notice: '200-task-has-been-updated-successfully',
+        data: {task: this.getTaskData(returnedTask)}
+      };
+
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  private async updateTask(task: Task, dataUpdateTask: UpdateTaskDto) {
+
+    if (([TaskStatuses.WAITING, TaskStatuses.COMPLETED] as const).includes(task.status as "Waiting" | "Completed")) {
+      dataUpdateTask.status = TaskStatuses.ACTIVE;
+    }
+    return await this.taskRepository.update(task.id, dataUpdateTask);
   }
 }

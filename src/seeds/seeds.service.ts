@@ -194,7 +194,7 @@ export class SeedsService {
       { lat: 27, lng: 10 },
     ];
 
-    await this.taskService.checkUsersInTask(task, workersIds);
+    await this.userService.checkUsersForTask(task, workersIds);
 
     // const usersData: any[] = [
     //   {

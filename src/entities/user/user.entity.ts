@@ -57,7 +57,7 @@ export class User {
   @Column()
   companyId: number;
 
-  @ManyToMany(() => Tag)
+  @ManyToMany(() => Tag, (tag) => tag.users)
   @JoinTable({
     name: 'UserTags',
     joinColumn: {

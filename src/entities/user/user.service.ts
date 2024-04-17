@@ -173,7 +173,7 @@ export class UserService {
       const {tags, ...userDto} = dto;
 
       const {user, message} = await this.createUser(userDto);
-      await this.tagService.checkTags(user, tags);
+      await this.tagService.checkTagsForUser(user, tags);
 
       const returnedUser: User = await this.getOneUser({id: user.id, companyId});
 
@@ -431,12 +431,11 @@ export class UserService {
     }
   }
 
-
-  async checkUsersForTask(task: Task, userIds: number[]) {
-    const existingUsers = await this.userRepository.find({ where: { id: In(userIds) } });
-    const existingUserIds = existingUsers.map(user => user.id);
-    const newUserIds = userIds.filter(userId => !existingUserIds.includes(userId));
-    const newUsers = newUserIds.map(userId => this.userRepository.create({ id: userId }));
+  async checkUsersForTask(task: Task, userIds: number[]): Promise<void> {
+    const existingUsers: User[] = await this.userRepository.find({ where: { id: In(userIds) } });
+    const existingUserIds: number[] = existingUsers.map(user => user.id);
+    const newUserIds: number[] = userIds.filter(userId => !existingUserIds.includes(userId));
+    const newUsers: User[] = newUserIds.map(userId => this.userRepository.create({ id: userId }));
 
     if (newUsers.length > 0) {
       await this.userRepository.save(newUsers);
@@ -445,6 +444,5 @@ export class UserService {
     task.workers = [...existingUsers, ...newUsers];
 
     await this.taskRepository.save(task);
-    // await this.entityManager.save(task);
   }
 }

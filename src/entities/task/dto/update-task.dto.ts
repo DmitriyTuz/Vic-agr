@@ -1,7 +1,8 @@
-import {IsDate, IsNotEmpty, IsNumber, IsString} from 'class-validator';
+import {IsDate, IsNotEmpty, IsNumber, IsString, Validate} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsPhone } from '@src/validators/is-phone.validator';
 
-export class ReqBodyTaskDto {
+export class UpdateTaskDto {
   @ApiProperty({ example: 'Task1', description: 'Task title' })
   @IsNotEmpty({ message: 'Title required !' })
   @IsString({ message: 'Must be a string' })
@@ -26,21 +27,11 @@ export class ReqBodyTaskDto {
 
   readonly documentsInfo: Record<string, any>[];
 
-  @ApiProperty({ example: '2024-04-17', description: 'Task due date' })
+  @ApiProperty({ example: '', description: 'Task due date' })
   @IsNotEmpty({ message: 'dueDate required !' })
-  @IsString({ message: 'Must be a string' })
-  // @IsDate({ message: 'Must be a date' })
+  @IsDate({ message: 'Must be a date' })
   readonly dueDate: Date;
 
-  @ApiProperty({ example: ['tag1', 'tag2'], description: 'Task tags names' })
-  readonly tags: string[];
-
-  @ApiProperty({ example: [10001, 10002], description: 'Task workers ids' })
-  readonly workers: number[];
-
-  @ApiProperty({ example: ['tag1', 'tag2'], description: 'Task workers ids' })
-  readonly mapLocation;
-
-  companyId: number;
+  status: string;
 
 }
