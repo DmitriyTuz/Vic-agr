@@ -7,6 +7,7 @@ import {ValidationPipe} from "@src/pipes/validation.pipe";
 import {ReqBodyTaskDto} from "@src/entities/task/dto/reqBody.task.dto";
 import {ReqBodyUpdateTaskDto} from "@src/entities/task/dto/reqBody.update-task.dto";
 import {ReqBodyCompleteTaskDto} from "@src/entities/complete-task/dto/reqBody.complete-task.dto";
+import {ReqBodyReportTaskDto} from "@src/entities/report-task/dto/reqBody.report-task.dto";
 
 @Controller('tasks')
 export class TaskController {
@@ -37,5 +38,11 @@ export class TaskController {
   @UseGuards(JwtAuthGuard)
   complete(@Body() reqBody: ReqBodyCompleteTaskDto, @Req() req: RequestWithUser, @Param('id') taskId: number) {
     return this.taskService.complete(reqBody, req.user.id, taskId);
+  }
+
+  @Put('/:id/report-task')
+  @UseGuards(JwtAuthGuard)
+  report(@Body() reqBody: ReqBodyReportTaskDto, @Req() req: RequestWithUser, @Param('id') taskId: number) {
+    return this.taskService.report(reqBody, req.user.id, taskId);
   }
 }

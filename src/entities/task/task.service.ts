@@ -22,6 +22,9 @@ import {ReqBodyUpdateTaskDto} from "@src/entities/task/dto/reqBody.update-task.d
 import {CompleteTask} from "@src/entities/complete-task/complete-task.entity";
 import {CompleteTask_createDto} from "@src/entities/complete-task/dto/complete-task_create.dto";
 import {ReqBodyCompleteTaskDto} from "@src/entities/complete-task/dto/reqBody.complete-task.dto";
+import {ReportTask} from "@src/entities/report-task/report-task.entity";
+import {ReportTask_createDto} from "@src/entities/report-task/dto/report-task_create.dto";
+import {ReqBodyReportTaskDto} from "@src/entities/report-task/dto/reqBody.report-task.dto";
 
 interface CustomFindManyOptions<Task> extends FindManyOptions<Task> {
   relations?: string[];
@@ -41,6 +44,8 @@ export class TaskService {
     private tagService: TagService,
     @InjectRepository(CompleteTask)
     private completeTaskRepository: Repository<CompleteTask>,
+    @InjectRepository(ReportTask)
+    private reportTaskRepository: Repository<ReportTask>,
   ) {}
 
   async getAll(reqBody: GetTasksOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { tasks: TaskDataInterface[], filterCounts: GetFilterCountTasksResponseInterface; } }> {
@@ -104,7 +109,11 @@ export class TaskService {
           createdAt: true,
           updatedAt: true,
           companyId: true
-        }
+        },
+        // completeInfo: {
+        //   id: true,
+        //
+        // }
       },
       where: {},
       relations: ['reportInfo', 'completeInfo', 'creator', 'tags', 'mapLocation', 'workers'],
@@ -290,18 +299,23 @@ export class TaskService {
     // data.dueDate = data.dueDate ? parseInt(data.dueDate.toString(), 10) : null;
 
     if (task?.completeInfo?.length) {
+      // console.log('!!! task.completeInfo = ', task.completeInfo);
+      // console.log(1);
       data.completeInfo = task.completeInfo.map((c: any) => ({
-        ...c.dataValues,
-        createdAt: c.dataValues.createdAt ? parseInt(c.dataValues.createdAt) : null,
-        updatedAt: c.dataValues.updatedAt ? parseInt(c.dataValues.updatedAt) : null,
+        ...c,
+        createdAt: c.createdAt ? c.createdAt: null,
+        updatedAt: c.updatedAt ? c.updatedAt: null,
       }));
     }
 
     if (task?.reportInfo?.length) {
+
+      console.log('!!! task.reportInfoInfo = ', task.reportInfo);
+      console.log(1);
       data.reportInfo = task.reportInfo.map((c: any) => ({
-        ...c.dataValues,
-        createdAt: c.dataValues.createdAt ? parseInt(c.dataValues.createdAt) : null,
-        updatedAt: c.dataValues.updatedAt ? parseInt(c.dataValues.updatedAt) : null,
+        ...c,
+        createdAt: c.createdAt ? c.createdAt: null,
+        updatedAt: c.updatedAt ? c.updatedAt: null,
       }));
     }
 
@@ -477,7 +491,7 @@ export class TaskService {
   }
 
   private async completeTask(userId: number, task: Task, completeData: ReqBodyCompleteTaskDto): Promise<CompleteTask> {
-    TaskService.checkTaskStatus(task.status, 'complete');
+    this.checkTaskStatus(task.status, 'complete');
 
     const {timeLog, comment, mediaInfo} = completeData;
 
@@ -494,12 +508,56 @@ export class TaskService {
     return completeInfo;
   }
 
-  private static checkTaskStatus(status: string, action: string): void {
+  private checkTaskStatus(status: string, action: string): void {
     if (action === 'start' && status !== TaskStatuses.WAITING) {
       throw new HttpException('task-already-started', HttpStatus.UNPROCESSABLE_ENTITY);
     }
     if (['report', 'complete'].includes(action) && status !== TaskStatuses.ACTIVE) {
       throw new HttpException(`task-${status === TaskStatuses.WAITING ? "didn't-start-yet" : 'already'}${status !== TaskStatuses.WAITING ? '-' + status.toLowerCase() : ''}`, HttpStatus.UNPROCESSABLE_ENTITY);
     }
+  }
+
+  async report(body: ReqBodyReportTaskDto, adminId: number, taskId): Promise<{ success: boolean, notice: string }> {
+    try {
+
+      if (!taskId) {
+        throw new HttpException('task-id-not-found', HttpStatus.NOT_FOUND);
+      }
+
+      const task: Task = await this.getOneTask({id: taskId});
+
+      if (!task) {
+        throw new HttpException('task-not-found', HttpStatus.NOT_FOUND);
+      }
+
+      await this.reportTask(adminId, task, body);
+
+      return {
+        success: true,
+        notice: '200-task-has-been-reported-successfully',
+      };
+
+    } catch (e) {
+      this.logger.error(`Error during report task: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
+    }
+  }
+
+  private async reportTask(userId, task, reportData): Promise<ReportTask> {
+    this.checkTaskStatus(task.status, 'report');
+
+    const {comment, mediaInfo} = reportData;
+
+    const newReportData: ReportTask_createDto = {
+      userId,
+      taskId: task.id,
+      comment,
+      mediaInfo
+    }
+
+    const reportInfo: ReportTask_createDto & ReportTask = await this.reportTaskRepository.save(newReportData);
+    await this.taskRepository.update(task.id, {status: TaskStatuses.WAITING});
+
+    return reportInfo;
   }
 }
