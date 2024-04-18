@@ -28,8 +28,8 @@ export class UpdateTaskDto {
   readonly documentsInfo: Record<string, any>[];
 
   @ApiProperty({ example: '', description: 'Task due date' })
-  @IsNotEmpty({ message: 'dueDate required !' })
-  @IsDate({ message: 'Must be a date' })
+  // @IsNotEmpty({ message: 'dueDate required !' })
+  // @IsDate({ message: 'Must be a date' })
   readonly dueDate: Date;
 
   status: string;
