@@ -19,6 +19,7 @@ import { PasswordModule } from './password/password.module';
 import { TwilioModule } from './twilio/twilio.module';
 import {AwsConfigModule} from "@src/aws/config/aws.config.module";
 import {S3Module} from "@src/aws/s3/s3.module";
+import { CheckerModule } from './checker/checker.module';
 
 @Module({
   imports: [
@@ -42,7 +43,8 @@ import {S3Module} from "@src/aws/s3/s3.module";
     PasswordModule,
     TwilioModule,
     AwsConfigModule,
-    S3Module
+    S3Module,
+    CheckerModule
   ],
   controllers: [],
   providers: [],

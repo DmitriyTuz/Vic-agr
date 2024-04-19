@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { Request, Response } from 'express';
 import * as bcrypt from 'bcryptjs';
+import generator from 'generate-password';
 import { JwtService } from '@nestjs/jwt';
 
 import { User } from '@src/entities/user/user.entity';
@@ -16,13 +17,12 @@ import {CompanyService} from "@src/entities/company/company.service";
 import {Company} from "@src/entities/company/company.entity";
 import {CreateCompanyDto} from "@src/entities/company/dto/create-company.dto";
 import {CreateUserDto} from "@src/entities/user/dto/create-user.dto";
+import {PasswordService} from "@src/password/password.service";
+import {TwilioService} from "@src/twilio/twilio.service";
+import {CheckerService} from "@src/checker/checker.service";
 
 interface TokenPayload {
   id: number;
-}
-
-interface TokenResponse {
-  token: string;
 }
 
 @Injectable()
@@ -38,6 +38,9 @@ export class AuthService {
       private companyService: CompanyService,
       @InjectRepository(Company)
       private companyRepository: Repository<Company>,
+      private readonly passwordService: PasswordService,
+      private readonly twilioService: TwilioService,
+      private readonly checkerService: CheckerService
   ) {}
 
   async login(reqBody: LoginUserDto, req: Request, res: Response): Promise<Response> {
@@ -135,4 +138,35 @@ export class AuthService {
       throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
+
+  async forgotPassword(body): Promise<{ notice: string, smsMessage?: string }> {
+    try {
+      const {phone} = body;
+
+      const user: User = await this.userService.getOneUser({phone});
+
+      if (!user) {
+        throw new HttpException('looks-like-you-do-not-have-an-account-yet', HttpStatus.NOT_FOUND);
+      }
+
+      const newPass: string = this.passwordService.createPassword();
+      const hashNewPas: string = await this.passwordService.hashPassword(newPass);
+      const updateData: {password: string} = {password: hashNewPas};
+
+      await this.userService.updateUser(user, updateData)
+      const message: string = await this.twilioService.sendSMS(phone, newPass);
+
+      let response: { notice: string, smsMessage?: string } = {
+        notice: '200-the-password-has-been-reset',
+      }
+
+      response = this.checkerService.checkResponse(response, message);
+
+      return response;
+    } catch (e) {
+      this.logger.error(`Error during user forgotPassword: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
+    }
+  }
+
 }

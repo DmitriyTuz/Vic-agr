@@ -205,7 +205,8 @@ export class UserService {
 
       } else { password = dto.password }
 
-      const hashPassword: string = await bcrypt.hash(password, 5);
+      const hashPassword: string = await this.passwordService.hashPassword(password);
+      // const hashPassword: string = await bcrypt.hash(password, 5);
 
       const newUser: CreateUserDto = {
         ...dto,

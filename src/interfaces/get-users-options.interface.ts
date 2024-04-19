@@ -5,4 +5,5 @@ export interface GetUsersOptionsInterface {
   limit?: number;
   companyId?: number;
   id?: number;
+  phone?: string;
 }

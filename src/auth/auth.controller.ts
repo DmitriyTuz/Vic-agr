@@ -1,10 +1,11 @@
-import {Body, Controller, Get, Post, Req, Res, UseGuards, UsePipes} from '@nestjs/common';
+import {Body, Controller, Get, Post, Put, Req, Res, UseGuards, UsePipes} from '@nestjs/common';
 import { AuthService } from '@src/auth/auth.service';
 import { Request, Response } from 'express';
 import { LoginUserDto } from '@src/auth/dto/login-user.dto';
 import {ValidationPipe} from "@src/pipes/validation.pipe";
 import {JwtAuthGuard} from "@src/auth/jwt-auth.guard";
 import {SignUpUserDto} from "@src/auth/dto/signUp-user.dto";
+import {ForgotPasswordUserDto} from "@src/auth/dto/forgotPassword-user.dto";
 
 @Controller('auth')
 export class AuthController {
@@ -26,5 +27,11 @@ export class AuthController {
   @Post('/sign-up')
   signUp(@Body() reqBody: SignUpUserDto, @Req() req: Request, @Res() res: Response) {
     return this.authService.signUp(reqBody, req, res);
+  }
+
+  @UsePipes(ValidationPipe)
+  @Put('/forgot-password')
+  forgotPassword(@Body() reqBody: ForgotPasswordUserDto) {
+    return this.authService.forgotPassword(reqBody);
   }
 }
