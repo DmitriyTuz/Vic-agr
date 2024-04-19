@@ -9,6 +9,9 @@ import {TypeOrmModule} from "@nestjs/typeorm";
 import {User} from "@src/entities/user/user.entity";
 import {CompanyModule} from "@src/entities/company/company.module";
 import {Company} from "@src/entities/company/company.entity";
+import {PasswordModule} from "@src/password/password.module";
+import {TwilioModule} from "@src/twilio/twilio.module";
+import {CheckerModule} from "@src/checker/checker.module";
 
 @Module({
   controllers: [AuthController],
@@ -24,7 +27,10 @@ import {Company} from "@src/entities/company/company.entity";
     }),
     PassportModule,
     TypeOrmModule.forFeature([User, Company]),
-    CompanyModule
+    CompanyModule,
+    PasswordModule,
+    TwilioModule,
+    CheckerModule
   ],
   exports: [AuthService, JwtModule],
 })
