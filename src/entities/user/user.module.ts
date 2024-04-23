@@ -12,19 +12,22 @@ import {TagModule} from "@src/entities/tag/tag.module";
 import {Payment} from "@src/entities/payment/payment.entity";
 import {PaymentModule} from "@src/entities/payment/payment.module";
 import {Task} from "@src/entities/task/task.entity";
+import {StripeModule} from "@src/stripe/stripe.module";
+import {Company} from "@src/entities/company/company.entity";
 
 
 @Module({
   controllers: [UserController],
   providers: [UserService],
   imports: [
-    TypeOrmModule.forFeature([User, Tag, Payment, Task]),
+    TypeOrmModule.forFeature([User, Tag, Payment, Task, Company]),
     forwardRef(() => AuthModule),
     HelperModule,
     PasswordModule,
     TwilioModule,
     forwardRef(() => TagModule),
     forwardRef(() => PaymentModule),
+    StripeModule
   ],
   exports: [UserService],
 })

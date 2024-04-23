@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 import credentials from '@lib/credentials';
 const stripe = new Stripe(credentials.config.STRIPE_SECRET_KEY);
 import * as _ from 'underscore';
+import * as moment from 'moment';
 import {User} from "@src/entities/user/user.entity";
 
 interface SubscriptionData {
@@ -23,7 +24,6 @@ export class StripeService {
     };
 
     const sub = await stripe.subscriptions.create(stripeQuery);
-    console.log('!!! sub = ', sub)
     return sub
   }
 
@@ -47,5 +47,10 @@ export class StripeService {
     return stripe.products.create({
       name: name,
     });
+  };
+
+  checkTrialDays(currentDate, trialDate) {
+    const diff = +moment(currentDate, 'x').diff(moment(trialDate, 'x'), 'day');
+    return diff >= 15;
   };
 }

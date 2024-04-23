@@ -22,6 +22,7 @@ import { GetUsersOptionsInterface } from '@src/interfaces/get-users-options.inte
 import {UpdateUserDto} from "@src/entities/user/dto/update-user.dto";
 import {ReqBodyUserDto} from "@src/entities/user/dto/reqBody.user.dto";
 import {CheckSuperUserGuard} from "@src/guards/check-super-user.guard";
+import {CheckPlanGuard} from "@src/guards/check-plan.guard";
 
 @ApiTags('Users')
 @Controller('users')
@@ -39,7 +40,8 @@ export class UserController {
   }
 
   @Get('/get-users')
-  @UseGuards(JwtAuthGuard, CheckSuperUserGuard)
+  @UseGuards(JwtAuthGuard, CheckPlanGuard)
+  // @UseGuards(JwtAuthGuard, CheckSuperUserGuard, CheckPlanGuard)
   getAll(@Query() reqQuery: GetUsersOptionsInterface, @Req() req: RequestWithUser) {
     return this.userService.getAll(reqQuery, req.user.id);
   }
