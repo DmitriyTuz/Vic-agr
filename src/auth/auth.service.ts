@@ -21,6 +21,9 @@ import {PasswordService} from "@src/password/password.service";
 import {TwilioService} from "@src/twilio/twilio.service";
 import {CheckerService} from "@src/checker/checker.service";
 
+import * as nodemailer from 'nodemailer';
+
+
 interface TokenPayload {
   id: number;
 }
@@ -155,6 +158,49 @@ export class AuthService {
 
       await this.userService.updateUser(user, updateData)
       const message: string = await this.twilioService.sendSMS(phone, newPass);
+
+      // const transporter = nodemailer.createTransport({
+      //   service: 'gmail',//smtp.gmail.com  //in place of service use host...
+      //   secure: false,//true
+      //   port: 25,//465
+      //   auth: {
+      //         user: 'dmitriytuz123@gmail.com',
+      //         pass: 'poqxfjnvuztqjlqv',
+      //   }, tls: {
+      //     rejectUnauthorized: false
+      //   }
+      // });
+
+      let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        // host: 'smtp.gmail.com',
+        port: 587, // порт для tls
+        // secure: false,
+        // port: 465, // порт для ssl
+        secure: true,
+        logger: true,
+        // debug: true,
+        secureConnection: false,
+
+        auth: {
+          user: 'dmitriytuz123@gmail.com',
+          pass: 'poqxfjnvuztqjlqv',
+        },
+
+        tls: {
+          rejectUnauthorized: true
+        }
+      })
+
+      // poqx fjnv uztq jlqv
+
+      await transporter.sendMail({
+        from: 'dmitriytuz123@gmail.com', // sender address
+        to: "jb.dmitriy.tkachenko@gmail.com", // list of receivers
+        subject: "Your password reset", // Subject line
+               text: "Your password reset !", // plain text body
+        html: `<div>Your new password - ${newPass} </div></br>`
+      });
 
       let response: { notice: string, smsMessage?: string } = {
         notice: '200-the-password-has-been-reset',
