@@ -12,6 +12,7 @@ import {Company} from "@src/entities/company/company.entity";
 import {PasswordModule} from "@src/password/password.module";
 import {TwilioModule} from "@src/twilio/twilio.module";
 import {CheckerModule} from "@src/checker/checker.module";
+import {MailModule} from "@src/mail/mail.module";
 
 @Module({
   controllers: [AuthController],
@@ -30,7 +31,8 @@ import {CheckerModule} from "@src/checker/checker.module";
     CompanyModule,
     PasswordModule,
     TwilioModule,
-    CheckerModule
+    CheckerModule,
+    MailModule
   ],
   exports: [AuthService, JwtModule],
 })

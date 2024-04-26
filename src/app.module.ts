@@ -20,6 +20,7 @@ import { TwilioModule } from './twilio/twilio.module';
 import {AwsConfigModule} from "@src/aws/config/aws.config.module";
 import {S3Module} from "@src/aws/s3/s3.module";
 import { CheckerModule } from './checker/checker.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -44,7 +45,8 @@ import { CheckerModule } from './checker/checker.module';
     TwilioModule,
     AwsConfigModule,
     S3Module,
-    CheckerModule
+    CheckerModule,
+    MailModule
   ],
   controllers: [],
   providers: [],
