@@ -126,10 +126,10 @@ export class TagService {
   }
 
   async checkTags(entity: any, tagNames: string[]): Promise<void> {
-    const existingTags: Tag[] = await this.tagRepository.find({ where: { name: In(tagNames) } });
+    const existingTags: Tag[] = await this.tagRepository.find({ where: { name: In(tagNames), companyId: entity.companyId } });
     const existingTagNames: string[] = existingTags.map(tag => tag.name);
     const newTagNames: string[] = tagNames.filter(tagName => !existingTagNames.includes(tagName));
-    const newTags: Tag[] = newTagNames.map(tagName => this.tagRepository.create({ name: tagName }));
+    const newTags: Tag[] = newTagNames.map(tagName => this.tagRepository.create({ name: tagName, companyId: entity.companyId }));
 
     if (newTags.length > 0) {
       await this.tagRepository.save(newTags);

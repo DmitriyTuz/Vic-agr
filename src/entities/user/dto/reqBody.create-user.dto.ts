@@ -35,7 +35,7 @@ import {IsPhone} from "@src/validators/is-phone.validator";
 //   readonly tags: string[];
 // }
 
-export class ReqBodyUserDto extends CreateUserDto {
+export class ReqBodyCreateUserDto extends CreateUserDto {
   @ApiProperty({ example: ['tag1', 'tag2'], description: 'User tags names' })
   readonly tags: string[];
 }
