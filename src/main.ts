@@ -6,8 +6,14 @@ import { SeedsService } from '@src/seeds/seeds.service';
 import { JwtStrategy } from '@src/auth/strategies/jwt.strategy';
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
+import {ConfigService} from "@nestjs/config";
+
+const configService = new ConfigService();
 
 async function start() {
+
+  const PORT = configService.get('PORT') || 5000;
+  // const PORT = process.env.PORT || 5000;
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('api/');
@@ -41,6 +47,6 @@ async function start() {
   SwaggerModule.setup('/api/docs', app, document);
 
   const logger = new Logger();
-  await app.listen(5000, () => logger.log(`Application starting ...`));
+  await app.listen(PORT, () => logger.log(`Application starting ...`));
 }
 start();

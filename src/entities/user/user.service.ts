@@ -30,7 +30,7 @@ import {UpdateUserDto} from "@src/entities/user/dto/update-user.dto";
 import {Payment} from "@src/entities/payment/payment.entity";
 import {UserTypes} from "@lib/constants";
 import {PaymentService} from "@src/entities/payment/payment.service";
-import {ReqBodyUserDto} from "@src/entities/user/dto/reqBody.user.dto";
+import {ReqBodyCreateUserDto} from "@src/entities/user/dto/reqBody.create-user.dto";
 
 
 type UserDataType = {
@@ -163,7 +163,7 @@ export class UserService {
     return filterCounts;
   }
 
-  async create(dto: ReqBodyUserDto, adminId: number): Promise <{ success: boolean, notice: string, data: {user: UserDataInterface}, smsMessage: string }>  {
+  async create(dto: ReqBodyCreateUserDto, adminId: number): Promise <{ success: boolean, notice: string, data: {user: UserDataInterface}, smsMessage: string }>  {
     try {
       const admin: User = await this.getOneUser({id: adminId});
       const {companyId} = admin;

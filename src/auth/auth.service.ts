@@ -61,7 +61,7 @@ export class AuthService {
       user.lastActive = new Date();
       await this.userRepository.save(user)
 
-      return res.json({success: true});
+      return res.json({success: true, token: token});
 
     } catch (e) {
       this.logger.error(`Error during user login: ${e.message}`);

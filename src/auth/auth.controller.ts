@@ -6,7 +6,9 @@ import {ValidationPipe} from "@src/pipes/validation.pipe";
 import {JwtAuthGuard} from "@src/auth/jwt-auth.guard";
 import {SignUpUserDto} from "@src/auth/dto/signUp-user.dto";
 import {ForgotPasswordUserDto} from "@src/auth/dto/forgotPassword-user.dto";
+import {ApiTags} from "@nestjs/swagger";
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
