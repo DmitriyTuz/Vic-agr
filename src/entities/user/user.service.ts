@@ -5,7 +5,7 @@ import {
   FindManyOptions,
   FindOneOptions,
   In,
-  Like,
+  Like, Not,
   Repository,
   SelectQueryBuilder, UpdateResult
 } from 'typeorm';
@@ -113,9 +113,7 @@ export class UserService {
       } else if (typeof (options.ids === 'string')) {
         arrIds = [options.ids]
       }
-      query.where = { ...(query.where || {}), id: In(arrIds) };
-      console.log('!!! arrIds = ', arrIds);
-      // query.where.id = In(options.ids);
+      query.where = { ...(query.where || {}), id: Not(In(arrIds)) };
     }
 
     // if (options.ids?.length) {
@@ -357,9 +355,8 @@ export class UserService {
       } else if (typeof (options.ids === 'string')) {
         arrIds = options.ids.split(',')
       }
-      query.where = { ...(query.where || {}), id: In(arrIds) };
-      console.log('!!! arrIds = ', arrIds);
-      // query.where.id = In(options.ids);
+      query.where = { ...(query.where || {}), id: Not(In(arrIds)) };
+
     }
 
     if (options.search) {
@@ -395,7 +392,7 @@ export class UserService {
       const user: User = await this.getOneUser({ id: currentUserId });
 
       if (!user) {
-        throw { status: 404, message: '404-user-not-found', stack: new Error().stack };
+        throw new HttpException('user-not-found', HttpStatus.NOT_FOUND);
       }
 
       await this.updateOnboard(user);
