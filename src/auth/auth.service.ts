@@ -161,7 +161,7 @@ export class AuthService {
       await this.userService.updateUser(user, updateData)
       const message: string = await this.twilioService.sendSMS(phone, newPass);
 
-      await this.mailService.sendPasswordResetEmail(newPass)
+      // await this.mailService.sendPasswordResetEmail(newPass)
 
       let response: { notice: string, smsMessage?: string } = {
         notice: '200-the-password-has-been-reset',

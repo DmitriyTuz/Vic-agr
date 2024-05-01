@@ -71,6 +71,13 @@ export class UserController {
   }
 
   @Patch('/onboard')
+  @ApiOperation({ summary: 'User onboard' })
+  @ApiResponse({
+    status: 200,
+    description: 'user-has-been-updated-onboard-successfully'
+  })
+  // @ApiResponse({ status: 200, type: [User] })
+  @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   updateOnboardUser(@Req() req: RequestWithUser) {
     return this.userService.updateOnboardUser(req.user.id);
