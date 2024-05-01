@@ -14,16 +14,16 @@ import {
 import { UserService } from '@src/entities/user/user.service';
 import { CreateUserDto } from '@src/entities/user/dto/create-user.dto';
 import { User } from '@src/entities/user/user.entity';
-import {ApiBearerAuth, ApiExtraModels, ApiOperation, ApiQuery, ApiResponse, ApiTags} from '@nestjs/swagger';
+import {ApiBearerAuth, ApiExtraModels, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags} from '@nestjs/swagger';
 import { ValidationPipe } from '@src/pipes/validation.pipe';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
 import { ReqQueryGetUsersInterface } from '@src/interfaces/reqQuery.get-users.interface';
-import {UpdateUserDto} from "@src/entities/user/dto/update-user.dto";
 import {CheckSuperUserGuard} from "@src/guards/check-super-user.guard";
 import {CheckPlanGuard} from "@src/guards/check-plan.guard";
 import {ReqBodyCreateUserDto} from "@src/entities/user/dto/reqBody.create-user.dto";
 import {ReqQueryGetWorkerTagsInterface} from "@src/interfaces/reqQuery.get-worker-tags.interface";
+import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
 
 @ApiTags('Users')
 @Controller('users')
@@ -83,14 +83,29 @@ export class UserController {
     return this.userService.updateOnboardUser(req.user.id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Patch('/update-user/:id')
-  update(@Param('id') id: number, @Body() dto: UpdateUserDto & { tags?: string[] }) {
+  @ApiOperation({ summary: 'Update user by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'user-has-been-updated-successfully'
+  })
+  @ApiBearerAuth('JWT')
+  @ApiParam({ name: 'id', example: '10001', description: 'User ID', type: 'number' })
+  @UseGuards(JwtAuthGuard)
+  update(@Param('id') id: number, @Body() dto: ReqBodyUpdateUserDto) {
+  // update(@Param('id') id: number, @Body() dto: UpdateUserDto & { tags?: string[] }) {
     return this.userService.update(id, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete('/delete-user/:id')
+  @ApiOperation({ summary: 'Delete user by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'user-has-been-removed-successfully'
+  })
+  @ApiBearerAuth('JWT')
+  @ApiParam({ name: 'id', example: '10001', description: 'User ID', type: 'number' })
+  @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: number) {
     return this.userService.remove(id);
   }

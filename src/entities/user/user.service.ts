@@ -33,6 +33,7 @@ import {PaymentService} from "@src/entities/payment/payment.service";
 import {ReqBodyCreateUserDto} from "@src/entities/user/dto/reqBody.create-user.dto";
 import {GetWorkerTagsInterface} from "@src/interfaces/get-worker-tags.interface";
 import {GetUsersInterface} from "@src/interfaces/get-users-interface";
+import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
 
 
 type UserDataType = {
@@ -412,9 +413,9 @@ export class UserService {
     await this.userRepository.update(user.id, { hasOnboard: true });
   }
 
-  async update(id: number, dto: UpdateUserDto & { tags?: string[] }): Promise <{ success: boolean, notice: string, data: {user: UserDataInterface} }> {
+  async update(id: number, dto: ReqBodyUpdateUserDto): Promise <{ success: boolean, notice: string, data: {user: UserDataInterface} }> {
     try {
-      const user: User = await this.getOneUser({id});
+      const user: User = await this.getOneUser({id: +id});
 
       if (!user) {
         throw new HttpException('user-not-found', HttpStatus.NOT_FOUND);
@@ -423,11 +424,11 @@ export class UserService {
       const {tags, ...userDto} = dto;
       await this.updateUser(user, userDto);
 
-      const updatedUser: User = await this.getOneUser({id});
+      const updatedUser: User = await this.getOneUser({id: +id});
 
-      await this.tagService.checkTags(updatedUser, tags);
+      await this.tagService.checkTagsForUser(updatedUser, tags);
 
-      const returnedUser: User = await this.getOneUser({id});
+      const returnedUser: User = await this.getOneUser({id: +id});
 
       return {
         success: true,

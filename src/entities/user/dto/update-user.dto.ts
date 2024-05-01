@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsPhone } from '@src/validators/is-phone.validator';
 
 export class UpdateUserDto {
-  @ApiProperty({ example: 'User1', description: 'User name for create' })
+  @ApiProperty({ example: 'User1', description: 'User name for update' })
   // @IsNotEmpty({ message: 'Name required !' })
   // @IsString({ message: 'Must be a string' })
   readonly name?: string;
