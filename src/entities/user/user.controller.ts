@@ -18,11 +18,12 @@ import {ApiBearerAuth, ApiExtraModels, ApiOperation, ApiQuery, ApiResponse, ApiT
 import { ValidationPipe } from '@src/pipes/validation.pipe';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
-import { GetUsersOptionsInterface } from '@src/interfaces/get-users-options.interface';
+import { ReqQueryGetUsersInterface } from '@src/interfaces/reqQuery.get-users.interface';
 import {UpdateUserDto} from "@src/entities/user/dto/update-user.dto";
 import {CheckSuperUserGuard} from "@src/guards/check-super-user.guard";
 import {CheckPlanGuard} from "@src/guards/check-plan.guard";
 import {ReqBodyCreateUserDto} from "@src/entities/user/dto/reqBody.create-user.dto";
+import {ReqQueryGetWorkerTagsInterface} from "@src/interfaces/reqQuery.get-worker-tags.interface";
 
 @ApiTags('Users')
 @Controller('users')
@@ -44,11 +45,11 @@ export class UserController {
   @ApiOperation({ summary: 'Get users' })
   @ApiResponse({ status: 200, type: [User] })
   @ApiBearerAuth('JWT')
-  @ApiQuery({ name: 'search', example: 'User', description: 'Search by part of name', required: false })
+  @ApiQuery({ name: 'search', example: 'U', description: 'Search by part of name', required: false })
   @ApiQuery({ name: 'type', example: 'Worker', description: 'User type', required: false })
-  @UseGuards(JwtAuthGuard/*, CheckPlanGuard*/)
+  @UseGuards(JwtAuthGuard, CheckPlanGuard)
   // @UseGuards(JwtAuthGuard, CheckSuperUserGuard, CheckPlanGuard)
-  getAll(@Query() reqQuery: GetUsersOptionsInterface, @Req() req: RequestWithUser) {
+  getAll(@Query() reqQuery: ReqQueryGetUsersInterface, @Req() req: RequestWithUser) {
     return this.userService.getAll(reqQuery, req.user.id);
   }
 
@@ -59,9 +60,14 @@ export class UserController {
   // }
 
   @Get('/worker-tags')
-  @UseGuards(JwtAuthGuard)
-  async getWorkers(@Query() workerOptions: GetUsersOptionsInterface, @Req() req: RequestWithUser) {
-    return this.userService.getWorkers(workerOptions, req.user.id);
+  @ApiOperation({ summary: 'Get workers' })
+  @ApiResponse({ status: 200, type: [User] })
+  @ApiBearerAuth('JWT')
+  @ApiQuery({ name: 'search', example: 'U', description: 'Search by part of name', required: false })
+  @ApiQuery({ name: 'ids', example: '10001,10002', description: 'Worker ids', required: false })
+  @UseGuards(JwtAuthGuard/*, CheckPlanGuard*/)
+  async getWorkers(@Query() reqQuery: ReqQueryGetWorkerTagsInterface, @Req() req: RequestWithUser) {
+    return this.userService.getWorkers(reqQuery, req.user.id);
   }
 
   @Patch('/onboard')

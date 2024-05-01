@@ -19,7 +19,7 @@ import {User} from '@src/entities/user/user.entity';
 import {HelperService} from '@src/helper/helper.service';
 import {Task} from '@src/entities/task/task.entity';
 import {Company} from '@src/entities/company/company.entity';
-import {GetUsersOptionsInterface} from "@src/interfaces/get-users-options.interface";
+import {ReqQueryGetUsersInterface} from "@src/interfaces/reqQuery.get-users.interface";
 import {GetFilterCountUsersResponseInterface} from "@src/interfaces/get-filterCountUsers-response.interface";
 import {UserDataInterface} from "@src/interfaces/user-data.interface";
 import {PasswordService} from "@src/password/password.service";
@@ -31,6 +31,8 @@ import {Payment} from "@src/entities/payment/payment.entity";
 import {UserTypes} from "@lib/constants";
 import {PaymentService} from "@src/entities/payment/payment.service";
 import {ReqBodyCreateUserDto} from "@src/entities/user/dto/reqBody.create-user.dto";
+import {GetWorkerTagsInterface} from "@src/interfaces/get-worker-tags.interface";
+import {GetUsersInterface} from "@src/interfaces/get-users-interface";
 
 
 type UserDataType = {
@@ -66,7 +68,7 @@ export class UserService {
     private taskRepository: Repository<Task>,
   ) {}
 
-  async getAll(reqQuery: GetUsersOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { users: UserDataInterface[], filterCounts: GetFilterCountUsersResponseInterface; } }> {
+  async getAll(reqQuery: GetUsersInterface, currentUserId: number): Promise<{ success: boolean; data: { users: UserDataInterface[], filterCounts: GetFilterCountUsersResponseInterface; } }> {
     try {
       const user: User = await this.getOneUser({ id: currentUserId });
       const { companyId } = user;
@@ -91,7 +93,7 @@ export class UserService {
     }
   }
 
-  async getAllUsers(options: GetUsersOptionsInterface): Promise<User[]> {
+  async getAllUsers(options: GetUsersInterface): Promise<User[]> {
     const query: FindManyOptions<User> = {
       where: {},
       relations: ['tags', 'tasks'],
@@ -99,15 +101,27 @@ export class UserService {
     };
 
     if (options.companyId) {
-      if (!options.ids?.includes(10000)) {
+      if (!options.ids?.includes('10000')) {
         query.where = { ...(query.where || {}), companyId: options.companyId };
       }
     }
 
     if (options.ids?.length) {
-      query.where = { ...(query.where || {}), id: In(options.ids) };
+      let arrIds = [];
+      if (Array.isArray(options.ids)) {
+        arrIds = options.ids.map(id => +id)
+      } else if (typeof (options.ids === 'string')) {
+        arrIds = [options.ids]
+      }
+      query.where = { ...(query.where || {}), id: In(arrIds) };
+      console.log('!!! arrIds = ', arrIds);
       // query.where.id = In(options.ids);
     }
+
+    // if (options.ids?.length) {
+    //   query.where = { ...(query.where || {}), id: In(options.ids) };
+    //   // query.where.id = In(options.ids);
+    // }
 
     if (options.type) {
       query.where = { ...(query.where || {}), type: options.type };
@@ -235,7 +249,7 @@ export class UserService {
     return await this.userRepository.findOne({ where: { id } });
   }
 
-  async getOneUser(findQuery: GetUsersOptionsInterface): Promise<User> {
+  async getOneUser(findQuery: GetUsersInterface): Promise<User> {
     try {
       // const selectFields: string[] = await this.helperService.getEntityFields(this.userRepository, [], true, false);
       // const selectObject: Record<string, true> = {};
@@ -301,16 +315,16 @@ export class UserService {
     return await this.userRepository.findOne({ where: { phone } });
   }
 
-  async getWorkers(workerOptions: GetUsersOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { workers: User[]; } }> {
+  async getWorkers(reqQuery: GetWorkerTagsInterface, currentUserId: number): Promise<{ success: boolean; data: { workers: User[]; } }> {
     try {
       const user: User = await this.getOneUser({ id: currentUserId });
 
-      let { search, ids } = workerOptions;
+      let { search, ids } = reqQuery;
       const { companyId } = user;
 
-      if (typeof ids === 'string') {
-        ids = [ids];
-      }
+      // if (typeof ids === 'string') {
+      //   ids = [ids];
+      // }
 
       const workers: User[] = await this.getAllWorkers({ search, ids, companyId });
 
@@ -325,27 +339,55 @@ export class UserService {
     }
   }
 
-  async getAllWorkers(options: GetUsersOptionsInterface): Promise<User[]> {
-    let query: SelectQueryBuilder<User> = this.userRepository
-      .createQueryBuilder('user')
-      .select(['user.id', 'user.name'])
-      .orderBy('user.name', 'ASC')
-      .take(10);
+  async getAllWorkers(options: GetWorkerTagsInterface): Promise<User[]> {
+    const query: FindManyOptions<User> = {
+      select: ['id', 'name'],
+      order: { name: 'ASC' },
+      where: {},
+    };
 
     if (options.companyId) {
-      query = query.where('user.companyId = :companyId', { companyId: options.companyId });
+      query.where = { ...(query.where || {}), companyId: options.companyId };
     }
 
     if (options.ids?.length) {
-      query = query.andWhere('user.id NOT IN (:...ids)', { ids: options.ids });
+      let arrIds = [];
+      if (Array.isArray(options.ids)) {
+        arrIds = options.ids.map(id => +id)
+      } else if (typeof (options.ids === 'string')) {
+        arrIds = options.ids.split(',')
+      }
+      query.where = { ...(query.where || {}), id: In(arrIds) };
+      console.log('!!! arrIds = ', arrIds);
+      // query.where.id = In(options.ids);
     }
 
     if (options.search) {
-      query = query.andWhere('user.name ILIKE :search', { search: `%${options.search}%` });
+      query.where = { ...(query.where || {}), name: Like(`%${options.search}%`) };
     }
 
-    const users: User[] = await query.getMany();
-    return users;
+    return await this.userRepository.find(query);
+
+    // let query: SelectQueryBuilder<User> = this.userRepository
+    //   .createQueryBuilder('user')
+    //   .select(['user.id', 'user.name'])
+    //   .orderBy('user.name', 'ASC')
+    //   .take(10);
+    //
+    // if (options.companyId) {
+    //   query = query.where('user.companyId = :companyId', { companyId: options.companyId });
+    // }
+    //
+    // if (options.ids?.length) {
+    //   query = query.andWhere('user.id NOT IN (:...ids)', { ids: options.ids });
+    // }
+    //
+    // if (options.search) {
+    //   query = query.andWhere('user.name ILIKE :search', { search: `%${options.search}%` });
+    // }
+    //
+    // const users: User[] = await query.getMany();
+    // return users;
   }
 
   async updateOnboardUser(currentUserId: number): Promise<{ success: boolean; notice: string; userId: number; }>  {
