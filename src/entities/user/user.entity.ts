@@ -21,7 +21,7 @@ import { ReportTask } from '@src/entities/report-task/report-task.entity';
 @Entity({ schema: 'public', name: 'Users' })
 export class User {
   @PrimaryGeneratedColumn()
-  @ApiProperty({ example: '1', description: 'User unique id' })
+  @ApiProperty({ example: '10001', description: 'User unique id' })
   id: number;
 
   @Column()
