@@ -8,11 +8,11 @@ import { User } from '@src/entities/user/user.entity';
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '@src/entities/user/user.service';
-import { LoginUserDto } from '@src/auth/dto/login-user.dto';
+import { LoginDto } from '@src/auth/dto/login.dto';
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {UserTypes} from "@lib/constants";
-import {SignUpUserDto} from "@src/auth/dto/signUp-user.dto";
+import {SignUpDto} from "@src/auth/dto/sign-up.dto";
 import {CompanyService} from "@src/entities/company/company.service";
 import {Company} from "@src/entities/company/company.entity";
 import {CreateCompanyDto} from "@src/entities/company/dto/create-company.dto";
@@ -48,7 +48,7 @@ export class AuthService {
       private readonly mailService: MailService,
   ) {}
 
-  async login(reqBody: LoginUserDto, req: Request, res: Response): Promise<Response> {
+  async login(reqBody: LoginDto, req: Request, res: Response): Promise<Response> {
     try {
       req.body.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
       const user: User = await this.validateUser(reqBody);
@@ -69,7 +69,7 @@ export class AuthService {
     }
   }
 
-  private async validateUser(dto: LoginUserDto): Promise<User> {
+  private async validateUser(dto: LoginDto): Promise<User> {
     const user: User | undefined = await this.userService.findByPhone(dto.phone);
 
     if (user) {
@@ -105,7 +105,7 @@ export class AuthService {
     }
   }
 
-  async signUp(reqBody: SignUpUserDto, req: Request, res: Response): Promise<Response<Record<string, any>>> {
+  async signUp(reqBody: SignUpDto, req: Request, res: Response): Promise<Response<Record<string, any>>> {
     try {
       req.body.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
@@ -161,7 +161,7 @@ export class AuthService {
       await this.userService.updateUser(user, updateData)
       const message: string = await this.twilioService.sendSMS(phone, newPass);
 
-      // await this.mailService.sendPasswordResetEmail(newPass)
+      await this.mailService.sendPasswordResetEmail(newPass)
 
       let response: { notice: string, smsMessage?: string } = {
         notice: '200-the-password-has-been-reset',

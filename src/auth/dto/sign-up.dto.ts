@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, Length, Validate } from 'class-validator';
 import { IsPhone } from '@src/validators/is-phone.validator';
 
-export class SignUpUserDto {
+export class SignUpDto {
   @ApiProperty({ example: '+100000000001', description: 'User phone' })
   @IsNotEmpty({ message: 'Phone required !' })
   @IsString({ message: 'Must be a string' })
@@ -26,9 +26,10 @@ export class SignUpUserDto {
   @IsString({ message: 'Must be a string' })
   readonly companyName: string;
 
-  @ApiProperty({ example: '1234567', description: 'User password' })
+  // @ApiProperty({ example: '1234567', description: 'User password' })
   readonly passwordConfirmation: string;
 
+  @ApiProperty({ example: 'logo1', description: 'Logo' })
   readonly logo: Record<string, any>;
 
 }
