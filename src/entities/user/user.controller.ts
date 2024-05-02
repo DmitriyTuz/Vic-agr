@@ -14,7 +14,16 @@ import {
 import { UserService } from '@src/entities/user/user.service';
 import { CreateUserDto } from '@src/entities/user/dto/create-user.dto';
 import { User } from '@src/entities/user/user.entity';
-import {ApiBearerAuth, ApiExtraModels, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags} from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiExtraModels,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags
+} from '@nestjs/swagger';
 import { ValidationPipe } from '@src/pipes/validation.pipe';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
@@ -32,8 +41,10 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Post('/create-user')
-  @ApiOperation({ summary: 'User creation' })
-  @ApiResponse({ status: 200, type: User })
+  @ApiOperation({ summary: 'Create new user' })
+  @ApiBody({ type: ReqBodyCreateUserDto, description: 'User data' })
+  @ApiResponse({ status: 200, type: User, description: 'User has been created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid user data' })
   @ApiBearerAuth('JWT')
   @UsePipes(ValidationPipe)
   @UseGuards(JwtAuthGuard)
@@ -43,7 +54,8 @@ export class UserController {
 
   @Get('/get-users')
   @ApiOperation({ summary: 'Get users' })
-  @ApiResponse({ status: 200, type: [User] })
+  @ApiResponse({ status: 200, type: [User], description: 'List of users' })
+  @ApiResponse({ status: 400, description: 'Invalid query parameters' })
   @ApiBearerAuth('JWT')
   @ApiQuery({ name: 'search', example: 'U', description: 'Search by part of name', required: false })
   @ApiQuery({ name: 'type', example: 'Worker', description: 'User type', required: false })
@@ -53,15 +65,10 @@ export class UserController {
     return this.userService.getAll(reqQuery, req.user.id);
   }
 
-  // @Get('get-all-users')
-  // async findAll() {
-  //   throw new HttpException('Some error', 400);
-  //   return this.userService.findAll();
-  // }
-
   @Get('/worker-tags')
   @ApiOperation({ summary: 'Get workers' })
-  @ApiResponse({ status: 200, type: [User] })
+  @ApiResponse({ status: 200, type: [User], description: 'List of workers' })
+  @ApiResponse({ status: 400, description: 'Invalid query parameters' })
   @ApiBearerAuth('JWT')
   @ApiQuery({ name: 'search', example: 'U', description: 'Search by part of name', required: false })
   @ApiQuery({ name: 'ids', example: '10001,10002', description: 'Worker ids', required: false })
@@ -72,11 +79,8 @@ export class UserController {
 
   @Patch('/onboard')
   @ApiOperation({ summary: 'User onboard' })
-  @ApiResponse({
-    status: 200,
-    description: 'user-has-been-updated-onboard-successfully'
-  })
-  // @ApiResponse({ status: 200, type: [User] })
+  @ApiResponse({status: 200, description: 'User has been successfully onboarded'})
+  @ApiResponse({ status: 400, description: 'Invalid user id' })
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   updateOnboardUser(@Req() req: RequestWithUser) {
@@ -85,24 +89,21 @@ export class UserController {
 
   @Patch('/update-user/:id')
   @ApiOperation({ summary: 'Update user by id' })
-  @ApiResponse({
-    status: 200,
-    description: 'user-has-been-updated-successfully'
-  })
+  @ApiResponse({status: 200, description: 'User has been updated successfully'})
+  @ApiResponse({ status: 400, description: 'Invalid user id or request body' })
   @ApiBearerAuth('JWT')
   @ApiParam({ name: 'id', example: '10001', description: 'User ID', type: 'number' })
+  @ApiBody({ type: ReqBodyUpdateUserDto, description: 'User data' })
   @UseGuards(JwtAuthGuard)
+  @UsePipes(ValidationPipe)
   update(@Param('id') id: number, @Body() dto: ReqBodyUpdateUserDto) {
-  // update(@Param('id') id: number, @Body() dto: UpdateUserDto & { tags?: string[] }) {
     return this.userService.update(id, dto);
   }
 
   @Delete('/delete-user/:id')
   @ApiOperation({ summary: 'Delete user by id' })
-  @ApiResponse({
-    status: 200,
-    description: 'user-has-been-removed-successfully'
-  })
+  @ApiResponse({ status: 200, description: 'User has been removed successfully'})
+  @ApiResponse({ status: 400, description: 'Invalid user id' })
   @ApiBearerAuth('JWT')
   @ApiParam({ name: 'id', example: '10001', description: 'User ID', type: 'number' })
   @UseGuards(JwtAuthGuard)
