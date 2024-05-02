@@ -4,7 +4,7 @@ import {InjectEntityManager, InjectRepository} from '@nestjs/typeorm';
 
 import _ from 'underscore';
 
-import { GetTagsOptionsInterface } from '@src/interfaces/get-tags-options.interface';
+import { GetTagsInterface } from '@src/interfaces/get-tags.interface';
 
 import { Tag } from '@src/entities/tag/tag.entity';
 
@@ -28,7 +28,7 @@ export class TagService {
     @InjectEntityManager() private readonly entityManager: EntityManager
   ) {}
 
-  async getAll(reqQuery: GetTagsOptionsInterface, user: User): Promise<{ success: boolean; data: { tags: Tag[]; } }> {
+  async getAll(reqQuery: GetTagsInterface, user: User): Promise<{ success: boolean; data: { tags: Tag[]; } }> {
     try {
       // const user: User = await this.userService.getOneUser({ id: currentUserId });
 
@@ -44,7 +44,8 @@ export class TagService {
 
       const response = {
         success: true,
-        data: { tags: returnedTags },
+        data: { tags }
+        // data: { tags: returnedTags },
       };
 
       return response;
@@ -54,7 +55,7 @@ export class TagService {
     }
   }
 
-  async getAllTags(options: GetTagsOptionsInterface): Promise<Tag[]> {
+  async getAllTags(options: GetTagsInterface): Promise<Tag[]> {
     const query: FindManyOptions<Tag> = {
       select: ['id', 'name'],
       order: { name: 'ASC' },
@@ -67,20 +68,23 @@ export class TagService {
 
     if (options.action === 'GetAll') {
       if (options.names?.length) {
-
+        let arrNames = [];
         if (Array.isArray(options.names)) {
-          options.names = options.names.map((name) => name.toLowerCase());
+          arrNames = options.names.map((name) => name.toLowerCase());
         } else if (typeof options.names === 'string') {
-          options.names = [options.names.toLowerCase()];
+          arrNames = options.names.split(',').map((name) => name.toLowerCase());
         }
-        query.where = { ...(query.where || {}), name: Not(In(options.names)) };
-        query.where = { ...(query.where || {}), name: Like(`%${options.search}%`) };
+        query.where = { ...(query.where || {}), name: Not(In(arrNames)) };
       }
 
       query.take = 10;
     }
 
-    return this.tagRepository.find(query);
+    if (options.search) {
+      query.where = { ...(query.where || {}), name: Like(`%${options.search}%`) };
+    }
+
+    return await this.tagRepository.find(query);
   }
 
   async getTagData(tag) {

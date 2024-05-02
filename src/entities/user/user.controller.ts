@@ -71,6 +71,7 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Invalid query parameters' })
   @ApiBearerAuth('JWT')
   @ApiQuery({ name: 'search', example: 'U', description: 'Search by part of name', required: false })
+  // @ApiQuery({ name: 'ids', example: 'tag1, tag2', description: 'Worker ids', required: false })
   @ApiQuery({ name: 'ids', example: '10001,10002', description: 'Worker ids', required: false })
   @UseGuards(JwtAuthGuard/*, CheckPlanGuard*/)
   async getWorkers(@Query() reqQuery: ReqQueryGetWorkerTagsInterface, @Req() req: RequestWithUser) {
