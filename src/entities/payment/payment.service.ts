@@ -15,8 +15,8 @@ import { Plan } from '@src/entities/plan/plan.entity';
 import { StripeService } from '@src/stripe/stripe.service';
 import {User} from "@src/entities/user/user.entity";
 import {CreatePaymentDto} from "@src/entities/payment/dto/create-payment.dto";
-import {ReqBodyForCreateSubscribeDto} from "@src/entities/payment/dto/reqBody-for-create-subscribe.dto";
-import {ReqBodyForCreatePaymentDto} from "@src/entities/payment/dto/reqBody-for-create-payment.dto";
+import {ReqBodyCreateSubscribeDto} from "@src/entities/payment/dto/reqBody-create-subscribe.dto";
+import {ReqBodyCreatePaymentDto} from "@src/entities/payment/dto/reqBody-create-payment.dto";
 
 @Injectable()
 export class PaymentService {
@@ -39,7 +39,7 @@ export class PaymentService {
     return this.paymentRepository.findOne({ where: { userId } });
   }
 
-  async create(body: ReqBodyForCreatePaymentDto, user: User): Promise <{ success: boolean, notice: string, data: {payment: Payment} }> {
+  async create(body: ReqBodyCreatePaymentDto, user: User): Promise <{ success: boolean, notice: string, data: {payment: Payment} }> {
     try {
       body.expiration = `${moment(body.exp_month, 'M').format('MM')}/${moment(body.exp_year, 'YYYY').format('YY')}`;
 
@@ -76,7 +76,7 @@ export class PaymentService {
     await this.paymentRepository.remove(payment);
   }
 
-  private async createPayment(user: User, newPaymentInfo: ReqBodyForCreatePaymentDto): Promise<CreatePaymentDto & Payment>{
+  private async createPayment(user: User, newPaymentInfo: ReqBodyCreatePaymentDto): Promise<CreatePaymentDto & Payment>{
     // const requiredFields = ['number', 'token', 'cardType','expiration'];
     // this.checkerService.checkRequiredFields(newPaymentInfo, requiredFields, false);
 
@@ -97,7 +97,7 @@ export class PaymentService {
     return this.paymentRepository.save(newPayment);
   }
 
-  async createSubscribe(paymentId: number, body: ReqBodyForCreateSubscribeDto, admin: User): Promise <{ success: boolean, notice: string}> {
+  async createSubscribe(paymentId: number, body: ReqBodyCreateSubscribeDto, admin: User): Promise <{ success: boolean, notice: string}> {
     try {
       // const user = await this.userService.getOneUser({ id: req.user.id });
 
@@ -183,7 +183,7 @@ export class PaymentService {
 
     return  {
       success: true,
-      notice: 'Subscribed'
+      notice: 'Unsubscribed'
     }
   }
 

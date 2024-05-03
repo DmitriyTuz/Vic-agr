@@ -1,32 +1,36 @@
 import {IsBoolean, IsNotEmpty, IsNumber, IsString} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ReqBodyForCreatePaymentDto {
+export class ReqBodyCreatePaymentDto {
   @ApiProperty({ example: 'false', description: 'Subscription agreement accepted' })
   @IsNotEmpty({ message: 'Agree required !' })
   @IsBoolean({ message: 'Must be a boolean' })
   readonly agree: boolean;
 
   @ApiProperty({ example: 'Visa', description: 'Card type' })
-  @IsNotEmpty({ message: 'cardType required !' })
+  @IsNotEmpty({ message: 'CardType required !' })
   @IsString({ message: 'Must be a string' })
   readonly cardType: string;
 
-  @IsNotEmpty({ message: 'exp_month required !' })
+  @ApiProperty({ example: 7, description: 'Subscribe exp month' })
+  @IsNotEmpty({ message: 'Exp_month required !' })
   @IsNumber({}, { message: 'Must be a number' })
   readonly exp_month: number;
 
-  @IsNotEmpty({ message: 'exp_year required !' })
+  @ApiProperty({ example: 2024, description: 'Subscribe exp year' })
+  @IsNotEmpty({ message: 'Exp_year required !' })
   @IsNumber({}, { message: 'Must be a number' })
   readonly exp_year: number;
 
   readonly nameOnCard: string;
 
-  @IsNotEmpty({ message: 'number required !' })
-  @IsNumber({}, { message: 'Must be a number' })
+  @ApiProperty({ example: '4242', description: 'Subscribe number' })
+  @IsNotEmpty({ message: 'Number required !' })
+  @IsString({ message: 'Must be a string' })
   readonly number: string;
 
-  @IsNotEmpty({ message: 'cardType required !' })
+  @ApiProperty({ example: 'tok_1PCQVBC581Db3P9C1cJqkE0r', description: 'Subscribe token' })
+  @IsNotEmpty({ message: 'Token required !' })
   @IsString({ message: 'Must be a string' })
   readonly token: string;
 
