@@ -36,11 +36,11 @@ export class TagService {
       const { companyId } = user;
 
       const tags: Tag[] = await this.getAllTags({names, action: 'GetAll', search, companyId});
-      const returnedTags: Tag[] = [];
+      // const returnedTags: Tag[] = [];
 
-      for (const t of tags) {
-        returnedTags.push(await this.getTagData(t));
-      }
+      // for (const t of tags) {
+      //   returnedTags.push(await this.getTagData(t));
+      // }
 
       const response = {
         success: true,
@@ -70,15 +70,29 @@ export class TagService {
       if (options.names?.length) {
         let arrNames = [];
         if (Array.isArray(options.names)) {
-          arrNames = options.names.map((name) => name.toLowerCase());
+          arrNames = options.names;
         } else if (typeof options.names === 'string') {
-          arrNames = options.names.split(',').map((name) => name.toLowerCase());
+          arrNames = options.names.split(',');
         }
         query.where = { ...(query.where || {}), name: Not(In(arrNames)) };
       }
 
       query.take = 10;
     }
+
+    // if (options.action === 'GetAll') {
+    //   if (options.names?.length) {
+    //     let arrNames = [];
+    //     if (Array.isArray(options.names)) {
+    //       arrNames = options.names.map((name) => name.toLowerCase());
+    //     } else if (typeof options.names === 'string') {
+    //       arrNames = options.names.split(',').map((name) => name.toLowerCase());
+    //     }
+    //     query.where = { ...(query.where || {}), name: Not(In(arrNames)) };
+    //   }
+    //
+    //   query.take = 10;
+    // }
 
     if (options.search) {
       query.where = { ...(query.where || {}), name: Like(`%${options.search}%`) };
@@ -133,7 +147,8 @@ export class TagService {
     const existingTags: Tag[] = await this.tagRepository.find({ where: { name: In(tagNames), companyId: entity.companyId } });
     const existingTagNames: string[] = existingTags.map(tag => tag.name);
     const newTagNames: string[] = tagNames.filter(tagName => !existingTagNames.includes(tagName));
-    const newTags: Tag[] = newTagNames.map(tagName => this.tagRepository.create({ name: tagName, companyId: entity.companyId }));
+    const newTagNamesUniq: string[] = this.uniqTagNames(newTagNames);
+    const newTags: Tag[] = newTagNamesUniq.map(tagName => this.tagRepository.create({ name: tagName, companyId: entity.companyId }));
 
     if (newTags.length > 0) {
       await this.tagRepository.save(newTags);
@@ -141,4 +156,30 @@ export class TagService {
 
     entity.tags = [...existingTags, ...newTags];
   }
+
+  // async checkTags(entity: any, tagNames: string[]): Promise<void> {
+  //   const existingTags: Tag[] = await this.tagRepository.find({ where: { name: In(tagNames), companyId: entity.companyId } });
+  //   const existingTagNames: string[] = existingTags.map(tag => tag.name);
+  //   const newTagNames: string[] = tagNames.filter(tagName => !existingTagNames.includes(tagName));
+  //   // const newTagNamesUniq: string[] = this.uniqTagNames(newTagNames)
+  //   const newTags: Tag[] = newTagNames.map(tagName => this.tagRepository.create({ name: tagName, companyId: entity.companyId }));
+  //
+  //   if (newTags.length > 0) {
+  //     await this.tagRepository.save(newTags);
+  //   }
+  //
+  //   entity.tags = [...existingTags, ...newTags];
+  // }
+
+  private uniqTagNames = (arr) => {
+    let arrRes = [];
+    for (let i = 0; i < arr.length; i ++) {
+      if (!arrRes.includes(arr[i])) {
+        arrRes.push(arr[i]);
+      }
+    }
+
+    return arrRes;
+  }
+
 }
