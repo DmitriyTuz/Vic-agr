@@ -1,7 +1,7 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { AccountService } from '@src/account/account.service';
-import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
+import { RequestWithUser } from '@src/interfaces/users/add-field-user-to-Request.interface';
 
 @Controller()
 export class AccountController {

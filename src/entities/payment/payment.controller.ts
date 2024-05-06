@@ -1,7 +1,7 @@
 import {Body, Controller, HttpException, HttpStatus, Param, Post, Req, Res, UseGuards, UsePipes} from '@nestjs/common';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { PaymentService } from '@src/entities/payment/payment.service';
-import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
+import { RequestWithUser } from '@src/interfaces/users/add-field-user-to-Request.interface';
 import {UserService} from "@src/entities/user/user.service";
 import {ReqBodyCreatePaymentDto} from "@src/entities/payment/dto/reqBody-create-payment.dto";
 import {CreatePaymentDto} from "@src/entities/payment/dto/create-payment.dto";

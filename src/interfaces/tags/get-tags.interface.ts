@@ -1,4 +1,4 @@
-import {ReqQueryGetTagsInterface} from "@src/interfaces/reqQuery.get-tags.interface";
+import {ReqQueryGetTagsInterface} from "@src/interfaces/tags/reqQuery.get-tags.interface";
 
 export interface GetTagsInterface extends ReqQueryGetTagsInterface {
   action?: string;

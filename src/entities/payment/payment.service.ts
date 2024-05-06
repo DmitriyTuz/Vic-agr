@@ -6,7 +6,7 @@ import * as moment from 'moment';
 
 import { PlanTypes } from '@lib/constants';
 
-import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
+import { RequestWithUser } from '@src/interfaces/users/add-field-user-to-Request.interface';
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 
 import { Payment } from '@src/entities/payment/payment.entity';

@@ -19,9 +19,9 @@ import {User} from '@src/entities/user/user.entity';
 import {HelperService} from '@src/helper/helper.service';
 import {Task} from '@src/entities/task/task.entity';
 import {Company} from '@src/entities/company/company.entity';
-import {ReqQueryGetUsersInterface} from "@src/interfaces/reqQuery.get-users.interface";
-import {GetFilterCountUsersResponseInterface} from "@src/interfaces/get-filterCountUsers-response.interface";
-import {UserDataInterface} from "@src/interfaces/user-data.interface";
+import {ReqQueryGetUsersInterface} from "@src/interfaces/users/reqQuery.get-users.interface";
+import {GetFilterCountUsersResponseInterface} from "@src/interfaces/users/get-filterCountUsers-response.interface";
+import {UserDataInterface} from "@src/interfaces/users/user-data.interface";
 import {PasswordService} from "@src/password/password.service";
 import {TwilioService} from "@src/twilio/twilio.service";
 import {Tag} from "@src/entities/tag/tag.entity";
@@ -31,8 +31,8 @@ import {Payment} from "@src/entities/payment/payment.entity";
 import {UserTypes} from "@lib/constants";
 import {PaymentService} from "@src/entities/payment/payment.service";
 import {ReqBodyCreateUserDto} from "@src/entities/user/dto/reqBody.create-user.dto";
-import {GetWorkerTagsInterface} from "@src/interfaces/get-worker-tags.interface";
-import {GetUsersInterface} from "@src/interfaces/get-users-interface";
+import {GetWorkerTagsInterface} from "@src/interfaces/tasks/get-worker-tags.interface";
+import {GetUsersInterface} from "@src/interfaces/users/get-users-interface";
 import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
 
 
