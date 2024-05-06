@@ -4,7 +4,7 @@ import {InjectEntityManager, InjectRepository} from '@nestjs/typeorm';
 
 import _ from 'underscore';
 
-import { GetTagsInterface } from '@src/interfaces/get-tags.interface';
+import { GetTagsInterface } from '@src/interfaces/tags/get-tags.interface';
 
 import { Tag } from '@src/entities/tag/tag.entity';
 

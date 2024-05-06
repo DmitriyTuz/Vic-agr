@@ -26,12 +26,12 @@ import {
 } from '@nestjs/swagger';
 import { ValidationPipe } from '@src/pipes/validation.pipe';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
-import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
-import { ReqQueryGetUsersInterface } from '@src/interfaces/reqQuery.get-users.interface';
+import { RequestWithUser } from '@src/interfaces/users/add-field-user-to-Request.interface';
+import { ReqQueryGetUsersInterface } from '@src/interfaces/users/reqQuery.get-users.interface';
 import {CheckSuperUserGuard} from "@src/guards/check-super-user.guard";
 import {CheckPlanGuard} from "@src/guards/check-plan.guard";
 import {ReqBodyCreateUserDto} from "@src/entities/user/dto/reqBody.create-user.dto";
-import {ReqQueryGetWorkerTagsInterface} from "@src/interfaces/reqQuery.get-worker-tags.interface";
+import {ReqQueryGetWorkerTagsInterface} from "@src/interfaces/tasks/reqQuery.get-worker-tags.interface";
 import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
 
 @ApiTags('Users')

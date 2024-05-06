@@ -1,6 +1,6 @@
 import {HttpException, HttpStatus, Injectable, Logger} from '@nestjs/common';
 
-import { GetTasksOptionsInterface } from '@src/interfaces/get-tasks-options.interface';
+// import { GetTasksInterface } from '@src/interfaces/tasks/get-tasks.interface';
 import { Task } from '@src/entities/task/task.entity';
 import { TaskStatuses, TaskTypes, UserTypes } from '@lib/constants';
 import { FindManyOptions, In, Not, Repository } from 'typeorm';
@@ -11,8 +11,8 @@ import * as moment from 'moment';
 import { UserService } from '@src/entities/user/user.service';
 import { User } from '@src/entities/user/user.entity';
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
-import {GetFilterCountTasksResponseInterface} from "@src/interfaces/get-filterCountTasks-response.interface";
-import {TaskDataInterface} from "@src/interfaces/task-data.interface";
+import {GetFilterCountTasksResponseInterface} from "@src/interfaces/tasks/get-filterCountTasks-response.interface";
+import {TaskDataInterface} from "@src/interfaces/tasks/task-data.interface";
 import {HelperService} from "@src/helper/helper.service";
 import {TagService} from "@src/entities/tag/tag.service";
 import {CreateTaskDto} from "@src/entities/task/dto/create-task.dto";
@@ -25,6 +25,7 @@ import {ReqBodyCompleteTaskDto} from "@src/entities/complete-task/dto/reqBody.co
 import {ReportTask} from "@src/entities/report-task/report-task.entity";
 import {ReportTask_createDto} from "@src/entities/report-task/dto/report-task_create.dto";
 import {ReqBodyReportTaskDto} from "@src/entities/report-task/dto/reqBody.report-task.dto";
+import {GetTasksDto} from "@src/entities/task/dto/get-tasks.dto";
 
 interface CustomFindManyOptions<Task> extends FindManyOptions<Task> {
   relations?: string[];
@@ -48,7 +49,7 @@ export class TaskService {
     private reportTaskRepository: Repository<ReportTask>,
   ) {}
 
-  async getAll(reqBody: GetTasksOptionsInterface, currentUserId: number): Promise<{ success: boolean; data: { tasks: TaskDataInterface[], filterCounts: GetFilterCountTasksResponseInterface; } }> {
+  async getAll(reqQuery: GetTasksDto, currentUserId: number): Promise<{ success: boolean; data: { tasks: TaskDataInterface[], filterCounts: GetFilterCountTasksResponseInterface; } }> {
     try {
       const user: User = await this.userService.getOneUser({ id: currentUserId });
       let userId: number;
@@ -59,7 +60,7 @@ export class TaskService {
 
       const { companyId } = user;
 
-      const { status, date, type, location, tags } = reqBody;
+      const { status, date, type, location, tags } = reqQuery;
       const tasks: Task[] = await this.getAllTasks({ status, date, type, location, tags, companyId, userId }, true);
 
       let returnedTasks: TaskDataInterface[] = [];
@@ -79,6 +80,7 @@ export class TaskService {
 
       return {
         success: true,
+        // data: { tasks: tasks },
         data: { tasks: returnedTasks, filterCounts },
       };
     } catch (e) {
@@ -87,7 +89,7 @@ export class TaskService {
     }
   }
 
-  async getAllTasks(options: GetTasksOptionsInterface, isDatesInMs: boolean = false): Promise<Task[]> {
+  async getAllTasks(options: GetTasksDto, isDatesInMs: boolean = false): Promise<Task[]> {
     // const selectFields: string[] = await this.helperService.getEntityFields(this.taskRepository, [], true, false);
     // const selectObject: Record<string, true> = {};
     // // const selectObject: { [key: string]: true } = {};

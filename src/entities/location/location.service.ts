@@ -6,7 +6,7 @@ import { MapLocation } from '@src/entities/location/location.entity';
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';
 import {User} from "@src/entities/user/user.entity";
 import {Tag} from "@src/entities/tag/tag.entity";
-import {GetLocationsOptionsInterface} from "@src/interfaces/get-locations-options.interface";
+import {GetLocationsOptionsInterface} from "@src/interfaces/locations/get-locations-options.interface";
 
 @Injectable()
 export class LocationService {

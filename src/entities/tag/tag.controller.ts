@@ -1,11 +1,11 @@
 import { Controller, Get, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { TagService } from '@src/entities/tag/tag.service';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
-import { RequestWithUser } from '@src/interfaces/add-field-user-to-Request.interface';
+import { RequestWithUser } from '@src/interfaces/users/add-field-user-to-Request.interface';
 import {User} from "@src/entities/user/user.entity";
 import {UserService} from "@src/entities/user/user.service";
 import {ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags} from "@nestjs/swagger";
-import {ReqQueryGetTagsInterface} from "@src/interfaces/reqQuery.get-tags.interface";
+import {ReqQueryGetTagsInterface} from "@src/interfaces/tags/reqQuery.get-tags.interface";
 import {Tag} from "@src/entities/tag/tag.entity";
 
 @ApiTags('Tags')

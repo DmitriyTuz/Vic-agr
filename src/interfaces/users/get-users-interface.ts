@@ -1,4 +1,4 @@
-import {ReqQueryGetUsersInterface} from "@src/interfaces/reqQuery.get-users.interface";
+import {ReqQueryGetUsersInterface} from "@src/interfaces/users/reqQuery.get-users.interface";
 
 export interface GetUsersInterface extends ReqQueryGetUsersInterface{
   ids?: string[] | string | undefined;
