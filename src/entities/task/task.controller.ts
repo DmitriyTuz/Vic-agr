@@ -8,7 +8,7 @@ import {ReqBodyCreateTaskDto} from "@src/entities/task/dto/reqBody.create-task.d
 import {ReqBodyUpdateTaskDto} from "@src/entities/task/dto/reqBody.update-task.dto";
 import {ReqBodyCompleteTaskDto} from "@src/entities/complete-task/dto/reqBody.complete-task.dto";
 import {ReqBodyReportTaskDto} from "@src/entities/report-task/dto/reqBody.report-task.dto";
-import {ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags} from "@nestjs/swagger";
+import {ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags} from "@nestjs/swagger";
 // import {ReqQueryGetTasksInterface} from "@src/interfaces/tasks/reqQuery.get-tasks.interface";
 import {Task} from "@src/entities/task/task.entity";
 import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
@@ -58,6 +58,12 @@ export class TaskController {
   }
 
   @Patch('/:id/update-task')
+  @ApiOperation({ summary: 'Update task by ID' })
+  @ApiBody({ type: ReqBodyUpdateTaskDto, description: 'Task data' })
+  @ApiResponse({ status: 200,/* type: Task,*/ description: 'Task has been updated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid task id or request body' })
+  @ApiParam({ name: 'id', example: '10001', description: 'Task ID', type: 'number' })
+  @ApiBearerAuth('JWT')
   @UsePipes(ValidationPipe)
   @UseGuards(JwtAuthGuard)
   update(@Body() reqBody: ReqBodyUpdateTaskDto, @Req() req: RequestWithUser, @Param('id') taskId: number) {

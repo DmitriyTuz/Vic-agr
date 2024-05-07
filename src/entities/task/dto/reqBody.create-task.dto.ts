@@ -27,7 +27,7 @@ export class ReqBodyCreateTaskDto {
   readonly documentsInfo?: Record<string, any>[];
 
   @ApiProperty({ example: '2024-04-17', description: 'Task due date' })
-  @IsNotEmpty({ message: 'dueDate required !' })
+  @IsNotEmpty({ message: 'DueDate required !' })
   @IsString({ message: 'Must be a string' })
   // @IsDate({ message: 'Must be a date' })
   readonly dueDate: Date;
