@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { TaskService } from '@src/entities/task/task.service';
 import {RequestWithUser} from "@src/interfaces/users/add-field-user-to-Request.interface";
 import {ValidationPipe} from "@src/pipes/validation.pipe";
-import {ReqBodyTaskDto} from "@src/entities/task/dto/reqBody.task.dto";
+import {ReqBodyCreateTaskDto} from "@src/entities/task/dto/reqBody.create-task.dto";
 import {ReqBodyUpdateTaskDto} from "@src/entities/task/dto/reqBody.update-task.dto";
 import {ReqBodyCompleteTaskDto} from "@src/entities/complete-task/dto/reqBody.complete-task.dto";
 import {ReqBodyReportTaskDto} from "@src/entities/report-task/dto/reqBody.report-task.dto";
@@ -46,9 +46,14 @@ export class TaskController {
   }
 
   @Post('/create-task')
+  @ApiOperation({ summary: 'Create new task' })
+  @ApiBody({ type: ReqBodyCreateTaskDto, description: 'Task data' })
+  @ApiResponse({ status: 200,/* type: Task,*/ description: 'Task has been created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid task data' })
+  @ApiBearerAuth('JWT')
   @UsePipes(ValidationPipe)
   @UseGuards(JwtAuthGuard)
-  create(@Body() reqBody: ReqBodyTaskDto, @Req() req: RequestWithUser) {
+  create(@Body() reqBody: ReqBodyCreateTaskDto, @Req() req: RequestWithUser) {
     return this.taskService.create(reqBody, req.user.id);
   }
 
