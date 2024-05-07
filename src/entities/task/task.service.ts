@@ -16,7 +16,7 @@ import {TaskDataInterface} from "@src/interfaces/tasks/task-data.interface";
 import {HelperService} from "@src/helper/helper.service";
 import {TagService} from "@src/entities/tag/tag.service";
 import {CreateTaskDto} from "@src/entities/task/dto/create-task.dto";
-import {ReqBodyTaskDto} from "@src/entities/task/dto/reqBody.task.dto";
+import {ReqBodyCreateTaskDto} from "@src/entities/task/dto/reqBody.create-task.dto";
 import {UpdateTaskDto} from "@src/entities/task/dto/update-task.dto";
 import {ReqBodyUpdateTaskDto} from "@src/entities/task/dto/reqBody.update-task.dto";
 import {CompleteTask} from "@src/entities/complete-task/complete-task.entity";
@@ -26,6 +26,7 @@ import {ReportTask} from "@src/entities/report-task/report-task.entity";
 import {ReportTask_createDto} from "@src/entities/report-task/dto/report-task_create.dto";
 import {ReqBodyReportTaskDto} from "@src/entities/report-task/dto/reqBody.report-task.dto";
 import {GetTasksDto} from "@src/entities/task/dto/get-tasks.dto";
+import {CreateTaskInterface} from "@src/interfaces/tasks/create-task.interface";
 
 interface CustomFindManyOptions<Task> extends FindManyOptions<Task> {
   relations?: string[];
@@ -347,7 +348,7 @@ export class TaskService {
     return filterCounts;
   }
 
-  async create(body: ReqBodyTaskDto, adminId: number): Promise<{ success: boolean, notice: string, data: {task: TaskDataInterface} }> {
+  async create(body: CreateTaskDto, adminId: number): Promise<{ success: boolean, notice: string, data: {task: TaskDataInterface} }> {
     try {
       const user: User = await this.userService.getOneUser({id: adminId});
       const {companyId} = user;
@@ -380,11 +381,11 @@ export class TaskService {
     }
   }
 
-  private async createTask(userId: number, taskData: ReqBodyTaskDto): Promise<Task> {
+  private async createTask(userId: number, taskData: CreateTaskDto): Promise<Task> {
 
     const {title, type, executionTime, comment, mediaInfo, documentsInfo, companyId, dueDate} = taskData
 
-    const newTask: CreateTaskDto = {
+    const newTask: CreateTaskInterface = {
       title,
       type,
       executionTime,
