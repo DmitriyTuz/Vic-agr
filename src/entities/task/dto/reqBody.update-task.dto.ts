@@ -8,6 +8,6 @@ export class ReqBodyUpdateTaskDto extends UpdateTaskDto {
   @ApiProperty({ example: [10001, 10002], description: 'Task workers ids' })
   readonly workers: number[];
 
-  @ApiProperty({ example: ['tag1', 'tag2'], description: 'Task workers ids' })
+  @ApiProperty({ example: [], description: 'Task workers ids' })
   readonly mapLocation;
 }

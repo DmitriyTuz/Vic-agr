@@ -476,13 +476,12 @@ export class UserService {
     const existingUsers: User[] = await this.userRepository.find({ where: { id: In(userIds) } });
     const existingUserIds: number[] = existingUsers.map(user => user.id);
     const newUserIds: number[] = userIds.filter(userId => !existingUserIds.includes(userId));
-    const newUsers: User[] = newUserIds.map(userId => this.userRepository.create({ id: userId }));
 
-    if (newUsers.length > 0) {
-      await this.userRepository.save(newUsers);
+    if (newUserIds[0]) {
+      throw new HttpException(`workers-with-this-ids-not-found`, HttpStatus.NOT_FOUND);
     }
 
-    task.workers = [...existingUsers, ...newUsers];
+    task.workers = [...existingUsers];
 
     await this.taskRepository.save(task);
   }
