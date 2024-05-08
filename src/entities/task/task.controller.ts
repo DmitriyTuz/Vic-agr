@@ -8,7 +8,16 @@ import {ReqBodyCreateTaskDto} from "@src/entities/task/dto/reqBody.create-task.d
 import {ReqBodyUpdateTaskDto} from "@src/entities/task/dto/reqBody.update-task.dto";
 import {ReqBodyCompleteTaskDto} from "@src/entities/complete-task/dto/reqBody.complete-task.dto";
 import {ReqBodyReportTaskDto} from "@src/entities/report-task/dto/reqBody.report-task.dto";
-import {ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags} from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags
+} from "@nestjs/swagger";
 // import {ReqQueryGetTasksInterface} from "@src/interfaces/tasks/reqQuery.get-tasks.interface";
 import {Task} from "@src/entities/task/task.entity";
 import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
@@ -71,6 +80,12 @@ export class TaskController {
   }
 
   @Put('/:id/complete-task')
+  @ApiOperation({ summary: 'Complete task by ID' })
+  @ApiBody({ type: ReqBodyCompleteTaskDto, description: 'Task completion data' })
+  @ApiResponse({ status: 200, description: 'Task has been completed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid task id or request body' })
+  @ApiParam({ name: 'id', example: '10001', description: 'Task ID', type: 'number' })
+  @ApiBearerAuth('JWT')
   @UsePipes(ValidationPipe)
   @UseGuards(JwtAuthGuard)
   complete(@Body() reqBody: ReqBodyCompleteTaskDto, @Req() req: RequestWithUser, @Param('id') taskId: number) {
@@ -78,6 +93,13 @@ export class TaskController {
   }
 
   @Put('/:id/report-task')
+  @ApiOperation({ summary: 'Report task by ID' })
+  @ApiBody({ type: ReqBodyReportTaskDto, description: 'Task report data' })
+  @ApiResponse({ status: 200, description: 'Task has been reported successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid task id or request body' })
+  @ApiParam({ name: 'id', example: '10001', description: 'Task ID', type: 'number' })
+  @ApiBearerAuth('JWT')
+  @UsePipes(ValidationPipe)
   @UseGuards(JwtAuthGuard)
   report(@Body() reqBody: ReqBodyReportTaskDto, @Req() req: RequestWithUser, @Param('id') taskId: number) {
     return this.taskService.report(reqBody, req.user.id, taskId);
