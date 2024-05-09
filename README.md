@@ -26,24 +26,56 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Installation
+## 1. Installation
+
+Versions: node - 16.19.1, PostgreSQL - 12.17
 
 ```bash
 $ npm install
 ```
 
-## Running the app
+## 2. DB (please install Docker !)
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+# initialization database for development with docker 
+$ npm run init-db
+# deleting database
+$ npm run remove-db
 ```
+
+(!) Now you can access your database in the development environment using environment variables located in the 
+.development.env file 
+
+## 3. Migrations
+
+```bash
+# run migrations for development database ( !!! do this to create tables in the development database)
+$ npm run migration-dev:run
+
+# revert migrations for development database 
+$ npm run migration-dev:revert
+```
+
+## 4. Seeds
+
+(!) do this to create several users in the development database
+
+```bash
+$ npm run seeds-dev
+```
+
+## 5. Running the app (Terminal console)
+
+```bash
+#development
+$ npm run start:dev
+```
+
+## 6. Swagger documentation
+
+#### run this in a browser with the server enabled !
+
+http://localhost:5000/api/docs
 
 ## Test
 
