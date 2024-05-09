@@ -77,7 +77,7 @@ $ npm run start:dev
 
 http://localhost:5000/api/docs
 
-## Test
+## 7. Test
 
 ```bash
 # unit tests
