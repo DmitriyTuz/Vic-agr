@@ -52,6 +52,16 @@ export class UserController {
     return await this.userService.create(dto, req.user.id);
   }
 
+  @Get('/account')
+  @ApiOperation({ summary: 'Get user account' })
+  @ApiResponse({ status: 200, type: User, description: 'User account data' })
+  @ApiResponse({ status: 400, description: 'Invalid user account data' })
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  async getOne(@Req() req: RequestWithUser) {
+    return await this.userService.getOne(req.user.id);
+  }
+
   @Get('/get-users')
   @ApiOperation({ summary: 'Get users' })
   @ApiResponse({ status: 200, type: [User], description: 'List of users' })
