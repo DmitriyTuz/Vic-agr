@@ -69,6 +69,30 @@ export class UserService {
     private taskRepository: Repository<Task>,
   ) {}
 
+  async getOne(currentUserId: number) {
+    try {
+      const user: User = await this.getOneUser({ id: currentUserId });
+
+      if (!user) {
+        throw new HttpException(`user-not-found`, HttpStatus.NOT_FOUND);
+      }
+
+      const payment: Payment = await this.paymentService.getOnePayment(user.id);
+
+      return {
+        success: true,
+        data: {
+          user: this.getUserData(user),
+          payment,
+          company: user.company,
+        },
+      };
+    } catch (e) {
+      this.logger.error(`Error during get account: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
+    }
+  }
+
   async getAll(reqQuery: GetUsersInterface, currentUserId: number): Promise<{ success: boolean; data: { users: UserDataInterface[], filterCounts: GetFilterCountUsersResponseInterface; } }> {
     try {
       const user: User = await this.getOneUser({ id: currentUserId });
