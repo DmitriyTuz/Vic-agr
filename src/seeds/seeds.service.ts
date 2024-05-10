@@ -36,90 +36,90 @@ export class SeedsService {
   }
 
   async seedData() {
-    // const companiesData: any[] = [
-    //   {
-    //     logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg',
-    //     name: 'Company One',
-    //   },
-    //   {
-    //     logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg',
-    //     name: 'Company Two',
-    //   },
-    //   {
-    //     logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg',
-    //     name: 'Company Three',
-    //   },
-    // ];
-    //
-    // for (const companyData of companiesData) {
-    //   const company = await this.companyRepository.create(companyData);
-    //   await this.companyRepository.save(company);
-    // }
-    //
-    // const companyOne = await this.companyRepository.findOne({ where: { name: 'Company One' } });
-    // const companyTwo = await this.companyRepository.findOne({ where: { name: 'Company Two' } });
-    // const companyThree = await this.companyRepository.findOne({ where: { name: 'Company Three' } });
-    //
-    // const usersAdminData: any[] = [
-    //   {
-    //     name: 'Super Admin',
-    //     password: '12345678',
-    //     phone: '+100000000000',
-    //     type: UserTypes.SUPER_ADMIN,
-    //   },
-    //   {
-    //     name: 'Michael',
-    //     password: '12345678',
-    //     phone: '+380982920503',
-    //     type: UserTypes.ADMIN,
-    //     companyId: companyOne.id,
-    //   },
-    //   {
-    //     name: 'Alex',
-    //     password: '12345678',
-    //     phone: '+380636446032',
-    //     type: UserTypes.ADMIN,
-    //     companyId: companyTwo.id,
-    //   },
-    //   {
-    //     name: 'Svetlana',
-    //     password: '12345678',
-    //     phone: '+100000000001',
-    //     type: UserTypes.ADMIN,
-    //     companyId: companyThree.id,
-    //   },
-    // ];
-    //
-    // for (const userData of usersAdminData) {
-    //   const user = await this.userService.createUser(userData);
-    //   await this.userRepository.save(user);
-    // }
+    const companiesData: any[] = [
+      {
+        logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg',
+        name: 'Company One',
+      },
+      {
+        logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg',
+        name: 'Company Two',
+      },
+      {
+        logo: 'https://loremflickr.com/cache/resized/5479_11470311495_04c2ef3ca6_c_640_480_nofilter.jpg',
+        name: 'Company Three',
+      },
+    ];
+
+    for (const companyData of companiesData) {
+      const company = await this.companyRepository.create(companyData);
+      await this.companyRepository.save(company);
+    }
+
+    const companyOne = await this.companyRepository.findOne({ where: { name: 'Company One' } });
+    const companyTwo = await this.companyRepository.findOne({ where: { name: 'Company Two' } });
+    const companyThree = await this.companyRepository.findOne({ where: { name: 'Company Three' } });
+
+    const usersAdminData: any[] = [
+      {
+        name: 'Super Admin',
+        password: '12345678',
+        phone: '+100000000000',
+        type: UserTypes.SUPER_ADMIN,
+      },
+      {
+        name: 'Michael',
+        password: '12345678',
+        phone: '+380982920503',
+        type: UserTypes.ADMIN,
+        companyId: companyOne.id,
+      },
+      {
+        name: 'Alex',
+        password: '12345678',
+        phone: '+380636446032',
+        type: UserTypes.ADMIN,
+        companyId: companyTwo.id,
+      },
+      {
+        name: 'Svetlana',
+        password: '12345678',
+        phone: '+100000000001',
+        type: UserTypes.ADMIN,
+        companyId: companyThree.id,
+      },
+    ];
+
+    for (const userData of usersAdminData) {
+      const user = await this.userService.createUser(userData);
+      // await this.userRepository.save(user);
+    }
 
     const Michael = await this.userRepository.findOne({ select: ['id', 'companyId'], where: { name: 'Michael' } });
-    // const Alex = await this.userRepository.findOne({ select: ['id', 'companyId'], where: { name: 'Alex' } });
-    // const Svetlana = await this.userRepository.findOne({ select: ['id', 'companyId'], where: { name: 'Svetlana' } });
-    //
-    // const tagsData = [
-    //   { name: 'admin', companyId: Michael.companyId },
-    //   { name: 'worker', companyId: Michael.companyId },
-    //   { name: 'manager', companyId: Michael.companyId },
-    //   { name: 'michael', companyId: Michael.companyId },
-    //
-    //   { name: 'admin', companyId: Alex.companyId },
-    //   { name: 'worker', companyId: Alex.companyId },
-    //   { name: 'manager', companyId: Alex.companyId },
-    //   { name: 'alex', companyId: Alex.companyId },
-    //
-    //   { name: 'admin', companyId: Svetlana.companyId },
-    //   { name: 'worker', companyId: Svetlana.companyId },
-    //   { name: 'manager', companyId: Svetlana.companyId },
-    //   { name: 'svetlana', companyId: Svetlana.companyId },
-    // ];
-    //
-    // for (const tagData of tagsData) {
-    //   const tag = await this.tagRepository.create(tagData);
-    //   await this.tagRepository.save(tag);
-    // }
+    const Alex = await this.userRepository.findOne({ select: ['id', 'companyId'], where: { name: 'Alex' } });
+    const Svetlana = await this.userRepository.findOne({ select: ['id', 'companyId'], where: { name: 'Svetlana' } });
+
+    const tagsData = [
+      { name: 'admin', companyId: Michael.companyId },
+      { name: 'worker', companyId: Michael.companyId },
+      { name: 'manager', companyId: Michael.companyId },
+      { name: 'michael', companyId: Michael.companyId },
+
+      { name: 'admin', companyId: Alex.companyId },
+      { name: 'worker', companyId: Alex.companyId },
+      { name: 'manager', companyId: Alex.companyId },
+      { name: 'alex', companyId: Alex.companyId },
+
+      { name: 'admin', companyId: Svetlana.companyId },
+      { name: 'worker', companyId: Svetlana.companyId },
+      { name: 'manager', companyId: Svetlana.companyId },
+      { name: 'svetlana', companyId: Svetlana.companyId },
+    ];
+
+    for (const tagData of tagsData) {
+      const tag = await this.tagRepository.create(tagData);
+      await this.tagRepository.save(tag);
+    }
 
     const tasksData = [
       {
@@ -196,41 +196,41 @@ export class SeedsService {
 
     await this.userService.checkUsersForTask(task, workersIds);
 
-    // const usersData: any[] = [
-    //   {
-    //     name: 'User 1',
-    //     password: '12345678',
-    //     phone: '+100000000100',
-    //     type: UserTypes.MANAGER,
-    //     companyId: Michael.companyId
-    //   },
-    //   {
-    //     name: 'User 2',
-    //     password: '12345678',
-    //     phone: '+100000000200',
-    //     type: UserTypes.WORKER,
-    //     companyId: Michael.companyId
-    //   },
-    //   {
-    //     name: 'User 3',
-    //     password: '12345678',
-    //     phone: '+100000000300',
-    //     type: UserTypes.MANAGER,
-    //     companyId: Michael.companyId
-    //   },
-    //   {
-    //     name: 'User 4',
-    //     password: '12345678',
-    //     phone: '+100000000400',
-    //     type: UserTypes.WORKER,
-    //     companyId: Michael.companyId
-    //   }
-    // ];
-    //
-    // for (const userData of usersData) {
-    //   const user = await this.userService.createUser(userData);
-    //   await this.userRepository.save(user.user);
-    // }
+    const usersData: any[] = [
+      {
+        name: 'User 1',
+        password: '12345678',
+        phone: '+100000000100',
+        type: UserTypes.MANAGER,
+        companyId: Michael.companyId
+      },
+      {
+        name: 'User 2',
+        password: '12345678',
+        phone: '+100000000200',
+        type: UserTypes.WORKER,
+        companyId: Michael.companyId
+      },
+      {
+        name: 'User 3',
+        password: '12345678',
+        phone: '+100000000300',
+        type: UserTypes.MANAGER,
+        companyId: Michael.companyId
+      },
+      {
+        name: 'User 4',
+        password: '12345678',
+        phone: '+100000000400',
+        type: UserTypes.WORKER,
+        companyId: Michael.companyId
+      }
+    ];
+
+    for (const userData of usersData) {
+      const user = await this.userService.createUser(userData);
+      await this.userRepository.save(user.user);
+    }
 
 // Create Plans
     const product_name = 'Vic-agr';
