@@ -2,18 +2,39 @@ version: '3.0'
 services:
 
   # POSTGRES
-  postgres:
-    container_name: postgres
+  postgres-dev:
+    container_name: vic_agr_dev
     image: postgres:12
     env_file:
       - .development.env
     environment:
       PG_DATA: /var/lib/postgresql/data
     ports:
-      - 5432:5432
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+      - 5433:5432
+#    volumes:
+#      - pgdata:/var/lib/postgresql/data
     restart: always
+    networks:
+      - vic-local
 
-volumes:
-  pgdata:
+  postgres-test:
+    container_name: vic_agr_test
+    image: postgres:12
+    env_file:
+      - .test.env
+    environment:
+      PG_DATA: /var/lib/postgresql/data
+    ports:
+      - 5434:5432
+#    volumes:
+#      - pgdata:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - vic-local
+
+#volumes:
+#  pgdata:
+
+networks:
+  vic-local:
+
