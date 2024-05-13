@@ -2,7 +2,7 @@ import {HttpException, HttpStatus, Injectable, Logger} from '@nestjs/common';
 
 // import { GetTasksInterface } from '@src/interfaces/tasks/get-tasks.interface';
 import { Task } from '@src/entities/task/task.entity';
-import { TaskStatuses, TaskTypes, UserTypes } from '@lib/constants';
+import { TaskStatuses, TaskTypes, UserTypes } from '@src/lib/constants';
 import { FindManyOptions, In, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 

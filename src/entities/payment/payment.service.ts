@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import * as moment from 'moment';
 
-import { PlanTypes } from '@lib/constants';
+import { PlanTypes } from '@src/lib/constants';
 
 import { RequestWithUser } from '@src/interfaces/users/add-field-user-to-Request.interface';
 import { CustomHttpException } from '@src/exceptions/сustomHttp.exception';

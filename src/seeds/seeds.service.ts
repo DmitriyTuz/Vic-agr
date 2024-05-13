@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {DeepPartial, Repository} from 'typeorm';
 import { Company } from '@src/entities/company/company.entity';
-import {PlanTypes, TaskStatuses, TaskTypes, UserTypes} from '@lib/constants';
+import {PlanTypes, TaskStatuses, TaskTypes, UserTypes} from '@src/lib/constants';
 import { User } from '@src/entities/user/user.entity';
 import { UserService } from '@src/entities/user/user.service';
 import { Tag } from '@src/entities/tag/tag.entity';

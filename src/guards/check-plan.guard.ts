@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import {User} from "@src/entities/user/user.entity";
 import {Company} from "@src/entities/company/company.entity";
 import {StripeService} from "@src/stripe/stripe.service";
-import {UserTypes} from "@lib/constants";
+import {UserTypes} from "@src/lib/constants";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {CustomHttpException} from "@src/exceptions/сustomHttp.exception";

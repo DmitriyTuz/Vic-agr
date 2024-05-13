@@ -12,7 +12,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { TaskStatuses } from '@lib/constants';
+import { TaskStatuses } from '@src/lib/constants';
 
 import { Company } from '@src/entities/company/company.entity';
 import { User } from '@src/entities/user/user.entity';

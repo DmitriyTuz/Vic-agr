@@ -11,7 +11,7 @@ import { UserService } from '@src/entities/user/user.service';
 import { LoginDto } from '@src/auth/dto/login.dto';
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
-import {UserTypes} from "@lib/constants";
+import {UserTypes} from "@src/lib/constants";
 import {SignUpDto} from "@src/auth/dto/sign-up.dto";
 import {CompanyService} from "@src/entities/company/company.service";
 import {Company} from "@src/entities/company/company.entity";

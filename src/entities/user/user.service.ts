@@ -28,7 +28,7 @@ import {Tag} from "@src/entities/tag/tag.entity";
 import {TagService} from "@src/entities/tag/tag.service";
 import {UpdateUserDto} from "@src/entities/user/dto/update-user.dto";
 import {Payment} from "@src/entities/payment/payment.entity";
-import {UserTypes} from "@lib/constants";
+import {UserTypes} from "@src/lib/constants";
 import {PaymentService} from "@src/entities/payment/payment.service";
 import {ReqBodyCreateUserDto} from "@src/entities/user/dto/reqBody.create-user.dto";
 import {GetWorkerTagsInterface} from "@src/interfaces/tasks/get-worker-tags.interface";
@@ -509,4 +509,5 @@ export class UserService {
 
     await this.taskRepository.save(task);
   }
+
 }
