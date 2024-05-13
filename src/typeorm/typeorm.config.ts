@@ -14,12 +14,8 @@ config({
       : join(process.cwd(), '.development.env'),
 });
 
-console.log('NODE_ENV = ', configService.get('NODE_ENV'));
-console.log('POSTGRES_SSL = ', configService.get<boolean>('POSTGRES_SSL'));
-
 const options = (): DataSourceOptions => {
   const url = configService.get('POSTGRES_URL');
-  console.log('POSTGRES_URL = ', url);
   if (!url) {
     throw new Error('Database URL is empty');
   }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import Credentials from "@lib/credentials";
+import Credentials from "@src/lib/credentials";
 
 @Injectable()
 export class CheckerService {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import Stripe from 'stripe';
-import credentials from '@lib/credentials';
+import credentials from '@src/lib/credentials';
 const stripe = new Stripe(credentials.config.STRIPE_SECRET_KEY);
 import * as _ from 'underscore';
 import * as moment from 'moment';

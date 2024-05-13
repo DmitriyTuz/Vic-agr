@@ -1,5 +1,5 @@
 import {MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex} from "typeorm";
-import {TaskStatuses} from "@lib/constants";
+import {TaskStatuses} from "@src/./lib/constants";
 
 export class CreateTasks1710329640180 implements MigrationInterface {
     name = 'CreateTasks1710329640180';
