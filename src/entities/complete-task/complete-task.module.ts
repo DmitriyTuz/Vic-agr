@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { CompleteTaskController } from './complete-task.controller';
-import { CompleteTaskService } from './complete-task.service';
+import {CompleteTaskController} from "@src/entities/complete-task/complete-task.controller";
+import {CompleteTaskService} from "@src/entities/complete-task/complete-task.service";
+
 
 @Module({
   controllers: [CompleteTaskController],

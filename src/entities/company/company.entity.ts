@@ -1,9 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../user/user.entity';
-import { Tag } from '../tag/tag.entity';
+import {User} from "@src/entities/user/user.entity";
+import {Tag} from "@src/entities/tag/tag.entity";
 import { Task } from '@src/entities/task/task.entity';
 import { MapLocation } from '@src/entities/location/location.entity';
+
 
 @Entity({ schema: 'public', name: 'Companies' })
 export class Company {
