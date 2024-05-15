@@ -6,25 +6,25 @@ import { TagModule } from '@src/entities/tag/tag.module';
 import { CompanyModule } from '@src/entities/company/company.module';
 import { PaymentModule } from '@src/entities/payment/payment.module';
 import { TaskModule } from '@src/entities/task/task.module';
-import { LocationModule } from './entities/location/location.module';
-import { CompleteTaskModule } from './entities/complete-task/complete-task.module';
-import { ReportTaskModule } from './entities/report-task/report-task.module';
-import { AuthModule } from './auth/auth.module';
-import { SeedsModule } from './seeds/seeds.module';
+import {LocationModule} from "@src/entities/location/location.module";
+import {AuthModule} from "@src/auth/auth.module";
+import {SeedsModule} from "@src/seeds/seeds.module";
+import {ReportTaskModule} from "@src/entities/report-task/report-task.module";
+import {CompleteTaskModule} from "@src/entities/complete-task/complete-task.module";
 import { ConfigModule } from '@nestjs/config';
-import { StripeModule } from './stripe/stripe.module';
-import { HelperModule } from './helper/helper.module';
-import { PasswordModule } from './password/password.module';
-import { TwilioModule } from './twilio/twilio.module';
+import {StripeModule} from "@src/stripe/stripe.module";
+import {HelperModule} from "@src/helper/helper.module";
+import {PasswordModule} from "@src/password/password.module";
+import {TwilioModule} from "@src/twilio/twilio.module";
 import {AwsConfigModule} from "@src/aws/config/aws.config.module";
 import {S3Module} from "@src/aws/s3/s3.module";
-import { CheckerModule } from './checker/checker.module';
-import { MailModule } from './mail/mail.module';
-
+import {MailModule} from "@src/mail/mail.module";
+import {CheckerModule} from "@src/checker/checker.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: `.${process.env.NODE_ENV}.env`,
       isGlobal: true,
     }),
     TypeormModule,

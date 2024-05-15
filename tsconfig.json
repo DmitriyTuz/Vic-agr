@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+//    "allowJs": true,
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
@@ -20,10 +21,10 @@
     "paths": {
       "@src/*": [
         "./src/*"
-      ],
-      "@lib/*": [
-        "./lib/*"
       ]
+//      "@lib/*": [
+//        "./src/lib/*"
+//      ]
     }
   }
 }

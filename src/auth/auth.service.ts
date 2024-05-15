@@ -48,20 +48,34 @@ export class AuthService {
       private readonly mailService: MailService,
   ) {}
 
-  async login(reqBody: LoginDto, req: Request, res: Response): Promise<Response> {
+  async login(reqBody: LoginDto, req?/*: Request*/, res?/*?: Response*/)/*: Promise<{ success: boolean, token: string }>*/ /*Promise<Response>*/ {
     try {
-      req.body.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      if (req) {
+        req.body.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      }
+      // req.body.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
       const user: User = await this.validateUser(reqBody);
       const token: string = await this.generateToken(user);
-      res.cookie('AuthorizationToken', token, {
-        maxAge: this.configService.get('JWT_EXPIRED_TIME'),
-        httpOnly: true,
-      });
+
+      if (res) {
+        res.cookie('AuthorizationToken', token, {
+          maxAge: this.configService.get('JWT_EXPIRED_TIME'),
+          httpOnly: true,
+        });
+      }
+      // res.cookie('AuthorizationToken', token, {
+      //   maxAge: this.configService.get('JWT_EXPIRED_TIME'),
+      //   httpOnly: true,
+      // });
 
       user.lastActive = new Date();
       await this.userRepository.save(user)
 
-      return res.json({success: true, token: token});
+      if (this.configService.get('NODE_ENV') === 'test') {
+        return {success: true, token: token}
+      } else return res.json({success: true, token: token});
+
+      // return res.json({success: true, token: token});
 
     } catch (e) {
       this.logger.error(`Error during user login: ${e.message}`);

@@ -33,12 +33,14 @@ import {UserController} from "@src/entities/user/user.controller";
 import {QueryRunner} from "typeorm";
 import {TestHelper} from "@src/helper/test/test-helper";
 import {RequestWithUser} from "@src/interfaces/users/add-field-user-to-Request.interface";
+import {AuthService} from "@src/auth/auth.service";
 
 
 
 describe('UsersController', () => {
     let userController: UserController;
     let userService: UserService;
+    let authService: AuthService;
     let testHelper: TestHelper;
     // let categoryService: CategoryService;
     // let paymentService: PaymentService;
@@ -51,6 +53,7 @@ describe('UsersController', () => {
 
         userController = testHelper.app.get<UserController>(UserController) as UserController;
         userService = testHelper.app.get<UserService>(UserService) as UserService;
+        authService = testHelper.app.get<AuthService>(AuthService) as AuthService;
         // categoryService = testHelper.app.get<CategoryService>(CategoryService) as CategoryService;
         // paymentService = testHelper.app.get<PaymentService>(PaymentService) as PaymentService;
 
@@ -81,6 +84,33 @@ describe('UsersController', () => {
 
         expect(userService.getAll).toHaveBeenCalledWith(reqQuery, req.user.id);
         expect(result.data.users).toEqual([]);
+    });
+
+    it('/get-users (GET)', async () => {
+
+        // const req = {
+        //     body: {},
+        //     headers: {
+        //         'x-forwarded-for': 'localhost' // Пример IP-адреса
+        //     },
+        //     connection: {
+        //         remoteAddress: 'localhost' // Пример удаленного адреса
+        //     }
+        // };
+
+        // const loginResponse = await authService.login({phone: '+100000000001', password: '12345678'});
+        let loginResponse = await authService.login({phone: '+100000000001', password: '12345678'})
+        // let token = JSON.parse(loginResponse.text).token;
+        console.log('!!! loginResponse = ', loginResponse);
+
+        let token = loginResponse.token;
+
+        // let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAwMDMsImlhdCI6MTcxNTY3NTQxMiwiZXhwIjoxNzE1NzYxODEyfQ.R0oOzTBzJ6R66MyNJVWIqYawb5aZ88oA27zh8_zXCYk';
+        const response = await request(testHelper.app.getHttpServer())
+            .get('/api/users/get-users?search=U&&type=Worker')
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200);
+        // expect(response.body.name).toEqual('');
     });
 
     /**

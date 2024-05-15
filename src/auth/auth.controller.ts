@@ -7,6 +7,9 @@ import {JwtAuthGuard} from "@src/auth/jwt-auth.guard";
 import {SignUpDto} from "@src/auth/dto/sign-up.dto";
 import {ForgotPasswordDto} from "@src/auth/dto/forgot-password.dto";
 import {ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags} from "@nestjs/swagger";
+import {ConfigService} from "@nestjs/config";
+
+const configService = new ConfigService();
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -19,8 +22,14 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User has been logged in successfully' })
   @ApiResponse({ status: 400, description: 'Unable to login user' })
   @UsePipes(ValidationPipe)
-  async login(@Body() reqBody: LoginDto, @Req() req: Request, @Res() res: Response): Promise<any> {
-    return this.authService.login(reqBody, req, res);
+  async login(@Body() reqBody: LoginDto, @Req() req?: Request, @Res() res?: Response): Promise<any> {
+    if (configService.get('NODE_ENV') === 'test') {
+      return this.authService.login(reqBody);
+    } else {
+      return this.authService.login(reqBody, req, res);
+    }
+
+    // return this.authService.login(reqBody, req, res);
   }
 
   @Get('/logout')

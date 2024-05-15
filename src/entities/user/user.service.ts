@@ -335,7 +335,8 @@ export class UserService {
   }
 
   async findByPhone(phone: string) {
-    return await this.userRepository.findOne({ where: { phone } });
+    console.log(phone);
+    return this.userRepository.findOne({ where: { phone } });
   }
 
   async getWorkers(reqQuery: GetWorkerTagsInterface, currentUserId: number): Promise<{ success: boolean; data: { workers: User[]; } }> {
