@@ -12,10 +12,10 @@ import {CustomHttpException} from "@src/exceptions/сustomHttp.exception";
 @Injectable()
 export class CheckPlanGuard implements CanActivate {
   constructor(
-      private reflector: Reflector,
-      private stripeService: StripeService,
+      private reflector?: Reflector,
+      private stripeService?: StripeService,
       @InjectRepository(Company)
-      private companyRepository: Repository<Company>
+      private companyRepository?: Repository<Company>
       ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

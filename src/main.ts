@@ -16,7 +16,7 @@ async function start() {
   // const PORT = process.env.PORT || 5000;
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('api/');
+  // app.setGlobalPrefix('api/');
 
   const seedDataFlag = process.env.SEED_DATA === 'true';
   if (seedDataFlag) {
