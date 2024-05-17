@@ -491,8 +491,9 @@ export class UserService {
         notice: '200-user-has-been-removed-successfully',
         userId: id
       };
-    } catch (err) {
-      throw err;
+    } catch (e) {
+      this.logger.error(`Error during remove user: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
