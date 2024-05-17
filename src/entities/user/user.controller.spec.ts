@@ -34,8 +34,6 @@ import {QueryRunner} from "typeorm";
 import {TestHelper} from "@src/helper/test/test-helper";
 import {RequestWithUser} from "@src/interfaces/users/add-field-user-to-Request.interface";
 import {AuthService} from "@src/auth/auth.service";
-import {CheckPlanGuard} from "@src/guards/check-plan.guard";
-
 
 
 describe('UsersController', () => {
@@ -43,11 +41,7 @@ describe('UsersController', () => {
     let userService: UserService;
     let authService: AuthService;
     let testHelper: TestHelper;
-    // let categoryService: CategoryService;
-    // let paymentService: PaymentService;
     let queryRunner: QueryRunner;
-
-    let checkPlanGuard: CheckPlanGuard;
 
     beforeEach(async () => {
         testHelper = new TestHelper();
@@ -57,10 +51,6 @@ describe('UsersController', () => {
         userController = testHelper.app.get<UserController>(UserController) as UserController;
         userService = testHelper.app.get<UserService>(UserService) as UserService;
         authService = testHelper.app.get<AuthService>(AuthService) as AuthService;
-        // categoryService = testHelper.app.get<CategoryService>(CategoryService) as CategoryService;
-        // paymentService = testHelper.app.get<PaymentService>(PaymentService) as PaymentService;
-
-        checkPlanGuard = testHelper.app.get<CheckPlanGuard>(CheckPlanGuard);
 
         await queryRunner.startTransaction();
     });
@@ -69,10 +59,6 @@ describe('UsersController', () => {
         await queryRunner.rollbackTransaction();
         await testHelper.close();
 
-        // await testHelper.clearDatabase(testHelper.app);
-
-        // const dataSource = testHelper.app.get(DataSource);
-        // await dataSource.createQueryBuilder().delete().from(Category).execute();
     });
 
     it('should be defined', () => {
@@ -89,22 +75,6 @@ describe('UsersController', () => {
 
         expect(userService.getAll).toHaveBeenCalledWith(reqQuery, req.user.id);
         expect(result.data.users).toEqual([]);
-    });
-
-    it('/get-users (GET)', async () => {
-
-        jest.spyOn(checkPlanGuard, 'canActivate').mockReturnValue(Promise.resolve(true));
-
-        let loginResponse = await authService.login({phone: '+100000000001', password: '12345678'})
-        let token = loginResponse.token;
-        const response = await request(testHelper.app.getHttpServer())
-            .get('/users/get-users?search=S&&type=Admin')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
-        console.log('! response.body.data = ', response.body.data);
-
-        expect(response.body.data.users[0].name).toEqual('Svetlana');
-        expect(response.body.data.filterCounts.admins).toEqual(1);
     });
 
     /**

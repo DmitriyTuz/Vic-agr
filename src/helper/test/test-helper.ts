@@ -15,6 +15,7 @@ export class TestHelper {
         }).compile();
 
         this.app = await module.createNestApplication();
+        this.app.setGlobalPrefix('api');
         await this.app.init();
 
         const dbConnection = module.get(DataSource);
