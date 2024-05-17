@@ -1,6 +1,6 @@
-if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
-    require('dotenv').config({path: '.development.env'});
-}
+// if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+//     require('dotenv').config({path: '.development.env'});
+// }
 
 const {
     NODE_ENV,

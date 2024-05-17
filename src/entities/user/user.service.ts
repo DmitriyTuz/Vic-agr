@@ -335,7 +335,6 @@ export class UserService {
   }
 
   async findByPhone(phone: string) {
-    console.log(phone);
     return this.userRepository.findOne({ where: { phone } });
   }
 
@@ -381,7 +380,7 @@ export class UserService {
       } else if (typeof (options.ids === 'string')) {
         arrIds = options.ids.split(',')
       }
-      query.where = { ...(query.where || {}), id: Not(In(arrIds)) };
+      query.where = { ...(query.where || {}), id: In(arrIds) };
 
     }
 
