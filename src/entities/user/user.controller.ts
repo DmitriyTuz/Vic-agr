@@ -119,6 +119,6 @@ export class UserController {
   @ApiParam({ name: 'id', example: '10001', description: 'User ID', type: 'number' })
   @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: number) {
-    return this.userService.remove(id);
+    return this.userService.remove(+id);
   }
 }

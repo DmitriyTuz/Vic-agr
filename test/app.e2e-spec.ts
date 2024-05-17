@@ -30,6 +30,7 @@ import {CheckPlanGuard} from "@src/guards/check-plan.guard";
 import {HttpStatus} from "@nestjs/common";
 import {CreateUserDto} from "@src/entities/user/dto/create-user.dto";
 import {ReqBodyCreateUserDto} from "@src/entities/user/dto/reqBody.create-user.dto";
+import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
 
 
 describe('Tests API (e2e)', () => {
@@ -130,25 +131,45 @@ describe('Tests API (e2e)', () => {
           .set('Authorization', `Bearer ${token}`)
           .expect(HttpStatus.OK);
 
-      console.log('! response.body =', response.body)
-
       expect(response.body.success).toBe(true);
       expect(response.body.userId).toBe(10003);
     });
 
-    it('/api/users/onboard (PATCH)', async () => {
+    it('/api/users/update-user/:id (PATCH)', async () => {
+      const loginResponse = await authService.login({phone: '+100000000001', password: '12345678'})
+      const token = loginResponse.token;
+
+      const updateUserDto: ReqBodyUpdateUserDto = {
+        name: 'Test User 2',
+        password: '11111',
+        phone: '+100000000123',
+        type: 'MANAGER',
+        tags: []
+      };
+
+      const response = await request(testHelper.app.getHttpServer())
+          .patch(`/api/users/update-user/${10008}`)
+          .set('Authorization', `Bearer ${token}`)
+          .send(updateUserDto)
+          .expect(HttpStatus.OK);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.user.id).toBe(10008);
+    });
+
+    it('/api/users/delete-user/:id (DELETE)', async () => {
       const loginResponse = await authService.login({phone: '+100000000001', password: '12345678'})
       const token = loginResponse.token;
 
       const response = await request(testHelper.app.getHttpServer())
-          .patch('/api/users/onboard')
+          .delete(`/api/users/delete-user/${10008}`)
           .set('Authorization', `Bearer ${token}`)
           .expect(HttpStatus.OK);
 
-      console.log('! response.body =', response.body)
+      console.log('! response.body =', response.body);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.userId).toBe(10003);
+      expect(response.body.userId).toBe(10008);
     });
 
   });
