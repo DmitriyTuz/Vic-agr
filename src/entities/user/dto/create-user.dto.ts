@@ -9,9 +9,9 @@ export class CreateUserDto {
   readonly name: string;
 
   @ApiProperty({ example: '1234567', description: 'Password' })
-  // @IsNotEmpty({ message: 'Password required !' })
-  // @IsString({ message: 'Must be a string' })
-  // @Length(4, 16, { message: 'Must be between 4 and 16' })
+  @IsNotEmpty({ message: 'Password required !' })
+  @IsString({ message: 'Must be a string' })
+  @Length(4, 16, { message: 'Must be between 4 and 16' })
   readonly password: string;
 
   @ApiProperty({ example: '+100000000001', description: 'Phone' })

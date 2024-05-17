@@ -13,12 +13,15 @@ const configService = new ConfigService();
 async function start() {
 
   const PORT = configService.get('PORT') || 5000;
-  // const PORT = process.env.PORT || 5000;
   const app = await NestFactory.create(AppModule);
 
-  // app.setGlobalPrefix('api/');
+  app.setGlobalPrefix('api/');
 
-  const seedDataFlag = process.env.SEED_DATA === 'true';
+  // if (configService.get('NODE_ENV') !== 'test') {
+  //   app.setGlobalPrefix('api/');
+  // }
+
+  const seedDataFlag = configService.get('SEED_DATA') === 'true';
   if (seedDataFlag) {
     const seedsService = app.get(SeedsService);
     await seedsService.seedData();
