@@ -21,8 +21,8 @@ export class TagController {
   @ApiResponse({ status: 200, description: 'List of tags', type: [Tag] })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiBearerAuth('JWT')
-  @ApiQuery({ name: 'names', example: 'tag1,tag2', description: 'List of tag names', required: false })
-  @ApiQuery({ name: 'search', example: 'search_query', description: 'Search by tag name', required: false })
+  @ApiQuery({ name: 'names', example: 'worker,manager', description: 'List of tag names', required: false })
+  @ApiQuery({ name: 'search', example: 'wo', description: 'Search by tag name', required: false })
   @UseGuards(JwtAuthGuard)
   async getAll(@Query() reqQuery: ReqQueryGetTagsInterface, @Req() req: RequestWithUser) {
     const user: User = await this.userService.getOneUser({ id: req.user.id });
