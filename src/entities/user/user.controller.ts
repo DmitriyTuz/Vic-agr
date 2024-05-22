@@ -48,8 +48,8 @@ export class UserController {
   @ApiBearerAuth('JWT')
   @UsePipes(ValidationPipe)
   @UseGuards(JwtAuthGuard)
-  async create(@Body() dto: ReqBodyCreateUserDto, @Req() req: RequestWithUser) {
-    return await this.userService.create(dto, req.user.id);
+  create(@Body() dto: ReqBodyCreateUserDto, @Req() req: RequestWithUser) {
+    return this.userService.create(dto, req.user.id);
   }
 
   @Get('/account')
@@ -58,8 +58,8 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Invalid user account data' })
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
-  async getOne(@Req() req: RequestWithUser) {
-    return await this.userService.getOne(req.user.id);
+  getOne(@Req() req: RequestWithUser) {
+    return this.userService.getOne(req.user.id);
   }
 
   @Get('/get-users')
@@ -84,7 +84,7 @@ export class UserController {
   // @ApiQuery({ name: 'ids', example: 'tag1, tag2', description: 'Worker ids', required: false })
   @ApiQuery({ name: 'ids', example: '10001,10002', description: 'Worker ids', required: false })
   @UseGuards(JwtAuthGuard/*, CheckPlanGuard*/)
-  async getWorkers(@Query() reqQuery: ReqQueryGetWorkerTagsInterface, @Req() req: RequestWithUser) {
+  getWorkers(@Query() reqQuery: ReqQueryGetWorkerTagsInterface, @Req() req: RequestWithUser) {
     return this.userService.getWorkers(reqQuery, req.user.id);
   }
 

@@ -21,6 +21,8 @@ export class UpdateUserDto {
 
   readonly password?: string;
 
+  readonly lastActive?: Date;
+
   // @ApiProperty({ example: ['tag1', 'tag2'], description: 'User tags' })
   // readonly tags?: string[];
 }

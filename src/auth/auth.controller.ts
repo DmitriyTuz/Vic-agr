@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Post, Put, Req, Res, UseGuards, UsePipes} from '@nestjs/common';
+import {Body, Controller, Get, HttpStatus, Post, Put, Req, Res, UseGuards, UsePipes} from '@nestjs/common';
 import { AuthService } from '@src/auth/auth.service';
 import { Request, Response } from 'express';
 import { LoginDto } from '@src/auth/dto/login.dto';
@@ -14,7 +14,9 @@ const configService = new ConfigService();
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService,
+              private configService: ConfigService
+  ) {}
 
   @Post('/login')
   @ApiOperation({ summary: 'Login' })
@@ -22,14 +24,16 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User has been logged in successfully' })
   @ApiResponse({ status: 400, description: 'Unable to login user' })
   @UsePipes(ValidationPipe)
-  async login(@Body() reqBody: LoginDto, @Req() req?: Request, @Res() res?: Response): Promise<any> {
-    if (configService.get('NODE_ENV') === 'test') {
-      return this.authService.login(reqBody);
-    } else {
-      return this.authService.login(reqBody, req, res);
-    }
+  async login(@Body() reqBody: LoginDto, @Req() req: Request, @Res() res: Response) {
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const result = await this.authService.login(reqBody);
 
-    // return this.authService.login(reqBody, req, res);
+    res.cookie('AuthorizationToken', result.token, {
+      maxAge: this.configService.get('JWT_EXPIRED_TIME'),
+      httpOnly: true,
+    });
+
+    res.status(HttpStatus.OK).json(result);
   }
 
   @Get('/logout')
@@ -39,7 +43,10 @@ export class AuthController {
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   logout(@Req() req: Request, @Res() res: Response) {
-    return this.authService.logout(req, res);
+    delete req.headers.authorization;
+    res.clearCookie('AuthorizationToken');
+
+    res.status(HttpStatus.OK).json({success: true})
   }
 
   @Post('/sign-up')
@@ -49,8 +56,16 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Unable to register user' })
   @ApiBearerAuth('JWT')
   @UsePipes(ValidationPipe)
-  signUp(@Body() reqBody: SignUpDto, @Req() req: Request, @Res() res: Response) {
-    return this.authService.signUp(reqBody, req, res);
+  async signUp(@Body() reqBody: SignUpDto, @Req() req: Request, @Res() res: Response) {
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const result = await this.authService.signUp(reqBody);
+
+    res.cookie('AuthorizationToken', result.token, {
+      maxAge: this.configService.get('JWT_EXPIRED_TIME'),
+      httpOnly: true,
+    });
+
+    res.status(HttpStatus.OK).json(result);
   }
 
   @Put('/forgot-password')

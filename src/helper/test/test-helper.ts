@@ -18,11 +18,10 @@ export class TestHelper {
         this.app.setGlobalPrefix('api');
         await this.app.init();
 
-        const dbConnection = module.get(DataSource);
-        const manager:any = module.get(EntityManager);
+        const dbConnection = await module.get(DataSource);
+        const manager:any = await module.get(EntityManager);
 
-        this.queryRunner = manager.queryRunner = dbConnection.createQueryRunner('master');
-
+        this.queryRunner = manager.queryRunner = await dbConnection.createQueryRunner('master');
     }
 
     async close() {

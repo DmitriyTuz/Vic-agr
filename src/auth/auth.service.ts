@@ -23,6 +23,8 @@ import {CheckerService} from "@src/checker/checker.service";
 
 import * as nodemailer from 'nodemailer';
 import {MailService} from "@src/mail/mail.service";
+import {UpdateUserDto} from "@src/entities/user/dto/update-user.dto";
+import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
 
 
 interface TokenPayload {
@@ -48,34 +50,15 @@ export class AuthService {
       private readonly mailService: MailService,
   ) {}
 
-  async login(reqBody: LoginDto, req?/*: Request*/, res?/*?: Response*/)/*: Promise<{ success: boolean, token: string }>*/ /*Promise<Response>*/ {
+  async login(reqBody: LoginDto): Promise<{ success: boolean, token: string }> {
     try {
-      if (req) {
-        req.body.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-      }
-      // req.body.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
       const user: User = await this.validateUser(reqBody);
       const token: string = await this.generateToken(user);
-
-      if (res) {
-        res.cookie('AuthorizationToken', token, {
-          maxAge: this.configService.get('JWT_EXPIRED_TIME'),
-          httpOnly: true,
-        });
-      }
-      // res.cookie('AuthorizationToken', token, {
-      //   maxAge: this.configService.get('JWT_EXPIRED_TIME'),
-      //   httpOnly: true,
-      // });
 
       user.lastActive = new Date();
       await this.userRepository.save(user)
 
-      if (this.configService.get('NODE_ENV') === 'test') {
-        return {success: true, token: token}
-      } else return res.json({success: true, token: token});
-
-      // return res.json({success: true, token: token});
+      return { success: true, token: token };
 
     } catch (e) {
       this.logger.error(`Error during user login: ${e.message}`);
@@ -119,9 +102,9 @@ export class AuthService {
     }
   }
 
-  async signUp(reqBody: SignUpDto, req: Request, res: Response): Promise<Response<Record<string, any>>> {
+  async signUp(reqBody: SignUpDto): Promise<{ success: boolean, token: string }> {
     try {
-      req.body.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      // req.body.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
       const { logo, companyName, phone, name, password } = reqBody;
 
@@ -146,12 +129,14 @@ export class AuthService {
       await this.companyRepository.save(company)
 
       const token: string = await this.generateToken(user);
-      res.cookie('AuthorizationToken', token, {
-        maxAge: this.configService.get('JWT_EXPIRED_TIME'),
-        httpOnly: true,
-      });
 
-      return res.json({success: true})
+      // res.cookie('AuthorizationToken', token, {
+      //   maxAge: this.configService.get('JWT_EXPIRED_TIME'),
+      //   httpOnly: true,
+      // });
+
+      return { success: true, token: token };
+      // return res.json({success: true})
     } catch (e) {
       this.logger.error(`Error during user signIn: ${e.message}`);
       throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
