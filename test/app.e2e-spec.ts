@@ -263,8 +263,6 @@ describe('Tests API (e2e)', () => {
           .send(signUpDto)
           .expect(HttpStatus.OK);
 
-      // console.log('! response.body =', response.body);
-
       expect(response.body.success).toBe(true);
       expect(response.body.token).toBeDefined();
     });
@@ -279,9 +277,29 @@ describe('Tests API (e2e)', () => {
           .send(forgotPasswordDto)
           .expect(HttpStatus.OK);
 
-      console.log('! response.body =', response.body);
-
       expect(response.body.notice).toBe('200-the-password-has-been-reset');
+    });
+  });
+
+  describe('Tags API (e2e)', () => {
+    it('/api/tags/get-tags (GET)', async () => {
+      const loginDto: LoginDto = {
+        phone: '+100000000001',
+        password: '12345678'
+      }
+
+      const loginResponse = await authService.login(loginDto)
+      const token = loginResponse.token;
+
+      const response = await request(testHelper.app.getHttpServer())
+          .get('/api/tags/get-tags?search=&&names=worker')
+          .set('Authorization', `Bearer ${token}`)
+          .expect(HttpStatus.OK);
+
+      console.log('! response.body =', response.body.data.tags);
+
+      expect(response.body.success).toBe(true);
+      expect(Array.isArray(response.body.data.tags)).toBe(true);
     });
   });
 });
