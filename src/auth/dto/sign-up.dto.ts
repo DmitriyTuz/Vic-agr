@@ -27,7 +27,7 @@ export class SignUpDto {
   readonly companyName: string;
 
   // @ApiProperty({ example: '1234567', description: 'User password' })
-  readonly passwordConfirmation: string;
+  readonly passwordConfirmation?: string;
 
   @ApiProperty({ example: 'logo1', description: 'Logo' })
   readonly logo: Record<string, any>;

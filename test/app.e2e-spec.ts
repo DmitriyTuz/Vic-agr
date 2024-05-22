@@ -31,39 +31,53 @@ import {HttpStatus} from "@nestjs/common";
 import {CreateUserDto} from "@src/entities/user/dto/create-user.dto";
 import {ReqBodyCreateUserDto} from "@src/entities/user/dto/reqBody.create-user.dto";
 import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
+import {LoginDto} from "@src/auth/dto/login.dto";
+import {SignUpDto} from "@src/auth/dto/sign-up.dto";
+import {ForgotPasswordDto} from "@src/auth/dto/forgot-password.dto";
 
 
 describe('Tests API (e2e)', () => {
+  let userService: UserService;
   let authService: AuthService;
   let testHelper: TestHelper;
   let queryRunner: QueryRunner;
 
   let checkPlanGuard: CheckPlanGuard;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     testHelper = new TestHelper();
     await testHelper.init();
     queryRunner = testHelper.queryRunner;
 
+    userService = testHelper.app.get<UserService>(UserService);
     authService = testHelper.app.get<AuthService>(AuthService) as AuthService;
-
     checkPlanGuard = testHelper.app.get<CheckPlanGuard>(CheckPlanGuard);
 
+  });
+
+  beforeEach(async () => {
     await queryRunner.startTransaction();
   });
 
   afterEach(async () => {
     await queryRunner.rollbackTransaction();
-    await testHelper.close();
-
   });
 
-  describe('UsersController (e2e)', () => {
+  afterAll(async () => {
+    await testHelper.close();
+  });
 
+
+  describe('Users API (e2e)', () => {
     it('/api/users/get-users (GET)', async () => {
       jest.spyOn(checkPlanGuard, 'canActivate').mockReturnValue(Promise.resolve(true));
 
-      const loginResponse = await authService.login({phone: '+100000000001', password: '12345678'})
+      const loginDto: LoginDto = {
+        phone: '+100000000001',
+        password: '12345678'
+      }
+
+      const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
       const response = await request(testHelper.app.getHttpServer())
           .get('/api/users/get-users?search=S&&type=Admin')
@@ -77,8 +91,14 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/users/account (GET)', async () => {
-      const loginResponse = await authService.login({phone: '+100000000001', password: '12345678'})
+      const loginDto: LoginDto = {
+        phone: '+100000000001',
+        password: '12345678'
+      }
+
+      const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
+
       const response = await request(testHelper.app.getHttpServer())
           .get('/api/users/account')
           .set('Authorization', `Bearer ${token}`)
@@ -89,7 +109,12 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/users/create-user (POST)', async () => {
-      const loginResponse = await authService.login({phone: '+100000000001', password: '12345678'})
+      const loginDto: LoginDto = {
+        phone: '+100000000001',
+        password: '12345678'
+      }
+
+      const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
       const createUserDto: ReqBodyCreateUserDto = {
@@ -111,7 +136,12 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/users/worker-tags (GET)', async () => {
-      const loginResponse = await authService.login({phone: '+100000000001', password: '12345678'})
+      const loginDto: LoginDto = {
+        phone: '+100000000001',
+        password: '12345678'
+      }
+
+      const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
       const response = await request(testHelper.app.getHttpServer())
@@ -123,7 +153,12 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/users/onboard (PATCH)', async () => {
-      const loginResponse = await authService.login({phone: '+100000000001', password: '12345678'})
+      const loginDto: LoginDto = {
+        phone: '+100000000001',
+        password: '12345678'
+      }
+
+      const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
       const response = await request(testHelper.app.getHttpServer())
@@ -136,7 +171,12 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/users/update-user/:id (PATCH)', async () => {
-      const loginResponse = await authService.login({phone: '+100000000001', password: '12345678'})
+      const loginDto: LoginDto = {
+        phone: '+100000000001',
+        password: '12345678'
+      }
+
+      const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
       const updateUserDto: ReqBodyUpdateUserDto = {
@@ -158,7 +198,12 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/users/delete-user/:id (DELETE)', async () => {
-      const loginResponse = await authService.login({phone: '+100000000001', password: '12345678'})
+      const loginDto: LoginDto = {
+        phone: '+100000000001',
+        password: '12345678'
+      }
+
+      const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
       const response = await request(testHelper.app.getHttpServer())
@@ -166,12 +211,77 @@ describe('Tests API (e2e)', () => {
           .set('Authorization', `Bearer ${token}`)
           .expect(HttpStatus.OK);
 
-      console.log('! response.body =', response.body);
-
       expect(response.body.success).toBe(true);
       expect(response.body.userId).toBe(10008);
     });
-
   });
 
+  describe('Auth API (e2e)', () => {
+    it('/api/auth/login (POST)', async () => {
+      const loginDto: LoginDto = {
+        phone: '+100000000001',
+        password: '12345678'
+      }
+
+      const response = await request(testHelper.app.getHttpServer())
+          .post(`/api/auth/login`)
+          .send(loginDto)
+          .expect(HttpStatus.OK);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.token).toBeDefined();
+    });
+
+    it('/api/auth/logout (GET)', async () => {
+      const loginDto: LoginDto = {
+        phone: '+100000000001',
+        password: '12345678'
+      }
+
+      const loginResponse = await authService.login(loginDto)
+      const token = loginResponse.token;
+
+      const response = await request(testHelper.app.getHttpServer())
+          .get(`/api/auth/logout`)
+          .set('Authorization', `Bearer ${token}`)
+          .expect(HttpStatus.OK);
+
+      expect(response.body.success).toBe(true);
+    });
+
+    it('/api/auth/signUp (POST)', async () => {
+      const signUpDto: SignUpDto = {
+        phone: '+111111111111',
+        password: '12345678',
+        name: 'Test User',
+        companyName: 'Test Company',
+        logo: [{logo: "Test logo"}]
+      }
+
+      const response = await request(testHelper.app.getHttpServer())
+          .post(`/api/auth/sign-up`)
+          .send(signUpDto)
+          .expect(HttpStatus.OK);
+
+      // console.log('! response.body =', response.body);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.token).toBeDefined();
+    });
+
+    it('/api/auth/forgot-password (PUT)', async () => {
+      const forgotPasswordDto: ForgotPasswordDto = {
+        phone: '+100000000001'
+      }
+
+      const response = await request(testHelper.app.getHttpServer())
+          .put(`/api/auth/forgot-password`)
+          .send(forgotPasswordDto)
+          .expect(HttpStatus.OK);
+
+      console.log('! response.body =', response.body);
+
+      expect(response.body.notice).toBe('200-the-password-has-been-reset');
+    });
+  });
 });
