@@ -172,11 +172,18 @@ export class PaymentService {
     if (company.isTrial) {
       await this.companyRepository.update({ id: user.companyId }, { isTrial: false });
     } else if (payment?.subscriberId) {
-      await Promise.all([
-        this.stripeService.cancelSubscribe(payment.subscriberId),
-        this.companyRepository.update({ id: user.companyId }, { isSubscribe: false }),
-        this.paymentRepository.update({ id: payment.id }, { subscriberId: null })
-      ]);
+      // await Promise.all([
+        let cancel = await this.stripeService.cancelSubscribe(payment.subscriberId);
+        console.log('!!! cancel = ', cancel);
+        await this.companyRepository.update({ id: user.companyId }, { isSubscribe: false });
+        await this.paymentRepository.update({ id: payment.id }, { subscriberId: null });
+      // ]);
+
+      // await Promise.all([
+      //   this.stripeService.cancelSubscribe(payment.subscriberId),
+      //   this.companyRepository.update({ id: user.companyId }, { isSubscribe: false }),
+      //   this.paymentRepository.update({ id: payment.id }, { subscriberId: null })
+      // ]);
 
       console.log('The Subscribe has been cancelled successfully')
     }
