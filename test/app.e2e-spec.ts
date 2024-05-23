@@ -34,12 +34,26 @@ import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.d
 import {LoginDto} from "@src/auth/dto/login.dto";
 import {SignUpDto} from "@src/auth/dto/sign-up.dto";
 import {ForgotPasswordDto} from "@src/auth/dto/forgot-password.dto";
+import {StripeService} from "@src/stripe/stripe.service";
+import {Stripe} from "stripe";
+
+interface MockStripeCustomer extends Partial<Stripe.Customer> {
+  lastResponse: {
+    headers: { [key: string]: string };
+    requestId: string;
+    statusCode: number;
+    apiVersion?: string;
+    idempotencyKey?: string;
+    stripeAccount?: string;
+  };
+}
 
 
 describe('Tests API (e2e)', () => {
   let userService: UserService;
   let authService: AuthService;
   let testHelper: TestHelper;
+  let stripeService: StripeService;
   let queryRunner: QueryRunner;
 
   let checkPlanGuard: CheckPlanGuard;
@@ -52,6 +66,7 @@ describe('Tests API (e2e)', () => {
     userService = testHelper.app.get<UserService>(UserService);
     authService = testHelper.app.get<AuthService>(AuthService) as AuthService;
     checkPlanGuard = testHelper.app.get<CheckPlanGuard>(CheckPlanGuard);
+    stripeService = testHelper.app.get<StripeService>(StripeService);
 
   });
 
@@ -296,10 +311,80 @@ describe('Tests API (e2e)', () => {
           .set('Authorization', `Bearer ${token}`)
           .expect(HttpStatus.OK);
 
-      console.log('! response.body =', response.body.data.tags);
-
       expect(response.body.success).toBe(true);
       expect(Array.isArray(response.body.data.tags)).toBe(true);
+    });
+  });
+
+  describe('Payments API (e2e)', () => {
+    it('/api/payment/create-payment (POST)', async () => {
+      // const mockCancelSubscribeResponse = { id: 'sub_test', status: 'canceled' };
+      const mockCustomerCreateResponse: Stripe.Response<Stripe.Customer> = {
+        id: 'cus_Q9rqPf17ddoZRW',
+        object: 'customer',
+        address: null,
+        balance: 0,
+        created: 1716457153,
+        currency: null,
+        default_source: 'card_1PJY7AC581Db3P9CJ5DVJMEk',
+        delinquent: false,
+        description: null,
+        discount: null,
+        email: null,
+        invoice_prefix: '21AEC3CF',
+        invoice_settings: {
+          custom_fields: null,
+          default_payment_method: null,
+          footer: null,
+          rendering_options: null
+        },
+        livemode: false,
+        metadata: {},
+        name: 'Svetlana',
+        phone: '+100000000001',
+        preferred_locales: [],
+        shipping: null,
+        tax_exempt: 'none',
+        test_clock: null,
+
+        lastResponse: {
+          headers: {},
+          requestId: 'req_test',
+          statusCode: 200,
+          apiVersion: '2020-08-27',
+          idempotencyKey: 'idem_test',
+          stripeAccount: 'acct_test',
+        },
+      };
+
+      // jest.spyOn(stripeService, 'cancelSubscribe').mockResolvedValue(mockCancelSubscribeResponse);
+      jest.spyOn(stripeService, 'customerCreate').mockResolvedValue(mockCustomerCreateResponse);
+
+      const loginDto = { phone: '+100000000001', password: '12345678' };
+      const user = await authService.login(loginDto);
+      const token = user.token;
+
+      const paymentDto = {
+        agree: true,
+        cardType: 'Visa',
+        exp_month: 7,
+        exp_year: 2024,
+        number: '4242424242424242',
+        token: 'tok_1PCQVBC581Db3P9C1cJqkE0r',
+      };
+
+      const response = await request(testHelper.app.getHttpServer())
+          .post('/api/payment/create-payment')
+          .set('Authorization', `Bearer ${token}`)
+          .send(paymentDto)
+          .expect(HttpStatus.CREATED);
+
+      console.log('! response.body =', response.body);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.payment).toBeDefined();
+      expect(response.body.data.payment.cardType).toBe(paymentDto.cardType);
+      expect(response.body.data.payment.expiration).toBe('07/24');
     });
   });
 });

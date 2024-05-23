@@ -274,13 +274,6 @@ export class UserService {
 
   async getOneUser(findQuery: GetUsersInterface): Promise<User> {
     try {
-      // const selectFields: string[] = await this.helperService.getEntityFields(this.userRepository, [], true, false);
-      // const selectObject: Record<string, true> = {};
-      // // const selectObject: { [key: string]: true } = {};
-      //
-      // selectFields.forEach((field) => {
-      //   selectObject[field] = true;
-      // });
 
       const query: FindOneOptions<User> = {
         where: findQuery,
