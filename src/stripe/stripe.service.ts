@@ -24,6 +24,7 @@ export class StripeService {
     };
 
     const sub = await stripe.subscriptions.create(stripeQuery);
+    console.log('!!! sub = ', sub)
     return sub
   }
 

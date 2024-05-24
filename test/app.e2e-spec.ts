@@ -36,6 +36,7 @@ import {SignUpDto} from "@src/auth/dto/sign-up.dto";
 import {ForgotPasswordDto} from "@src/auth/dto/forgot-password.dto";
 import {StripeService} from "@src/stripe/stripe.service";
 import {Stripe} from "stripe";
+import {ReqBodyCreateSubscribeDto} from "@src/entities/payment/dto/reqBody-create-subscribe.dto";
 
 interface MockStripeCustomer extends Partial<Stripe.Customer> {
   lastResponse: {
@@ -87,11 +88,7 @@ describe('Tests API (e2e)', () => {
     it('/api/users/get-users (GET)', async () => {
       jest.spyOn(checkPlanGuard, 'canActivate').mockReturnValue(Promise.resolve(true));
 
-      const loginDto: LoginDto = {
-        phone: '+100000000001',
-        password: '12345678'
-      }
-
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
       const response = await request(testHelper.app.getHttpServer())
@@ -106,11 +103,7 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/users/account (GET)', async () => {
-      const loginDto: LoginDto = {
-        phone: '+100000000001',
-        password: '12345678'
-      }
-
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
@@ -124,11 +117,7 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/users/create-user (POST)', async () => {
-      const loginDto: LoginDto = {
-        phone: '+100000000001',
-        password: '12345678'
-      }
-
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
@@ -151,11 +140,7 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/users/worker-tags (GET)', async () => {
-      const loginDto: LoginDto = {
-        phone: '+100000000001',
-        password: '12345678'
-      }
-
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
@@ -168,11 +153,7 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/users/onboard (PATCH)', async () => {
-      const loginDto: LoginDto = {
-        phone: '+100000000001',
-        password: '12345678'
-      }
-
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
@@ -186,11 +167,7 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/users/update-user/:id (PATCH)', async () => {
-      const loginDto: LoginDto = {
-        phone: '+100000000001',
-        password: '12345678'
-      }
-
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
@@ -213,11 +190,7 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/users/delete-user/:id (DELETE)', async () => {
-      const loginDto: LoginDto = {
-        phone: '+100000000001',
-        password: '12345678'
-      }
-
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
@@ -233,10 +206,7 @@ describe('Tests API (e2e)', () => {
 
   describe('Auth API (e2e)', () => {
     it('/api/auth/login (POST)', async () => {
-      const loginDto: LoginDto = {
-        phone: '+100000000001',
-        password: '12345678'
-      }
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
 
       const response = await request(testHelper.app.getHttpServer())
           .post(`/api/auth/login`)
@@ -248,11 +218,7 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/auth/logout (GET)', async () => {
-      const loginDto: LoginDto = {
-        phone: '+100000000001',
-        password: '12345678'
-      }
-
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
@@ -298,11 +264,7 @@ describe('Tests API (e2e)', () => {
 
   describe('Tags API (e2e)', () => {
     it('/api/tags/get-tags (GET)', async () => {
-      const loginDto: LoginDto = {
-        phone: '+100000000001',
-        password: '12345678'
-      }
-
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
@@ -360,7 +322,7 @@ describe('Tests API (e2e)', () => {
       // jest.spyOn(stripeService, 'cancelSubscribe').mockResolvedValue(mockCancelSubscribeResponse);
       jest.spyOn(stripeService, 'customerCreate').mockResolvedValue(mockCustomerCreateResponse);
 
-      const loginDto = { phone: '+100000000001', password: '12345678' };
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const user = await authService.login(loginDto);
       const token = user.token;
 
@@ -379,12 +341,179 @@ describe('Tests API (e2e)', () => {
           .send(paymentDto)
           .expect(HttpStatus.CREATED);
 
-      console.log('! response.body =', response.body);
-
       expect(response.body.success).toBe(true);
       expect(response.body.data.payment).toBeDefined();
       expect(response.body.data.payment.cardType).toBe(paymentDto.cardType);
       expect(response.body.data.payment.expiration).toBe('07/24');
+    });
+
+    it('/api/payment/:id/create-subscribe (POST)', async () => {
+      const mockCreateSubscribersResponse: Stripe.Response<Stripe.Subscription> = {
+        id: 'sub_1PJv8ZC581Db3P9CoqVcN2Lq',
+        object: 'subscription',
+        application: null,
+        application_fee_percent: null,
+        automatic_tax: { enabled: false, liability: null },
+        billing_cycle_anchor: 1716545651,
+        billing_cycle_anchor_config: null,
+        billing_thresholds: null,
+        cancel_at: null,
+        cancel_at_period_end: false,
+        canceled_at: null,
+        cancellation_details: { comment: null, feedback: null, reason: null },
+        collection_method: 'charge_automatically',
+        created: 1716545651,
+        currency: 'eur',
+        current_period_end: 1719224051,
+        current_period_start: 1716545651,
+        customer: 'cus_Q9uYj9fRuVsUQm',
+        days_until_due: null,
+        default_payment_method: null,
+        default_source: null,
+        default_tax_rates: [],
+        description: null,
+        discount: null,
+        discounts: [],
+        ended_at: null,
+        items: {
+          object: 'list',
+          data: [
+            {
+              id: 'si_QAFtZYqXRLkmxS',
+              object: 'subscription_item',
+              billing_thresholds: null,
+              created: 1716546564,
+              discounts: [],
+              metadata: {},
+              plan: {
+                id: 'plan_Q52EGsX1mT2Mkn',
+                object: 'plan',
+                active: true,
+                aggregate_usage: null,
+                amount: 9990,
+                amount_decimal: '9990',
+                billing_scheme: 'per_unit',
+                created: 1715342560,
+                currency: 'eur',
+                interval: 'month',
+                interval_count: 1,
+                livemode: false,
+                metadata: {},
+                meter: null,
+                nickname: null,
+                product: 'prod_Q52ENNl4Dx6Z6C',
+                tiers_mode: null,
+                transform_usage: null,
+                trial_period_days: null,
+                usage_type: 'licensed'
+              },
+              price: {
+                id: 'plan_Q52EGsX1mT2Mkn',
+                object: 'price',
+                active: true,
+                billing_scheme: 'per_unit',
+                created: 1715342560,
+                currency: 'eur',
+                custom_unit_amount: null,
+                livemode: false,
+                lookup_key: null,
+                metadata: {},
+                nickname: null,
+                product: 'prod_Q52ENNl4Dx6Z6C',
+                recurring: {
+                  aggregate_usage: null,
+                  interval: 'month',
+                  interval_count: 1,
+                  meter: null,
+                  trial_period_days: null,
+                  usage_type: 'licensed'
+                },
+                tax_behavior: 'unspecified',
+                tiers_mode: null,
+                transform_quantity: null,
+                type: 'recurring',
+                unit_amount: 9990,
+                unit_amount_decimal: '9990'
+              },
+              quantity: 1,
+              subscription: 'sub_1PJvNHC581Db3P9CJ7jV9PLJ',
+              tax_rates: []
+            }
+          ],
+          has_more: false,
+          url: '/v1/subscription_items?subscription=sub_1PJv8ZC581Db3P9CoqVcN2Lq'
+        },
+        latest_invoice: 'in_1PJv8ZC581Db3P9Cs7wkt9VR',
+        livemode: false,
+        metadata: {},
+        next_pending_invoice_item_invoice: null,
+        on_behalf_of: null,
+        pause_collection: null,
+        payment_settings: {
+          payment_method_options: null,
+          payment_method_types: null,
+          save_default_payment_method: 'off'
+        },
+        pending_invoice_item_interval: null,
+        pending_setup_intent: null,
+        pending_update: null,
+        schedule: null,
+        start_date: 1716545651,
+        status: 'active',
+        test_clock: null,
+        transfer_data: null,
+        trial_end: null,
+        trial_settings: { end_behavior: { missing_payment_method: 'create_invoice' } },
+        trial_start: null,
+        lastResponse: {
+          headers: {},
+          requestId: 'req_test',
+          statusCode: 200,
+          apiVersion: '2020-08-27',
+          idempotencyKey: 'idem_test',
+          stripeAccount: 'acct_test',
+        },
+      }
+
+      jest.spyOn(stripeService, 'createSubscribers').mockResolvedValue(mockCreateSubscribersResponse);
+
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
+      const user = await authService.login(loginDto);
+      const token = user.token;
+
+      const reqBodyCreateSubscribeDto: ReqBodyCreateSubscribeDto = {
+        agree: true,
+        planType: "Monthly"
+      };
+
+      const response = await request(testHelper.app.getHttpServer())
+          .post(`/api/payment/${10004}/create-subscribe`)
+          .set('Authorization', `Bearer ${token}`)
+          .send(reqBodyCreateSubscribeDto)
+          .expect(HttpStatus.CREATED);
+
+      console.log('! response.body =', response.body);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.notice).toBe('Subscribed');
+    });
+
+    it('/api/payment/:id/remove-subscribe (DELETE)', async () => {
+      // jest.spyOn(stripeService, 'createSubscribers').mockResolvedValue(mockCreateSubscribersResponse);
+
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
+      const user = await authService.login(loginDto);
+      const token = user.token;
+
+      const response = await request(testHelper.app.getHttpServer())
+          .delete(`/api/payment/${10004}/remove-subscribe`)
+          .set('Authorization', `Bearer ${token}`)
+          .expect(HttpStatus.OK);
+
+      console.log('! response.body =', response.body);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.notice).toBe('Unsubscribed');
     });
   });
 });

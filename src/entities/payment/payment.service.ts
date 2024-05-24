@@ -60,8 +60,9 @@ export class PaymentService {
         notice: 'The payment has been created',
         data: {payment}
       };
-    } catch (err) {
-      throw err;
+    } catch (e) {
+      this.logger.error(`Error during payment creation: ${e.message}`);
+      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
     }
   }
 
@@ -116,8 +117,6 @@ export class PaymentService {
       } else {
         // paymentId = parseInt(paymentId, 10);
 
-        console.log('!!! paymentId = ', paymentId);
-
         if (!paymentId) {
           throw new HttpException(`Payment-ID-not-found.`, HttpStatus.NOT_FOUND);
         }
@@ -145,6 +144,9 @@ export class PaymentService {
           },
           admin,
         );
+
+        console.log('!!! subscriber.items.data = ', subscriber.items.data);
+        console.log('!!! subscriber.items.data.price.recurring = ', subscriber.items.data[0].price.recurring);
 
         await this.companyRepository.update(admin.companyId, { isSubscribe: true, isTrial: false, trialAt: null });
         await this.paymentRepository.update(paymentId, {

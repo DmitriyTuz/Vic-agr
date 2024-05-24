@@ -1,4 +1,16 @@
-import {Body, Controller, HttpException, HttpStatus, Param, Post, Req, Res, UseGuards, UsePipes} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+  UsePipes
+} from '@nestjs/common';
 import { JwtAuthGuard } from '@src/auth/jwt-auth.guard';
 import { PaymentService } from '@src/entities/payment/payment.service';
 import { RequestWithUser } from '@src/interfaces/users/add-field-user-to-Request.interface';
@@ -55,7 +67,7 @@ export class PaymentController {
     return this.paymentService.createSubscribe(paymentId, body, user);
   }
 
-  @Post('/:id/remove-subscribe')
+  @Delete('/:id/remove-subscribe')
   @ApiOperation({ summary: 'Remove subscription' })
   @ApiResponse({ status: 200, description: 'Subscription removed successfully' })
   @ApiResponse({ status: 400, description: 'Invalid payment id' })
