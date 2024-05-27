@@ -475,7 +475,7 @@ export class UserService {
       if (user.type === UserTypes.ADMIN && user.company.ownerId === user.id && user.company.isSubscribe) {
         const payment = await this.paymentRepository.findOne({select: ['id', 'userId', 'subscriberId', 'customerId'], where: {userId: user.id}});
         if (payment) {
-          await this.paymentService.removeSubscribe(payment);
+          await this.paymentService.removeSubscribe(payment.id);
         }
       }
 

@@ -62,7 +62,7 @@ export class TaskService {
       const { companyId } = user;
 
       const { status, date, type, location, tags } = reqQuery;
-      const tasks: Task[] = await this.getAllTasks({ status, date, type, location, tags, companyId, userId }, true);
+      const tasks: Task[] = await this.getAllTasks({ status, date, type, location, tags, companyId, userId }, false);
 
       let returnedTasks: TaskDataInterface[] = [];
 

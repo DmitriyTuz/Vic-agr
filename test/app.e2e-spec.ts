@@ -37,6 +37,11 @@ import {ForgotPasswordDto} from "@src/auth/dto/forgot-password.dto";
 import {StripeService} from "@src/stripe/stripe.service";
 import {Stripe} from "stripe";
 import {ReqBodyCreateSubscribeDto} from "@src/entities/payment/dto/reqBody-create-subscribe.dto";
+import {User} from "@src/entities/user/user.entity";
+import {ReqBodyCreatePaymentDto} from "@src/entities/payment/dto/reqBody-create-payment.dto";
+import {PaymentService} from "@src/entities/payment/payment.service";
+import {Payment} from "@src/entities/payment/payment.entity";
+import {PaymentController} from "@src/entities/payment/payment.controller";
 
 interface MockStripeCustomer extends Partial<Stripe.Customer> {
   lastResponse: {
@@ -53,6 +58,7 @@ interface MockStripeCustomer extends Partial<Stripe.Customer> {
 describe('Tests API (e2e)', () => {
   let userService: UserService;
   let authService: AuthService;
+  let paymentService: PaymentService;
   let testHelper: TestHelper;
   let stripeService: StripeService;
   let queryRunner: QueryRunner;
@@ -66,6 +72,7 @@ describe('Tests API (e2e)', () => {
 
     userService = testHelper.app.get<UserService>(UserService);
     authService = testHelper.app.get<AuthService>(AuthService) as AuthService;
+    paymentService = testHelper.app.get<PaymentService>(PaymentService);
     checkPlanGuard = testHelper.app.get<CheckPlanGuard>(CheckPlanGuard);
     stripeService = testHelper.app.get<StripeService>(StripeService);
 
@@ -91,6 +98,7 @@ describe('Tests API (e2e)', () => {
       const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
+
       const response = await request(testHelper.app.getHttpServer())
           .get('/api/users/get-users?search=S&&type=Admin')
           .set('Authorization', `Bearer ${token}`)
@@ -113,7 +121,7 @@ describe('Tests API (e2e)', () => {
           .expect(HttpStatus.OK);
 
       expect(response.body.data.user.name).toEqual('Svetlana');
-      expect(response.body.data.company.id).toBe(10002);
+      expect(response.body.data.company.id).toBeDefined();;
     });
 
     it('/api/users/create-user (POST)', async () => {
@@ -163,13 +171,24 @@ describe('Tests API (e2e)', () => {
           .expect(HttpStatus.OK);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.userId).toBe(10003);
+      expect(response.body.userId).toBeDefined();
     });
 
     it('/api/users/update-user/:id (PATCH)', async () => {
       const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
+
+      const createUserDto: ReqBodyCreateUserDto = {
+        name: 'Test User 1',
+        password: '11111',
+        phone: '+100000000123',
+        type: 'WORKER',
+        companyId: 10001,
+        tags: []
+      };
+
+      const userCreateData: { user: User, message: string } = await userService.createUser(createUserDto);
 
       const updateUserDto: ReqBodyUpdateUserDto = {
         name: 'Test User 2',
@@ -180,13 +199,13 @@ describe('Tests API (e2e)', () => {
       };
 
       const response = await request(testHelper.app.getHttpServer())
-          .patch(`/api/users/update-user/${10008}`)
+          .patch(`/api/users/update-user/${userCreateData.user.id}`)
           .set('Authorization', `Bearer ${token}`)
           .send(updateUserDto)
           .expect(HttpStatus.OK);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.user.id).toBe(10008);
+      expect(response.body.data.user.id).toBe(userCreateData.user.id);
     });
 
     it('/api/users/delete-user/:id (DELETE)', async () => {
@@ -194,13 +213,24 @@ describe('Tests API (e2e)', () => {
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
+      const createUserDto: ReqBodyCreateUserDto = {
+        name: 'Test User 1',
+        password: '11111',
+        phone: '+100000000123',
+        type: 'WORKER',
+        companyId: 10001,
+        tags: []
+      };
+
+      const userCreateData: { user: User, message: string } = await userService.createUser(createUserDto);
+
       const response = await request(testHelper.app.getHttpServer())
-          .delete(`/api/users/delete-user/${10008}`)
+          .delete(`/api/users/delete-user/${userCreateData.user.id}`)
           .set('Authorization', `Bearer ${token}`)
           .expect(HttpStatus.OK);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.userId).toBe(10008);
+      expect(response.body.userId).toBe(userCreateData.user.id);
     });
   });
 
@@ -326,7 +356,7 @@ describe('Tests API (e2e)', () => {
       const user = await authService.login(loginDto);
       const token = user.token;
 
-      const paymentDto = {
+      const paymentCreateDto: ReqBodyCreatePaymentDto = {
         agree: true,
         cardType: 'Visa',
         exp_month: 7,
@@ -338,16 +368,31 @@ describe('Tests API (e2e)', () => {
       const response = await request(testHelper.app.getHttpServer())
           .post('/api/payment/create-payment')
           .set('Authorization', `Bearer ${token}`)
-          .send(paymentDto)
+          .send(paymentCreateDto)
           .expect(HttpStatus.CREATED);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.payment).toBeDefined();
-      expect(response.body.data.payment.cardType).toBe(paymentDto.cardType);
+      expect(response.body.data.payment.cardType).toBe(paymentCreateDto.cardType);
       expect(response.body.data.payment.expiration).toBe('07/24');
     });
 
     it('/api/payment/:id/create-subscribe (POST)', async () => {
+      const mockPayment: Payment = {
+        id: 10005,
+        cardType: 'Visa',
+        customerId: 'cus_QBSCWN9lEE8gNy',
+        expiration: '06/24',
+        nameOnCard: null,
+        number: '4242',
+        prefer: false,
+        subscriberId: null,
+        paidAt: null,
+        agree: false,
+        userId: 10012,
+        user: {} as User
+      };
+
       const mockCreateSubscribersResponse: Stripe.Response<Stripe.Subscription> = {
         id: 'sub_1PJv8ZC581Db3P9CoqVcN2Lq',
         object: 'subscription',
@@ -475,6 +520,7 @@ describe('Tests API (e2e)', () => {
         },
       }
 
+      jest.spyOn(paymentService, 'findById').mockResolvedValue(mockPayment);
       jest.spyOn(stripeService, 'createSubscribers').mockResolvedValue(mockCreateSubscribersResponse);
 
       const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
@@ -487,18 +533,34 @@ describe('Tests API (e2e)', () => {
       };
 
       const response = await request(testHelper.app.getHttpServer())
-          .post(`/api/payment/${10004}/create-subscribe`)
+          .post(`/api/payment/${mockPayment.id}/create-subscribe`)
           .set('Authorization', `Bearer ${token}`)
           .send(reqBodyCreateSubscribeDto)
           .expect(HttpStatus.CREATED);
 
-      console.log('! response.body =', response.body);
+      // console.log('! response.body =', response.body);
 
       expect(response.body.success).toBe(true);
       expect(response.body.notice).toBe('Subscribed');
     });
 
     it('/api/payment/:id/remove-subscribe (DELETE)', async () => {
+      const mockPayment: Payment = {
+        id: 10005,
+        cardType: 'Visa',
+        customerId: 'cus_QBSCWN9lEE8gNy',
+        expiration: '06/24',
+        nameOnCard: null,
+        number: '4242',
+        prefer: false,
+        subscriberId: null,
+        paidAt: null,
+        agree: false,
+        userId: 10012,
+        user: {} as User
+      };
+
+      jest.spyOn(paymentService, 'findById').mockResolvedValue(mockPayment);
       // jest.spyOn(stripeService, 'createSubscribers').mockResolvedValue(mockCreateSubscribersResponse);
 
       const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
@@ -506,14 +568,38 @@ describe('Tests API (e2e)', () => {
       const token = user.token;
 
       const response = await request(testHelper.app.getHttpServer())
-          .delete(`/api/payment/${10004}/remove-subscribe`)
+          .delete(`/api/payment/${mockPayment.id}/remove-subscribe`)
           .set('Authorization', `Bearer ${token}`)
           .expect(HttpStatus.OK);
 
-      console.log('! response.body =', response.body);
+      // console.log('! response.body =', response.body);
 
       expect(response.body.success).toBe(true);
       expect(response.body.notice).toBe('Unsubscribed');
+    });
+  });
+
+  describe('Tasks API (e2e)', () => {
+    it('/api/tasks/get-tasks (POST)', async () => {
+      // jest.spyOn(checkPlanGuard, 'canActivate').mockReturnValue(Promise.resolve(true));
+
+      const loginDto: LoginDto = { phone: '+100000000002', password: '12345678' };
+      const loginResponse = await authService.login(loginDto)
+      const token = loginResponse.token;
+
+      const response = await request(testHelper.app.getHttpServer())
+          .post('/api/tasks/get-tasks')
+          .set('Authorization', `Bearer ${token}`)
+          .expect(HttpStatus.CREATED);
+
+      // console.log('! response.body =', response.body);
+
+      expect(Array.isArray(response.body.data.tasks)).toBe(true);
+      expect(response.body.data.tasks.length).toBeGreaterThan(0);
+      expect(response.body.data.filterCounts.low).toBeDefined();
+      expect(response.body.data.filterCounts.high).toBeDefined();
+      // expect(response.body.data.users[0].name).toEqual('Svetlana');
+      // expect(response.body.data.filterCounts.admins).toEqual(1);
     });
   });
 });

@@ -22,7 +22,7 @@ export class ReqBodyCreatePaymentDto {
   @IsNumber({}, { message: 'Must be a number' })
   readonly exp_year: number;
 
-  readonly nameOnCard: string;
+  readonly nameOnCard?: string;
 
   @ApiProperty({ example: '4242', description: 'Subscribe number' })
   @IsNotEmpty({ message: 'Number required !' })

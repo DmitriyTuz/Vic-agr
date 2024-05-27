@@ -29,7 +29,7 @@
     "migration-test:run": "nest build --tsc && cross-env NODE_ENV=test npm run typeorm migration:run -- -d ./src/typeorm/typeorm.config.ts",
     "migration-test:revert": "nest build --tsc && cross-env NODE_ENV=test npm run typeorm migration:revert -- -d ./src/typeorm/typeorm.config.ts",
     "seeds-dev": "cross-env NODE_ENV=development SEED_DATA=true nest build && cross-env NODE_ENV=development SEED_DATA=true nest start seed",
-    "seeds-test": "cross-env NODE_ENV=test SEED_DATA=true nest build && cross-env NODE_ENV=test SEED_DATA=true nest start seed",
+    "seeds-test": "cross-env NODE_ENV=test SEED_DATA=true nest build && cross-env NODE_ENV=test SEED_DATA=true ENTITIES_PATH='/home/dmitriy/My_projects/vic_agr/dist/src/entities/**/*.entity.{ts,js}' nest start seed",
     "test1": "cross-env NODE_ENV=test npx jest --runInBand",
     "test2": "npx jest --runInBand"
   },
