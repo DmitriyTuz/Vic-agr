@@ -78,15 +78,19 @@ export class PaymentController {
       @Req() req: RequestWithUser,
       @Param('id') paymentId: number,
   ) {
-    if (!paymentId) {
-      throw new HttpException(`payment-id-not-found`, HttpStatus.NOT_FOUND);
-    }
 
-    const payment: Payment = await this.paymentRepository.findOne({select: ['id', 'userId', 'subscriberId', 'customerId'], where: {id: paymentId}});
+    return await this.paymentService.removeSubscribe(paymentId);
 
-    if (payment) {
-      return await this.paymentService.removeSubscribe(payment);
-    }
+    // if (!paymentId) {
+    //   throw new HttpException(`payment-id-not-found`, HttpStatus.NOT_FOUND);
+    // }
+    //
+    // const payment: Payment = await this.paymentService.findById(paymentId);
+    // // const payment: Payment = await this.paymentRepository.findOne({select: ['id', 'userId', 'subscriberId', 'customerId'], where: {id: paymentId}});
+    //
+    // if (payment) {
+    //   return await this.paymentService.removeSubscribe(payment);
+    // }
   }
 
 }

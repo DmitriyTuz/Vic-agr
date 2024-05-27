@@ -73,7 +73,7 @@ export class PaymentService {
       throw ({status: 404, message: '404-payment-not-found', stack: new Error().stack});
     }
 
-    await this.removeSubscribe(payment);
+    await this.removeSubscribe(payment.id);
     await this.paymentRepository.remove(payment);
   }
 
@@ -121,7 +121,10 @@ export class PaymentService {
           throw new HttpException(`Payment-ID-not-found.`, HttpStatus.NOT_FOUND);
         }
 
-        const payment: Payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
+        const payment: Payment = await this.findById(paymentId);
+        // const payment: Payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
+
+        console.log('!!! payment = ', payment);
 
         if (!payment) {
           throw new HttpException(`Payment-not-found.`, HttpStatus.NOT_FOUND);
@@ -145,9 +148,6 @@ export class PaymentService {
           admin,
         );
 
-        console.log('!!! subscriber.items.data = ', subscriber.items.data);
-        console.log('!!! subscriber.items.data.price.recurring = ', subscriber.items.data[0].price.recurring);
-
         await this.companyRepository.update(admin.companyId, { isSubscribe: true, isTrial: false, trialAt: null });
         await this.paymentRepository.update(paymentId, {
           subscriberId: subscriber.id,
@@ -167,7 +167,13 @@ export class PaymentService {
     }
   }
 
-  async removeSubscribe(payment: Payment): Promise<{ success: boolean, notice: string }> {
+  async removeSubscribe(paymentId: number): Promise<{ success: boolean, notice: string }> {
+    if (!paymentId) {
+      throw new HttpException(`payment-id-not-found`, HttpStatus.NOT_FOUND);
+    }
+
+    const payment: Payment = await this.findById(paymentId);
+
     const user: User = await this.userRepository.findOne({select: ['id', 'companyId'], where: {id: payment.userId}});
     const company: Company = await this.companyRepository.findOne({select: ['id', 'isTrial'], where: {id: user.companyId}});
 
@@ -194,6 +200,10 @@ export class PaymentService {
       success: true,
       notice: 'Unsubscribed'
     }
+  }
+
+  async findById(id: number) {
+    return await this.paymentRepository.findOne({ where: { id } });
   }
 
 }

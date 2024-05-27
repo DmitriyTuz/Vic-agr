@@ -21,8 +21,11 @@ export class Payment {
   @Column({ type: 'varchar' })
   number: string;
 
-  @Column({ type: 'varchar' })
-  prefer: string;
+  @Column({ type: 'boolean' })
+  prefer: boolean;
+
+  // @Column({ type: 'varchar' })
+  // prefer: string;
 
   @Column({ type: 'varchar' })
   subscriberId: string;

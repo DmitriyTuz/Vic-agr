@@ -70,14 +70,14 @@ export class SeedsService {
       {
         name: 'Michael',
         password: '12345678',
-        phone: '+380982920503',
+        phone: '+100000000002',
         type: UserTypes.ADMIN,
         companyId: companyOne.id,
       },
       {
         name: 'Alex',
         password: '12345678',
-        phone: '+380636446032',
+        phone: '+100000000003',
         type: UserTypes.ADMIN,
         companyId: companyTwo.id,
       },
