@@ -17,6 +17,7 @@ import {User} from "@src/entities/user/user.entity";
 import {CreatePaymentDto} from "@src/entities/payment/dto/create-payment.dto";
 import {ReqBodyCreateSubscribeDto} from "@src/entities/payment/dto/reqBody-create-subscribe.dto";
 import {ReqBodyCreatePaymentDto} from "@src/entities/payment/dto/reqBody-create-payment.dto";
+import {UserService} from "@src/entities/user/user.service";
 
 @Injectable()
 export class PaymentService {
@@ -124,8 +125,6 @@ export class PaymentService {
         const payment: Payment = await this.findById(paymentId);
         // const payment: Payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
 
-        console.log('!!! payment = ', payment);
-
         if (!payment) {
           throw new HttpException(`Payment-not-found.`, HttpStatus.NOT_FOUND);
         }
@@ -173,9 +172,13 @@ export class PaymentService {
     }
 
     const payment: Payment = await this.findById(paymentId);
+    console.log('!!! payment = ', payment);
 
+    // const user: User = await this.userService.findById(payment.userId);
     const user: User = await this.userRepository.findOne({select: ['id', 'companyId'], where: {id: payment.userId}});
+    console.log('!!! user = ', user);
     const company: Company = await this.companyRepository.findOne({select: ['id', 'isTrial'], where: {id: user.companyId}});
+    console.log('!!! company = ', company);
 
     if (company.isTrial) {
       await this.companyRepository.update({ id: user.companyId }, { isTrial: false });
@@ -183,6 +186,8 @@ export class PaymentService {
       // await Promise.all([
         let cancel = await this.stripeService.cancelSubscribe(payment.subscriberId);
         console.log('!!! cancel = ', cancel);
+        console.log('!!! cancel.items.data = ', cancel.items.data);
+        console.log('!!! cancel.items.data[0].price.recurring = ', cancel.items.data[0].price.recurring);
         await this.companyRepository.update({ id: user.companyId }, { isSubscribe: false });
         await this.paymentRepository.update({ id: payment.id }, { subscriberId: null });
       // ]);

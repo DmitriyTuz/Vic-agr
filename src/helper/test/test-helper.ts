@@ -2,6 +2,10 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from '@src/app.module';
 import {INestApplication} from "@nestjs/common";
 import {Connection, DataSource, EntityManager, QueryRunner} from "typeorm";
+import {PaymentController} from "@src/entities/payment/payment.controller";
+import {AuthService} from "@src/auth/auth.service";
+import {StripeService} from "@src/stripe/stripe.service";
+import {PaymentService} from "@src/entities/payment/payment.service";
 
 export class TestHelper {
 
@@ -11,6 +15,30 @@ export class TestHelper {
 
     async init() {
         const module = await Test.createTestingModule({
+            // controllers: [PaymentController],
+            // providers: [
+            //     {
+            //         provide: PaymentService,
+            //         useValue: {
+            //             removeSubscribe: jest.fn(),
+            //             findById: jest.fn(),
+            //         },
+            //     },
+            //     {
+            //         provide: AuthService,
+            //         useValue: {
+            //             login: jest.fn(),
+            //             validateUser: jest.fn(),
+            //             generateToken: jest.fn(),
+            //         },
+            //     },
+            //     {
+            //         provide: StripeService,
+            //         useValue: {
+            //             cancelSubscribe: jest.fn(),
+            //         },
+            //     },
+            // ],
             imports: [AppModule]
         }).compile();
 

@@ -79,7 +79,7 @@ export class PaymentController {
       @Param('id') paymentId: number,
   ) {
 
-    return await this.paymentService.removeSubscribe(paymentId);
+    return this.paymentService.removeSubscribe(paymentId);
 
     // if (!paymentId) {
     //   throw new HttpException(`payment-id-not-found`, HttpStatus.NOT_FOUND);
