@@ -50,6 +50,7 @@ import {TaskDataInterface} from "@src/interfaces/tasks/task-data.interface";
 import {ReqBodyUpdateTaskDto} from "@src/entities/task/dto/reqBody.update-task.dto";
 import {ReqBodyCompleteTaskDto} from "@src/entities/complete-task/dto/reqBody.complete-task.dto";
 import {ReqBodyGetTasksDto} from "@src/entities/task/dto/reqBody.get-tasks.dto";
+import {ReqBodyReportTaskDto} from "@src/entities/report-task/dto/reqBody.report-task.dto";
 
 interface MockStripeCustomer extends Partial<Stripe.Customer> {
   lastResponse: {
@@ -849,7 +850,33 @@ describe('Tests API (e2e)', () => {
           .send(completeTaskDto)
           .expect(HttpStatus.OK);
 
-      console.log('! response.body =', response.body);
+      // console.log('! response.body =', response.body);
+
+      expect(response.body.success).toBe(true);
+    });
+
+    it('/api/tasks/:id/report-task (PUT)', async () => {
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
+      const loginResponse = await authService.login(loginDto)
+      const token = loginResponse.token;
+
+      const reportTaskDto: ReqBodyReportTaskDto = {
+        comment: 'Test Comment'
+      };
+
+      const admin = await userService.findByPhone('+100000000001');
+
+      const getTaskDto = {};
+
+      const getTasksData = await taskService.getAll(getTaskDto, admin.id);
+
+      const response = await request(testHelper.app.getHttpServer())
+          .put(`/api/tasks/${getTasksData.data.tasks[0].id}/report-task`)
+          .set('Authorization', `Bearer ${token}`)
+          .send(reportTaskDto)
+          .expect(HttpStatus.OK);
+
+      // console.log('! response.body =', response.body);
 
       expect(response.body.success).toBe(true);
     });
