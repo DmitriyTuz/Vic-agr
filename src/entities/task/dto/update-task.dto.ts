@@ -21,17 +21,17 @@ export class UpdateTaskDto {
   @ApiProperty({ example: 'Comment1', description: 'Any comment' })
   // @IsNotEmpty({ message: 'Type required !' })
   // @IsString({ message: 'Must be a string' })
-  readonly comment: string;
+  readonly comment?: string;
 
-  readonly mediaInfo: Record<string, any>[];
+  readonly mediaInfo?: Record<string, any>[];
 
-  readonly documentsInfo: Record<string, any>[];
+  readonly documentsInfo?: Record<string, any>[];
 
   @ApiProperty({ example: '2024-04-17', description: 'Task due date' })
   // @IsNotEmpty({ message: 'dueDate required !' })
   // @IsDate({ message: 'Must be a date' })
   readonly dueDate: Date;
 
-  status: string;
+  status?: string;
 
 }

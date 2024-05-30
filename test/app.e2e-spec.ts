@@ -45,6 +45,11 @@ import {PaymentController} from "@src/entities/payment/payment.controller";
 import {Company} from "@src/entities/company/company.entity";
 import * as bcrypt from 'bcryptjs';
 import {ReqBodyCreateTaskDto} from "@src/entities/task/dto/reqBody.create-task.dto";
+import {TaskService} from "@src/entities/task/task.service";
+import {TaskDataInterface} from "@src/interfaces/tasks/task-data.interface";
+import {ReqBodyUpdateTaskDto} from "@src/entities/task/dto/reqBody.update-task.dto";
+import {ReqBodyCompleteTaskDto} from "@src/entities/complete-task/dto/reqBody.complete-task.dto";
+import {ReqBodyGetTasksDto} from "@src/entities/task/dto/reqBody.get-tasks.dto";
 
 interface MockStripeCustomer extends Partial<Stripe.Customer> {
   lastResponse: {
@@ -62,6 +67,7 @@ describe('Tests API (e2e)', () => {
   let userService: UserService;
   let authService: AuthService;
   let paymentService: PaymentService;
+  let taskService: TaskService;
   let testHelper: TestHelper;
   let stripeService: StripeService;
   let queryRunner: QueryRunner;
@@ -76,6 +82,7 @@ describe('Tests API (e2e)', () => {
     userService = testHelper.app.get<UserService>(UserService);
     authService = testHelper.app.get<AuthService>(AuthService) as AuthService;
     paymentService = testHelper.app.get<PaymentService>(PaymentService);
+    taskService = testHelper.app.get<TaskService>(TaskService);
     checkPlanGuard = testHelper.app.get<CheckPlanGuard>(CheckPlanGuard);
     stripeService = testHelper.app.get<StripeService>(StripeService);
 
@@ -730,6 +737,8 @@ describe('Tests API (e2e)', () => {
           .set('Authorization', `Bearer ${token}`)
           .expect(HttpStatus.OK);
 
+      // console.log('! response.body =', response.body);
+
       expect(response.body.success).toBe(true);
       expect(response.body.notice).toBe('Unsubscribed');
     });
@@ -773,9 +782,76 @@ describe('Tests API (e2e)', () => {
           .send(createTaskDto)
           .expect(HttpStatus.CREATED);
 
-      console.log('! response.body =', response.body);
+      // console.log('! response.body =', response.body);
 
       expect(response.body.data.task.title).toBe('Test Task 1');
+    });
+
+    it('/api/tasks/:id/update-task (PATCH)', async () => {
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
+      const loginResponse = await authService.login(loginDto)
+      const token = loginResponse.token;
+
+      const createTaskDto: ReqBodyCreateTaskDto = {
+        title: 'Test Task 1',
+        type: 'Low',
+        executionTime: 1,
+        comment: 'Test Comment 1',
+        dueDate: new Date(),
+        tags: [],
+        workers: [],
+        mapLocation: []
+      };
+
+      const admin = await userService.findByPhone('+100000000001');
+
+      const taskCreateData: {success: boolean, notice: string, data: {task: TaskDataInterface}} = await taskService.create(createTaskDto, admin.id);
+
+      const updateTaskDto: ReqBodyUpdateTaskDto = {
+        title: 'Test Task 2',
+        type: 'Medium',
+        executionTime: 10,
+        dueDate: new Date('2124-04-17'),
+        workers: [],
+        tags: [],
+      };
+
+      const response = await request(testHelper.app.getHttpServer())
+          .patch(`/api/tasks/${taskCreateData.data.task.id}/update-task`)
+          .set('Authorization', `Bearer ${token}`)
+          .send(updateTaskDto)
+          .expect(HttpStatus.OK);
+
+      // console.log('! response.body =', response.body);
+
+      expect(response.body.data.task.title).toBe('Test Task 2');
+    });
+
+    it('/api/tasks/:id/complete-task (PUT)', async () => {
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
+      const loginResponse = await authService.login(loginDto)
+      const token = loginResponse.token;
+
+      const completeTaskDto: ReqBodyCompleteTaskDto = {
+        timeLog: '1',
+        comment: 'Test Comment'
+      };
+
+      const admin = await userService.findByPhone('+100000000001');
+
+      const getTaskDto = {};
+
+      const getTasksData = await taskService.getAll(getTaskDto, admin.id);
+
+      const response = await request(testHelper.app.getHttpServer())
+          .put(`/api/tasks/${getTasksData.data.tasks[0].id}/complete-task`)
+          .set('Authorization', `Bearer ${token}`)
+          .send(completeTaskDto)
+          .expect(HttpStatus.OK);
+
+      console.log('! response.body =', response.body);
+
+      expect(response.body.success).toBe(true);
     });
   });
 });
