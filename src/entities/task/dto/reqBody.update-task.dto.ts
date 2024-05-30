@@ -9,5 +9,5 @@ export class ReqBodyUpdateTaskDto extends UpdateTaskDto {
   readonly workers: number[];
 
   @ApiProperty({ example: [], description: 'Task workers ids' })
-  readonly mapLocation;
+  readonly mapLocation?;
 }

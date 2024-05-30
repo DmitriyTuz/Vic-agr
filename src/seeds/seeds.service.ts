@@ -171,6 +171,18 @@ export class SeedsService {
         status: TaskStatuses.WAITING,
         companyId: Michael.companyId,
       },
+      {
+        userId: Svetlana.id,
+        title: 'Test Task 5',
+        type: TaskTypes.LOW,
+        executionTime: 13,
+        comment:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris',
+        mediaInfo: [],
+        documentsInfo: [],
+        status: TaskStatuses.WAITING,
+        companyId: Svetlana.companyId,
+      },
     ];
 
     for (const taskData of tasksData) {

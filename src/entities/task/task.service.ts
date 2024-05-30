@@ -158,6 +158,7 @@ export class TaskService {
       query.where = { ...query.where, ...mapLocationQuery };
     }
 
+    console.log('!!! query = ', query);
     let tasks: Task[] = await this.taskRepository.find(query);
     // return await this.taskRepository.find(query);
 

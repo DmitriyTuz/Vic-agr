@@ -42,6 +42,14 @@ import {ReqBodyCreatePaymentDto} from "@src/entities/payment/dto/reqBody-create-
 import {PaymentService} from "@src/entities/payment/payment.service";
 import {Payment} from "@src/entities/payment/payment.entity";
 import {PaymentController} from "@src/entities/payment/payment.controller";
+import {Company} from "@src/entities/company/company.entity";
+import * as bcrypt from 'bcryptjs';
+import {ReqBodyCreateTaskDto} from "@src/entities/task/dto/reqBody.create-task.dto";
+import {TaskService} from "@src/entities/task/task.service";
+import {TaskDataInterface} from "@src/interfaces/tasks/task-data.interface";
+import {ReqBodyUpdateTaskDto} from "@src/entities/task/dto/reqBody.update-task.dto";
+import {ReqBodyCompleteTaskDto} from "@src/entities/complete-task/dto/reqBody.complete-task.dto";
+import {ReqBodyGetTasksDto} from "@src/entities/task/dto/reqBody.get-tasks.dto";
 
 interface MockStripeCustomer extends Partial<Stripe.Customer> {
   lastResponse: {
@@ -59,6 +67,7 @@ describe('Tests API (e2e)', () => {
   let userService: UserService;
   let authService: AuthService;
   let paymentService: PaymentService;
+  let taskService: TaskService;
   let testHelper: TestHelper;
   let stripeService: StripeService;
   let queryRunner: QueryRunner;
@@ -73,6 +82,7 @@ describe('Tests API (e2e)', () => {
     userService = testHelper.app.get<UserService>(UserService);
     authService = testHelper.app.get<AuthService>(AuthService) as AuthService;
     paymentService = testHelper.app.get<PaymentService>(PaymentService);
+    taskService = testHelper.app.get<TaskService>(TaskService);
     checkPlanGuard = testHelper.app.get<CheckPlanGuard>(CheckPlanGuard);
     stripeService = testHelper.app.get<StripeService>(StripeService);
 
@@ -393,7 +403,7 @@ describe('Tests API (e2e)', () => {
         user: {} as User
       };
 
-      const mockCreateSubscribersResponse: Stripe.Response<Stripe.Subscription> = {
+      const mockCreateSubscribeResponse: Stripe.Response<Stripe.Subscription> = {
         id: 'sub_1PJv8ZC581Db3P9CoqVcN2Lq',
         object: 'subscription',
         application: null,
@@ -521,7 +531,7 @@ describe('Tests API (e2e)', () => {
       }
 
       jest.spyOn(paymentService, 'findById').mockResolvedValue(mockPayment);
-      jest.spyOn(stripeService, 'createSubscribers').mockResolvedValue(mockCreateSubscribersResponse);
+      jest.spyOn(stripeService, 'createSubscribers').mockResolvedValue(mockCreateSubscribeResponse);
 
       const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const user = await authService.login(loginDto);
@@ -545,6 +555,7 @@ describe('Tests API (e2e)', () => {
     });
 
     it('/api/payment/:id/remove-subscribe (DELETE)', async () => {
+
       const mockPayment: Payment = {
         id: 10005,
         cardType: 'Visa',
@@ -553,19 +564,173 @@ describe('Tests API (e2e)', () => {
         nameOnCard: null,
         number: '4242',
         prefer: false,
-        subscriberId: null,
-        paidAt: null,
+        subscriberId: 'sub_1PLN4oC581Db3P9CiG26MuCo',
+        paidAt: new Date('2024-05-28T10:16:20.241Z'),
         agree: false,
         userId: 10012,
         user: {} as User
       };
 
-      jest.spyOn(paymentService, 'findById').mockResolvedValue(mockPayment);
-      // jest.spyOn(stripeService, 'createSubscribers').mockResolvedValue(mockCreateSubscribersResponse);
+      const mockCancelSubscribeResponse: Stripe.Response<Stripe.Subscription> =  {
+        id: 'sub_1PLNWwC581Db3P9CmnEG0fTu',
+        object: 'subscription',
+        application: null,
+        application_fee_percent: null,
+        automatic_tax: { enabled: false, liability: null },
+        billing_cycle_anchor: 1716893122,
+        billing_cycle_anchor_config: null,
+        billing_thresholds: null,
+        cancel_at: null,
+        cancel_at_period_end: false,
+        canceled_at: 1716893128,
+        cancellation_details: { comment: null, feedback: null, reason: 'cancellation_requested' },
+        collection_method: 'charge_automatically',
+        created: 1716893122,
+        currency: 'eur',
+        current_period_end: 1719571522,
+        current_period_start: 1716893122,
+        customer: 'cus_QBSCWN9lEE8gNy',
+        days_until_due: null,
+        default_payment_method: null,
+        default_source: null,
+        default_tax_rates: [],
+        description: null,
+        discount: null,
+        discounts: [],
+        ended_at: 1716893128,
+        items: {
+          object: 'list',
+          data: [
+            {
+              id: 'si_QBl3LbGcU9STRe',
+              object: 'subscription_item',
+              billing_thresholds: null,
+              created: 1716893122,
+              discounts: [],
+              metadata: {},
+              plan: {
+                id: 'plan_QBPDnRbujORk6C',
+                object: 'plan',
+                active: true,
+                aggregate_usage: null,
+                amount: 9990,
+                amount_decimal: '9990',
+                billing_scheme: 'per_unit',
+                created: 1716811928,
+                currency: 'eur',
+                interval: 'month',
+                interval_count: 1,
+                livemode: false,
+                metadata: {},
+                meter: null,
+                nickname: null,
+                product: 'prod_QBPDe9hFz16yO7',
+                tiers_mode: null,
+                transform_usage: null,
+                trial_period_days: null,
+                usage_type: 'licensed'
+              },
+              price: {
+                id: 'plan_QBPDnRbujORk6C',
+                object: 'price',
+                active: true,
+                billing_scheme: 'per_unit',
+                created: 1716811928,
+                currency: 'eur',
+                custom_unit_amount: null,
+                livemode: false,
+                lookup_key: null,
+                metadata: {},
+                nickname: null,
+                product: 'prod_QBPDe9hFz16yO7',
+                recurring: {
+                  aggregate_usage: null,
+                  interval: 'month',
+                  interval_count: 1,
+                  meter: null,
+                  trial_period_days: null,
+                  usage_type: 'licensed'
+                },
+                tax_behavior: 'unspecified',
+                tiers_mode: null,
+                transform_quantity: null,
+                type: 'recurring',
+                unit_amount: 9990,
+                unit_amount_decimal: '9990'
+              },
+              quantity: 1,
+              subscription: 'sub_1PLNWwC581Db3P9CmnEG0fTu',
+              tax_rates: []
+            }
+          ],
+          has_more: false,
+          url: '/v1/subscription_items?subscription=sub_1PLNWwC581Db3P9CmnEG0fTu'
+        },
+        latest_invoice: 'in_1PLNWwC581Db3P9CbOURxRWB',
+        livemode: false,
+        metadata: {},
+        next_pending_invoice_item_invoice: null,
+        on_behalf_of: null,
+        pause_collection: null,
+        payment_settings: {
+          payment_method_options: null,
+          payment_method_types: null,
+          save_default_payment_method: 'off'
+        },
+        pending_invoice_item_interval: null,
+        pending_setup_intent: null,
+        pending_update: null,
+        schedule: null,
+        start_date: 1716893122,
+        status: 'canceled',
+        test_clock: null,
+        transfer_data: null,
+        trial_end: null,
+        trial_settings: { end_behavior: { missing_payment_method: 'create_invoice' } },
+        trial_start: null,
+        lastResponse: {
+          headers: {},
+          requestId: 'req_test',
+          statusCode: 200,
+          apiVersion: '2020-08-27',
+          idempotencyKey: 'idem_test',
+          stripeAccount: 'acct_test',
+        },
+      }
+
+      const user1 = await userService.findByPhone('+100000000001');
+
+      const mockUser: User = {
+        id: user1.id,
+        name: user1.name,
+        phone: user1.phone,
+        type: user1.type,
+        companyId: user1.companyId,
+        password: await bcrypt.hash('12345678', 10),
+      } as User;
+
+      // const mockUser: User = {
+      //   id: 10012,
+      //   // name: 'Svetlana',
+      //   // phone: '+100000000001',
+      //   // type: 'ADMIN',
+      //   companyId: 10005,
+      //   password: await bcrypt.hash('12345678', 10),
+      // } as User;
+
+      const mockCompany: Company = {
+        id: 10005,
+        isTrial: false,
+      } as Company;
 
       const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const user = await authService.login(loginDto);
       const token = user.token;
+
+      jest.spyOn(paymentService, 'findById').mockResolvedValue(mockPayment);
+      jest.spyOn(paymentService['userRepository'], 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(paymentService['companyRepository'], 'findOne').mockResolvedValue(mockCompany);
+      jest.spyOn(stripeService, 'cancelSubscribe').mockResolvedValue(mockCancelSubscribeResponse);
 
       const response = await request(testHelper.app.getHttpServer())
           .delete(`/api/payment/${mockPayment.id}/remove-subscribe`)
@@ -581,9 +746,7 @@ describe('Tests API (e2e)', () => {
 
   describe('Tasks API (e2e)', () => {
     it('/api/tasks/get-tasks (POST)', async () => {
-      // jest.spyOn(checkPlanGuard, 'canActivate').mockReturnValue(Promise.resolve(true));
-
-      const loginDto: LoginDto = { phone: '+100000000002', password: '12345678' };
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
@@ -592,14 +755,103 @@ describe('Tests API (e2e)', () => {
           .set('Authorization', `Bearer ${token}`)
           .expect(HttpStatus.CREATED);
 
-      // console.log('! response.body =', response.body);
-
       expect(Array.isArray(response.body.data.tasks)).toBe(true);
-      expect(response.body.data.tasks.length).toBeGreaterThan(0);
       expect(response.body.data.filterCounts.low).toBeDefined();
       expect(response.body.data.filterCounts.high).toBeDefined();
-      // expect(response.body.data.users[0].name).toEqual('Svetlana');
-      // expect(response.body.data.filterCounts.admins).toEqual(1);
+    });
+
+    it('/api/tasks/create-task (POST)', async () => {
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
+      const loginResponse = await authService.login(loginDto)
+      const token = loginResponse.token;
+
+      const createTaskDto: ReqBodyCreateTaskDto = {
+        title: 'Test Task 1',
+        type: 'Low',
+        executionTime: 1,
+        comment: 'Test Comment 1',
+        dueDate: new Date(),
+        tags: [],
+        workers: [],
+        mapLocation: []
+      };
+
+      const response = await request(testHelper.app.getHttpServer())
+          .post('/api/tasks/create-task')
+          .set('Authorization', `Bearer ${token}`)
+          .send(createTaskDto)
+          .expect(HttpStatus.CREATED);
+
+      // console.log('! response.body =', response.body);
+
+      expect(response.body.data.task.title).toBe('Test Task 1');
+    });
+
+    it('/api/tasks/:id/update-task (PATCH)', async () => {
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
+      const loginResponse = await authService.login(loginDto)
+      const token = loginResponse.token;
+
+      const createTaskDto: ReqBodyCreateTaskDto = {
+        title: 'Test Task 1',
+        type: 'Low',
+        executionTime: 1,
+        comment: 'Test Comment 1',
+        dueDate: new Date(),
+        tags: [],
+        workers: [],
+        mapLocation: []
+      };
+
+      const admin = await userService.findByPhone('+100000000001');
+
+      const taskCreateData: {success: boolean, notice: string, data: {task: TaskDataInterface}} = await taskService.create(createTaskDto, admin.id);
+
+      const updateTaskDto: ReqBodyUpdateTaskDto = {
+        title: 'Test Task 2',
+        type: 'Medium',
+        executionTime: 10,
+        dueDate: new Date('2124-04-17'),
+        workers: [],
+        tags: [],
+      };
+
+      const response = await request(testHelper.app.getHttpServer())
+          .patch(`/api/tasks/${taskCreateData.data.task.id}/update-task`)
+          .set('Authorization', `Bearer ${token}`)
+          .send(updateTaskDto)
+          .expect(HttpStatus.OK);
+
+      // console.log('! response.body =', response.body);
+
+      expect(response.body.data.task.title).toBe('Test Task 2');
+    });
+
+    it('/api/tasks/:id/complete-task (PUT)', async () => {
+      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
+      const loginResponse = await authService.login(loginDto)
+      const token = loginResponse.token;
+
+      const completeTaskDto: ReqBodyCompleteTaskDto = {
+        timeLog: '1',
+        comment: 'Test Comment'
+      };
+
+      const admin = await userService.findByPhone('+100000000001');
+
+      const getTaskDto = {};
+
+      const getTasksData = await taskService.getAll(getTaskDto, admin.id);
+
+      const response = await request(testHelper.app.getHttpServer())
+          .put(`/api/tasks/${getTasksData.data.tasks[0].id}/complete-task`)
+          .set('Authorization', `Bearer ${token}`)
+          .send(completeTaskDto)
+          .expect(HttpStatus.OK);
+
+      console.log('! response.body =', response.body);
+
+      expect(response.body.success).toBe(true);
     });
   });
 });

@@ -506,4 +506,7 @@ export class UserService {
     await this.taskRepository.save(task);
   }
 
+  async findById(id: number) {
+    return await this.userRepository.findOne({ where: { id } });
+  }
 }
