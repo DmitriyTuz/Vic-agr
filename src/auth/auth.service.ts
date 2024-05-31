@@ -25,6 +25,7 @@ import * as nodemailer from 'nodemailer';
 import {MailService} from "@src/mail/mail.service";
 import {UpdateUserDto} from "@src/entities/user/dto/update-user.dto";
 import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
+import {RequestWithUser} from "@src/interfaces/users/add-field-user-to-Request.interface";
 
 
 interface TokenPayload {
@@ -175,4 +176,17 @@ export class AuthService {
     }
   }
 
+  async googleLogin(req: RequestWithUser): Promise<User> {
+    try {
+      if (!req.user) {
+        throw new HttpException('No user from Google', HttpStatus.NOT_FOUND);
+      }
+
+      return req.user
+      // return user
+    } catch (err) {
+      console.log('! error = ', err);
+      throw err
+    }
+  }
 }

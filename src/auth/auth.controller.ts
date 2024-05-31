@@ -8,6 +8,8 @@ import {SignUpDto} from "@src/auth/dto/sign-up.dto";
 import {ForgotPasswordDto} from "@src/auth/dto/forgot-password.dto";
 import {ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags} from "@nestjs/swagger";
 import {ConfigService} from "@nestjs/config";
+import {RequestWithUser} from "@src/interfaces/users/add-field-user-to-Request.interface";
+import {AuthGuard} from "@nestjs/passport";
 
 const configService = new ConfigService();
 
@@ -76,5 +78,17 @@ export class AuthController {
   @UsePipes(ValidationPipe)
   forgotPassword(@Body() reqBody: ForgotPasswordDto) {
     return this.authService.forgotPassword(reqBody);
+  }
+
+  @Get('/google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Req() req: RequestWithUser) {
+    return {msg: 'Google Authentication'}
+  }
+
+  @Get('/google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req: RequestWithUser) {
+    return this.authService.googleLogin(req);
   }
 }
