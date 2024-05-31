@@ -13,10 +13,11 @@ import {PasswordModule} from "@src/password/password.module";
 import {TwilioModule} from "@src/twilio/twilio.module";
 import {CheckerModule} from "@src/checker/checker.module";
 import {MailModule} from "@src/mail/mail.module";
+import {GoogleStrategy} from "@src/auth/strategies/google.strategy";
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, GoogleStrategy],
   imports: [
     // UserModule,
     forwardRef(() => UserModule),
