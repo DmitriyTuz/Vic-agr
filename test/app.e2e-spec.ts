@@ -833,19 +833,28 @@ describe('Tests API (e2e)', () => {
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
+      const createTaskDto: ReqBodyCreateTaskDto = {
+        title: 'Test Task',
+        type: 'Low',
+        executionTime: 1,
+        comment: 'Test Comment 1',
+        dueDate: new Date(),
+        tags: [],
+        workers: [],
+        mapLocation: []
+      };
+
+      const admin = await userService.findByPhone('+100000000001');
+
+      const taskCreateData: {success: boolean, notice: string, data: {task: TaskDataInterface}} = await taskService.create(createTaskDto, admin.id);
+
       const completeTaskDto: ReqBodyCompleteTaskDto = {
         timeLog: '1',
         comment: 'Test Comment'
       };
 
-      const admin = await userService.findByPhone('+100000000001');
-
-      const getTaskDto = {};
-
-      const getTasksData = await taskService.getAll(getTaskDto, admin.id);
-
       const response = await request(testHelper.app.getHttpServer())
-          .put(`/api/tasks/${getTasksData.data.tasks[0].id}/complete-task`)
+          .put(`/api/tasks/${taskCreateData.data.task.id}/complete-task`)
           .set('Authorization', `Bearer ${token}`)
           .send(completeTaskDto)
           .expect(HttpStatus.OK);
@@ -860,23 +869,32 @@ describe('Tests API (e2e)', () => {
       const loginResponse = await authService.login(loginDto)
       const token = loginResponse.token;
 
-      const reportTaskDto: ReqBodyReportTaskDto = {
-        comment: 'Test Comment'
+      const createTaskDto: ReqBodyCreateTaskDto = {
+        title: 'Test Task',
+        type: 'Low',
+        executionTime: 1,
+        comment: 'Test Comment 1',
+        dueDate: new Date(),
+        tags: [],
+        workers: [],
+        mapLocation: []
       };
 
       const admin = await userService.findByPhone('+100000000001');
 
-      const getTaskDto = {};
+      const taskCreateData: {success: boolean, notice: string, data: {task: TaskDataInterface}} = await taskService.create(createTaskDto, admin.id);
 
-      const getTasksData = await taskService.getAll(getTaskDto, admin.id);
+      const reportTaskDto: ReqBodyReportTaskDto = {
+        comment: 'Test Comment'
+      };
 
       const response = await request(testHelper.app.getHttpServer())
-          .put(`/api/tasks/${getTasksData.data.tasks[0].id}/report-task`)
+          .put(`/api/tasks/${taskCreateData.data.task.id}/report-task`)
           .set('Authorization', `Bearer ${token}`)
           .send(reportTaskDto)
           .expect(HttpStatus.OK);
 
-      // console.log('! response.body =', response.body);
+      console.log('! response.body =', response.body);
 
       expect(response.body.success).toBe(true);
     });
