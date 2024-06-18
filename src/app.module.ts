@@ -20,6 +20,8 @@ import {AwsConfigModule} from "@src/aws/config/aws.config.module";
 import {S3Module} from "@src/aws/s3/s3.module";
 import {MailModule} from "@src/mail/mail.module";
 import {CheckerModule} from "@src/checker/checker.module";
+import {BullModule} from "@nestjs/bull";
+import { MessageModule } from './entities/message/message.module';
 
 @Module({
   imports: [
@@ -27,6 +29,15 @@ import {CheckerModule} from "@src/checker/checker.module";
       envFilePath: `.${process.env.NODE_ENV}.env`,
       isGlobal: true,
     }),
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+      },
+    }),
+    // BullModule.registerQueue({
+    //   name: 'message-queue'
+    // }),
     TypeormModule,
     UserModule,
     TagModule,
@@ -45,7 +56,8 @@ import {CheckerModule} from "@src/checker/checker.module";
     AwsConfigModule,
     S3Module,
     CheckerModule,
-    MailModule
+    MailModule,
+    MessageModule
   ],
   controllers: [],
   providers: [],
