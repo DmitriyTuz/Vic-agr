@@ -32,6 +32,12 @@ services:
     networks:
       - vic-local
 
+  # REDIS
+  redis:
+    image: redis:6.0
+    ports:
+      - '6378:6379'
+
 #volumes:
 #  pgdata:
 
