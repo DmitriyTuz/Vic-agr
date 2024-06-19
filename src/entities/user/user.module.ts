@@ -14,11 +14,14 @@ import {PaymentModule} from "@src/entities/payment/payment.module";
 import {Task} from "@src/entities/task/task.entity";
 import {StripeModule} from "@src/stripe/stripe.module";
 import {Company} from "@src/entities/company/company.entity";
+import {UserProducerService} from "@src/entities/user/user.producer.service";
+import {UserConsumer} from "@src/entities/user/user.consumer";
+import {QueueModule} from "@src/queue/queue.module";
 
 
 @Module({
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, UserProducerService, UserConsumer],
   imports: [
     TypeOrmModule.forFeature([User, Tag, Payment, Task, Company]),
     forwardRef(() => AuthModule),
@@ -27,7 +30,8 @@ import {Company} from "@src/entities/company/company.entity";
     TwilioModule,
     forwardRef(() => TagModule),
     forwardRef(() => PaymentModule),
-    StripeModule
+    StripeModule,
+    QueueModule
   ],
   exports: [UserService],
 })

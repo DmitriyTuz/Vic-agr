@@ -22,6 +22,7 @@ import {MailModule} from "@src/mail/mail.module";
 import {CheckerModule} from "@src/checker/checker.module";
 import {BullModule} from "@nestjs/bull";
 import { MessageModule } from './entities/message/message.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -57,7 +58,8 @@ import { MessageModule } from './entities/message/message.module';
     S3Module,
     CheckerModule,
     MailModule,
-    MessageModule
+    MessageModule,
+    QueueModule
   ],
   controllers: [],
   providers: [],
