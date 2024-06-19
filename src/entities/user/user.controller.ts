@@ -33,12 +33,14 @@ import {CheckPlanGuard} from "@src/guards/check-plan.guard";
 import {ReqBodyCreateUserDto} from "@src/entities/user/dto/reqBody.create-user.dto";
 import {ReqQueryGetWorkerTagsInterface} from "@src/interfaces/tasks/reqQuery.get-worker-tags.interface";
 import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
+import {UserProducerService} from "@src/entities/user/user.producer.service";
 
 @ApiTags('Users')
 @Controller('users')
 @ApiExtraModels(CreateUserDto)
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService,
+              private userProducerService: UserProducerService) {}
 
   @Post('/create-user')
   @ApiOperation({ summary: 'Create new user' })
@@ -120,5 +122,11 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: number) {
     return this.userService.remove(+id);
+  }
+
+  @Get('/find-user-queue')
+  async findUser(@Query('userId') userId: number) {
+    await this.userProducerService.findUserDB(userId)
+    return userId;
   }
 }

@@ -8,7 +8,7 @@ export class MessageController {
   constructor(private readonly messageService: MessageService,
               private messageProducerService: MessageProducerService) {}
 
-  @Get('send-message')
+  @Get('send-message-queue')
   async sendMessage(@Query('msg') msg: string) {
     this.messageProducerService.sendMessage(msg);
     return msg;
