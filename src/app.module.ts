@@ -23,6 +23,8 @@ import {CheckerModule} from "@src/checker/checker.module";
 import {BullModule} from "@nestjs/bull";
 import { MessageModule } from './entities/message/message.module';
 import { QueueModule } from './queue/queue.module';
+import {RedisCacheModule} from "@src/redis/redis.cache/redis.cache.module";
+import {NestCacheModule} from "@src/cache/cache.module";
 
 @Module({
   imports: [
@@ -59,7 +61,9 @@ import { QueueModule } from './queue/queue.module';
     CheckerModule,
     MailModule,
     MessageModule,
-    QueueModule
+    QueueModule,
+    RedisCacheModule,
+    NestCacheModule
   ],
   controllers: [],
   providers: [],

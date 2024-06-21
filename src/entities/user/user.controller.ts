@@ -129,4 +129,16 @@ export class UserController {
     await this.userProducerService.findUserDB(userId)
     return userId;
   }
+
+  @Get('get-all-users-with-nest-cache')
+  @ApiOperation({ summary: 'get all users with memory cache' })
+  async findAllWithNestCache() {
+    return this.userService.findAllWithNestCache();
+  }
+
+  @Get('get-all-users-with-redis-cache')
+  @ApiOperation({ summary: 'get all users with redis cache' })
+  async findAllWithRedisCache() {
+    return this.userService.findAllWithRedisCache();
+  }
 }

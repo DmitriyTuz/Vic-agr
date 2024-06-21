@@ -34,6 +34,8 @@ import {ReqBodyCreateUserDto} from "@src/entities/user/dto/reqBody.create-user.d
 import {GetWorkerTagsInterface} from "@src/interfaces/tasks/get-worker-tags.interface";
 import {GetUsersInterface} from "@src/interfaces/users/get-users-interface";
 import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
+import {RedisCacheService} from "@src/redis/redis.cache/redis.cache.service";
+import {NestCacheService} from "@src/cache/cache.service";
 
 
 type UserDataType = {
@@ -67,6 +69,8 @@ export class UserService {
     @InjectEntityManager() private readonly entityManager: EntityManager,
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
+    private cacheNestService: NestCacheService,
+    private cacheRedisService: RedisCacheService,
   ) {}
 
   async getOne(currentUserId: number) {
@@ -509,4 +513,48 @@ export class UserService {
   async findById(id: number) {
     return await this.userRepository.findOne({ where: { id } });
   }
+
+  async findAllWithNestCache(): Promise<User[] | undefined> {
+    const cachedData = await this.cacheNestService.get<User[]>('some_key1');
+
+    if (cachedData) {
+      this.logger.log('Data found in memory cache: ', cachedData);
+
+      return cachedData;
+    }
+
+    this.logger.log(`Data not found in memory cache ! Fetching from the repository...`);
+
+    const newData = await this.userRepository.find();
+
+    await this.cacheNestService.set('some_key1', newData, 30000);
+
+    this.logger.log('Data saved in memory cache: ', newData);
+
+    return newData;
+  }
+
+  async findAllWithRedisCache(): Promise<User[] | undefined> {
+    const cachedData = await this.cacheRedisService.get<User[]>('some_key2');
+
+    if (cachedData) {
+      this.logger.log('Data found in redis cache: ', cachedData);
+
+      return cachedData;
+    }
+
+    this.logger.log(`Data not found in redis cache ! Fetching from the repository...`);
+
+    const newData = await this.userRepository.find();
+
+    await this.cacheRedisService.set('some_key2', newData, { ttl: 40 });
+
+    this.logger.log('Data saved in redis cache: ', newData);
+
+    // await this.cacheRedisService.delete('some_key2');
+    // await this.cacheRedisService.reset();
+
+    return newData;
+  }
+
 }
