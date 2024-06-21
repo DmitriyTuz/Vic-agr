@@ -17,6 +17,8 @@ import {Company} from "@src/entities/company/company.entity";
 import {UserProducerService} from "@src/entities/user/user.producer.service";
 import {UserConsumer} from "@src/entities/user/user.consumer";
 import {QueueModule} from "@src/queue/queue.module";
+import {RedisCacheModule} from "@src/redis/redis.cache/redis.cache.module";
+import {NestCacheModule} from "@src/cache/cache.module";
 
 
 @Module({
@@ -31,7 +33,9 @@ import {QueueModule} from "@src/queue/queue.module";
     forwardRef(() => TagModule),
     forwardRef(() => PaymentModule),
     StripeModule,
-    QueueModule
+    QueueModule,
+    RedisCacheModule,
+    NestCacheModule
   ],
   exports: [UserService],
 })
