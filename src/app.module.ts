@@ -25,6 +25,7 @@ import { MessageModule } from './entities/message/message.module';
 import { QueueModule } from './queue/queue.module';
 import {RedisCacheModule} from "@src/redis/redis.cache/redis.cache.module";
 import {NestCacheModule} from "@src/cache/cache.module";
+import {ElasticSearchModule} from "@src/elastic-search/elastic-search.module";
 
 @Module({
   imports: [
@@ -63,7 +64,8 @@ import {NestCacheModule} from "@src/cache/cache.module";
     MessageModule,
     QueueModule,
     RedisCacheModule,
-    NestCacheModule
+    NestCacheModule,
+    ElasticSearchModule
   ],
   controllers: [],
   providers: [],
