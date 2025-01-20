@@ -101,7 +101,6 @@ describe('Tests API (e2e)', () => {
     await testHelper.close();
   });
 
-
   describe('Users API (e2e)', () => {
     it('/api/users/get-users (GET)', async () => {
       jest.spyOn(checkPlanGuard, 'canActivate').mockReturnValue(Promise.resolve(true));

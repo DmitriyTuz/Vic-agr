@@ -7,6 +7,7 @@ import { JwtStrategy } from '@src/auth/strategies/jwt.strategy';
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import {ConfigService} from "@nestjs/config";
+import {AllExceptionsFilter} from "@src/exception-filters/exception-filter";
 
 const configService = new ConfigService();
 
@@ -14,6 +15,8 @@ async function start() {
 
   const PORT = configService.get('PORT') || 5000;
   const app = await NestFactory.create(AppModule);
+
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   app.setGlobalPrefix('api/');
 

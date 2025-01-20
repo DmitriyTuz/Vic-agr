@@ -36,6 +36,8 @@ import {GetUsersInterface} from "@src/interfaces/users/get-users-interface";
 import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
 import {RedisCacheService} from "@src/redis/redis.cache/redis.cache.service";
 import {NestCacheService} from "@src/cache/cache.service";
+import {FoundCompanyException} from "@src/exceptions/found-company-exception";
+import {FoundUserException} from "@src/exceptions/found-user-exception";
 
 
 type UserDataType = {
@@ -236,7 +238,8 @@ export class UserService {
 
       const currentUser: User = await this.userRepository.findOne({ where: { phone: dto.phone } });
       if (currentUser) {
-        throw new HttpException(`user-with-phone- ${currentUser.phone} -already-exists`, HttpStatus.FOUND);
+        // throw new HttpException(`user-with-phone- ${currentUser.phone} -already-exists`, HttpStatus.FOUND);
+        throw new FoundUserException(currentUser.phone);
       }
 
       let password: string;
