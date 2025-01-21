@@ -8,6 +8,7 @@ import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import {ConfigService} from "@nestjs/config";
 import {AllExceptionsFilter} from "@src/exception-filters/exception-filter";
+import {LoggingInterceptor} from "@src/logging.interceptor";
 
 const configService = new ConfigService();
 
@@ -17,6 +18,8 @@ async function start() {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalFilters(new AllExceptionsFilter());
+
+  app.useGlobalInterceptors(new LoggingInterceptor());
 
   app.setGlobalPrefix('api/');
 

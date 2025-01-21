@@ -4,7 +4,7 @@ import {Repository} from "typeorm";
 import {Company} from "@src/entities/company/company.entity";
 import {CreateCompanyDto} from "@src/entities/company/dto/create-company.dto";
 import {User} from "@src/entities/user/user.entity";
-import {FoundCompanyException} from "@src/exceptions/found-company-exception";
+import {FoundCompanyException} from "@src/exceptions/found-company-exception.exception";
 
 @Injectable()
 export class CompanyService {
@@ -20,7 +20,8 @@ export class CompanyService {
     const company: Company = await this.companyRepository.findOne({ where: { name: newCompany.name } });
     if (company) {
       // throw new HttpException(`company-with-name- ${company.name} -already-exists`, HttpStatus.FOUND);
-      throw new FoundCompanyException(company.name);
+      throw new FoundCompanyException(company.name, {code: 'error'});
+      // throw new FoundException();
     }
 
     return  await this.companyRepository.save(newCompany);

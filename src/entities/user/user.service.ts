@@ -36,7 +36,7 @@ import {GetUsersInterface} from "@src/interfaces/users/get-users-interface";
 import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
 import {RedisCacheService} from "@src/redis/redis.cache/redis.cache.service";
 import {NestCacheService} from "@src/cache/cache.service";
-import {FoundCompanyException} from "@src/exceptions/found-company-exception";
+// import {FoundCompanyException} from "@src/exceptions/found-company-exception.exception";
 import {FoundUserException} from "@src/exceptions/found-user-exception";
 
 
@@ -234,7 +234,7 @@ export class UserService {
   }
 
   async createUser(dto: CreateUserDto): Promise <{ user: User, message: string }> {
-    try {
+    // try {
 
       const currentUser: User = await this.userRepository.findOne({ where: { phone: dto.phone } });
       if (currentUser) {
@@ -265,10 +265,10 @@ export class UserService {
 
       return { user, message }
 
-    } catch (e) {
-      this.logger.error(`Error during user creation: ${e.message}`);
-      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
-    }
+    // } catch (e) {
+    //   this.logger.error(`Error during user creation: ${e.message}`);
+    //   throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
+    // }
   }
 
   async findAll() {

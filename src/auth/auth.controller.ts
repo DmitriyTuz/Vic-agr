@@ -1,4 +1,16 @@
-import {Body, Controller, Get, HttpStatus, Post, Put, Req, Res, UseGuards, UsePipes} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Post,
+  Put,
+  Req,
+  Res,
+  UseGuards,
+  UseInterceptors,
+  UsePipes
+} from '@nestjs/common';
 import { AuthService } from '@src/auth/auth.service';
 import { Request, Response } from 'express';
 import { LoginDto } from '@src/auth/dto/login.dto';
@@ -10,6 +22,7 @@ import {ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags} from "@nestj
 import {ConfigService} from "@nestjs/config";
 import {RequestWithUser} from "@src/interfaces/users/add-field-user-to-Request.interface";
 import {AuthGuard} from "@nestjs/passport";
+import {LoggingInterceptor} from "@src/logging.interceptor";
 
 const configService = new ConfigService();
 
@@ -58,6 +71,7 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Unable to register user' })
   @ApiBearerAuth('JWT')
   @UsePipes(ValidationPipe)
+  @UseInterceptors(LoggingInterceptor)
   async signUp(@Body() reqBody: SignUpDto, @Req() req: Request, @Res() res: Response) {
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     const result = await this.authService.signUp(reqBody);
