@@ -22,7 +22,7 @@ import {ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags} from "@nestj
 import {ConfigService} from "@nestjs/config";
 import {RequestWithUser} from "@src/interfaces/users/add-field-user-to-Request.interface";
 import {AuthGuard} from "@nestjs/passport";
-import {LoggingInterceptor} from "@src/logging.interceptor";
+import {LoggingInterceptor} from "@src/interceptors/logging.interceptor";
 
 const configService = new ConfigService();
 

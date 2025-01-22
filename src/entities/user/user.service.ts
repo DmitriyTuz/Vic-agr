@@ -518,23 +518,27 @@ export class UserService {
   }
 
   async findAllWithNestCache(): Promise<User[] | undefined> {
-    const cachedData = await this.cacheNestService.get<User[]>('some_key1');
-
-    if (cachedData) {
-      this.logger.log('Data found in memory cache: ', cachedData);
-
-      return cachedData;
-    }
-
-    this.logger.log(`Data not found in memory cache ! Fetching from the repository...`);
-
     const newData = await this.userRepository.find();
-
-    await this.cacheNestService.set('some_key1', newData, 30000);
-
-    this.logger.log('Data saved in memory cache: ', newData);
-
     return newData;
+
+
+    // const cachedData = await this.cacheNestService.get<User[]>('some_key1');
+    //
+    // if (cachedData) {
+    //   this.logger.log('Data found in memory cache: ', cachedData);
+    //
+    //   return cachedData;
+    // }
+    //
+    // this.logger.log(`Data not found in memory cache ! Fetching from the repository...`);
+    //
+    // const newData = await this.userRepository.find();
+    //
+    // await this.cacheNestService.set('some_key1', newData, 30000);
+    //
+    // this.logger.log('Data saved in memory cache: ', newData);
+    //
+    // return newData;
   }
 
   async findAllWithRedisCache(): Promise<User[] | undefined> {

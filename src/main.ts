@@ -8,7 +8,7 @@ import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import {ConfigService} from "@nestjs/config";
 import {AllExceptionsFilter} from "@src/exception-filters/exception-filter";
-import {LoggingInterceptor} from "@src/logging.interceptor";
+import {LoggingInterceptor} from "@src/interceptors/logging.interceptor";
 
 const configService = new ConfigService();
 
@@ -19,7 +19,7 @@ async function start() {
 
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  app.useGlobalInterceptors(new LoggingInterceptor());
+  // app.useGlobalInterceptors(new LoggingInterceptor());
 
   app.setGlobalPrefix('api/');
 
