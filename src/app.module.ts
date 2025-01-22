@@ -65,7 +65,7 @@ import {ElasticSearchModule} from "@src/elastic-search/elastic-search.module";
     QueueModule,
     RedisCacheModule,
     NestCacheModule,
-    ElasticSearchModule
+    // ElasticSearchModule
   ],
   controllers: [],
   providers: [],
