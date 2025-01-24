@@ -94,13 +94,13 @@ describe('Tests API (e2e)', () => {
   });
 
   afterEach(async () => {
+    jest.restoreAllMocks();
     await queryRunner.rollbackTransaction();
   });
 
   afterAll(async () => {
     await testHelper.close();
   });
-
 
   describe('Users API (e2e)', () => {
     it('/api/users/get-users (GET)', async () => {
@@ -710,15 +710,6 @@ describe('Tests API (e2e)', () => {
         password: await bcrypt.hash('12345678', 10),
       } as User;
 
-      // const mockUser: User = {
-      //   id: 10012,
-      //   // name: 'Svetlana',
-      //   // phone: '+100000000001',
-      //   // type: 'ADMIN',
-      //   companyId: 10005,
-      //   password: await bcrypt.hash('12345678', 10),
-      // } as User;
-
       const mockCompany: Company = {
         id: 10005,
         isTrial: false,
@@ -738,8 +729,6 @@ describe('Tests API (e2e)', () => {
           .set('Authorization', `Bearer ${token}`)
           .expect(HttpStatus.OK);
 
-      // console.log('! response.body =', response.body);
-
       expect(response.body.success).toBe(true);
       expect(response.body.notice).toBe('Unsubscribed');
     });
@@ -747,8 +736,8 @@ describe('Tests API (e2e)', () => {
 
   describe('Tasks API (e2e)', () => {
     it('/api/tasks/get-tasks (POST)', async () => {
-      const loginDto: LoginDto = { phone: '+100000000001', password: '12345678' };
-      const loginResponse = await authService.login(loginDto)
+      const loginDto: LoginDto = { phone: '+100000000003', password: '12345678' };
+      const loginResponse = await authService.login(loginDto);
       const token = loginResponse.token;
 
       const response = await request(testHelper.app.getHttpServer())
@@ -782,8 +771,6 @@ describe('Tests API (e2e)', () => {
           .set('Authorization', `Bearer ${token}`)
           .send(createTaskDto)
           .expect(HttpStatus.CREATED);
-
-      // console.log('! response.body =', response.body);
 
       expect(response.body.data.task.title).toBe('Test Task 1');
     });
@@ -823,8 +810,6 @@ describe('Tests API (e2e)', () => {
           .send(updateTaskDto)
           .expect(HttpStatus.OK);
 
-      // console.log('! response.body =', response.body);
-
       expect(response.body.data.task.title).toBe('Test Task 2');
     });
 
@@ -859,8 +844,6 @@ describe('Tests API (e2e)', () => {
           .send(completeTaskDto)
           .expect(HttpStatus.OK);
 
-      // console.log('! response.body =', response.body);
-
       expect(response.body.success).toBe(true);
     });
 
@@ -894,7 +877,7 @@ describe('Tests API (e2e)', () => {
           .send(reportTaskDto)
           .expect(HttpStatus.OK);
 
-      console.log('! response.body =', response.body);
+      // console.log('! response.body =', response.body);
 
       expect(response.body.success).toBe(true);
     });

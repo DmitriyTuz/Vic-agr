@@ -8,7 +8,7 @@ import {
   Query,
   Req,
   Res,
-  UseGuards,
+  UseGuards, UseInterceptors,
   UsePipes,
 } from '@nestjs/common';
 import { UserService } from '@src/entities/user/user.service';
@@ -34,6 +34,8 @@ import {ReqBodyCreateUserDto} from "@src/entities/user/dto/reqBody.create-user.d
 import {ReqQueryGetWorkerTagsInterface} from "@src/interfaces/tasks/reqQuery.get-worker-tags.interface";
 import {ReqBodyUpdateUserDto} from "@src/entities/user/dto/reqBody.update-user.dto";
 import {UserProducerService} from "@src/entities/user/user.producer.service";
+import {CacheNestInterceptor} from "@src/interceptors/cache.nest.interceptor";
+import {LoggingInterceptor} from "@src/interceptors/logging.interceptor";
 
 @ApiTags('Users')
 @Controller('users')
@@ -131,6 +133,7 @@ export class UserController {
   }
 
   @Get('get-all-users-with-nest-cache')
+  @UseInterceptors(LoggingInterceptor, CacheNestInterceptor)
   @ApiOperation({ summary: 'get all users with memory cache' })
   async findAllWithNestCache() {
     return this.userService.findAllWithNestCache();

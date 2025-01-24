@@ -104,7 +104,7 @@ export class AuthService {
   }
 
   async signUp(reqBody: SignUpDto): Promise<{ success: boolean, token: string }> {
-    try {
+    // try {
       // req.body.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
       const { logo, companyName, phone, name, password } = reqBody;
@@ -138,10 +138,10 @@ export class AuthService {
 
       return { success: true, token: token };
       // return res.json({success: true})
-    } catch (e) {
-      this.logger.error(`Error during user signIn: ${e.message}`);
-      throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
-    }
+    // } catch (e) {
+    //   this.logger.error(`Error during user signIn: ${e.message}`);
+    //   throw new CustomHttpException(e.message, HttpStatus.UNPROCESSABLE_ENTITY, [e.message], new Error().stack);
+    // }
   }
 
   async forgotPassword(body): Promise<{ notice: string, smsMessage?: string }> {

@@ -6,6 +6,7 @@ export class CreateUserDto {
   @ApiProperty({ example: 'User 1', description: 'User name for create' })
   @IsNotEmpty({ message: 'Name required !' })
   @IsString({ message: 'Must be a string' })
+  @Length(2, 1000, { message: '' })
   readonly name: string;
 
   @ApiProperty({ example: '1234567', description: 'Password' })
