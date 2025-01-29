@@ -279,13 +279,17 @@ export class UserService {
     return await this.userRepository.findOne({ where: { id } });
   }
 
-  async getOneUser(findQuery: GetUsersInterface): Promise<User> {
+  async getOneUser(findQuery: GetUsersInterface, selectFields?: (keyof User)[]): Promise<User> {
     try {
 
       const query: FindOneOptions<User> = {
         where: findQuery,
         relations: ['tags', 'company'],
       };
+
+      if (selectFields) {
+        query.select = selectFields as any;
+      }
 
       return await this.userRepository.findOne(query);
     } catch (e) {
