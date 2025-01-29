@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {forwardRef, HttpException, HttpStatus, Inject, Injectable, Logger} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -30,7 +30,8 @@ export class PaymentService {
     private companyRepository: Repository<Company>,
     @InjectRepository(Plan)
     private planRepository: Repository<Plan>,
-    // private userService: UserService,
+    @Inject(forwardRef(() => UserService))
+    private userService: UserService,
     private stripeService: StripeService,
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -173,7 +174,9 @@ export class PaymentService {
 
     const payment: Payment = await this.findById(paymentId);
 
-    const user: User = await this.userRepository.findOne({select: ['id', 'companyId'], where: {id: payment.userId}});
+    // const user: User = await this.userRepository.findOne({select: ['id', 'companyId'], where: {id: payment.userId}});
+    const user: User = await this.userService.getOneUser({id: payment.userId}, ['id', 'companyId']);
+
     const company: Company = await this.companyRepository.findOne({select: ['id', 'isTrial'], where: {id: user.companyId}});
 
     if (company.isTrial) {

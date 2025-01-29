@@ -33,8 +33,8 @@ export class PaymentController {
   constructor(
       private paymentService: PaymentService,
       private userService: UserService,
-      @InjectRepository(Payment)
-      private paymentRepository: Repository<Payment>,
+      // @InjectRepository(Payment)
+      // private paymentRepository: Repository<Payment>,
       ) {}
 
   @Post('/create-payment')
@@ -78,7 +78,7 @@ export class PaymentController {
       @Req() req: RequestWithUser,
       @Param('id') paymentId: number,
   ) {
-
+    // const user: User = await this.userService.getOneUser({id: payment.userId}, ['id', 'companyId']);
     return this.paymentService.removeSubscribe(paymentId);
 
     // if (!paymentId) {
