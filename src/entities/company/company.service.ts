@@ -25,6 +25,7 @@ export class CompanyService {
     }
 
     return  await this.companyRepository.save(newCompany);
-
   }
+
+
 }

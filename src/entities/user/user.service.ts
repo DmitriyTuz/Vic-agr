@@ -77,8 +77,9 @@ export class UserService {
 
   async getOne(currentUserId: number) {
     try {
-      const user: User = await this.getOneUser({ id: currentUserId });
-
+      // const user: User = await this.getOneUser({ id: currentUserId },);
+      const user: User = await this.getOneUser({ id: currentUserId }, undefined, ['tags', 'company']);
+      console.log('user = ', user);
       if (!user) {
         throw new HttpException(`user-not-found`, HttpStatus.NOT_FOUND);
       }
@@ -208,7 +209,8 @@ export class UserService {
 
   async create(dto: ReqBodyCreateUserDto, adminId: number): Promise <{ success: boolean, notice: string, data: {user: UserDataInterface}, smsMessage: string }>  {
     try {
-      const admin: User = await this.getOneUser({id: adminId});
+      // const admin: User = await this.getOneUser({id: adminId});
+      const admin: User = await this.getOneUser({id: adminId}, undefined, ['company']);
       const {companyId} = admin;
 
       dto.companyId = companyId;
@@ -218,11 +220,12 @@ export class UserService {
       const {user, message} = await this.createUser(userDto);
       await this.tagService.checkTagsForUser(user, tags);
 
-      const returnedUser: User = await this.getOneUser({id: user.id, companyId});
+      const returnedUser: User = await this.getOneUser({id: user.id, companyId}, undefined, ['tags', 'company']);
 
       return {
         success: true,
         notice: '200-user-has-been-created-successfully',
+        // data: {user: this.getUserData(returnedUser)},
         data: {user: this.getUserData(returnedUser)},
         smsMessage: message
       }
@@ -279,16 +282,25 @@ export class UserService {
     return await this.userRepository.findOne({ where: { id } });
   }
 
-  async getOneUser(findQuery: GetUsersInterface, selectFields?: (keyof User)[]): Promise<User> {
+  async getOneUser(
+    findQuery: GetUsersInterface,
+    selectFields?: (keyof User)[],
+    relations?: string[]
+  ): Promise<User> {
+
     try {
 
       const query: FindOneOptions<User> = {
         where: findQuery,
-        relations: ['tags', 'company'],
+        // relations: ['tags', 'company'],
       };
 
       if (selectFields) {
         query.select = selectFields as any;
+      }
+
+      if (relations) {
+        query.relations = relations;
       }
 
       return await this.userRepository.findOne(query);
@@ -452,13 +464,13 @@ export class UserService {
       const {tags, ...userDto} = dto;
       await this.updateUser(user, userDto);
 
-      const updatedUser: User = await this.getOneUser({id: +id});
+      const updatedUser: User = await this.getOneUser({id: +id}, undefined, ['tags']);
 
       if (tags) {
         await this.tagService.checkTagsForUser(updatedUser, tags);
       }
 
-      const returnedUser: User = await this.getOneUser({id: +id});
+      const returnedUser: User = await this.getOneUser({id: +id}, undefined, ['tags']);
 
       return {
         success: true,
