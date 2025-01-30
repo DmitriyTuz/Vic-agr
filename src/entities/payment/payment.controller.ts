@@ -63,7 +63,7 @@ export class PaymentController {
     @Param('id') paymentId: number,
     @Body() body: ReqBodyCreateSubscribeDto,
   ) {
-    const user: User = await this.userService.getOneUser({ id: req.user.id });
+    const user: User = await this.userService.getOneUser({ id: req.user.id }, undefined, ['company']);
     return this.paymentService.createSubscribe(paymentId, body, user);
   }
 

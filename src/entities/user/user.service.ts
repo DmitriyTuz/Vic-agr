@@ -79,7 +79,7 @@ export class UserService {
     try {
       // const user: User = await this.getOneUser({ id: currentUserId },);
       const user: User = await this.getOneUser({ id: currentUserId }, undefined, ['tags', 'company']);
-
+      console.log('user = ', user);
       if (!user) {
         throw new HttpException(`user-not-found`, HttpStatus.NOT_FOUND);
       }
