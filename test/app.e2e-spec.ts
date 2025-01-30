@@ -720,7 +720,8 @@ describe('Tests API (e2e)', () => {
       const token = user.token;
 
       jest.spyOn(paymentService, 'findById').mockResolvedValue(mockPayment);
-      jest.spyOn(paymentService['userRepository'], 'findOne').mockResolvedValue(mockUser);
+      // jest.spyOn(paymentService['userRepository'], 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(userService, 'getOneUser').mockResolvedValue(mockUser);
       jest.spyOn(paymentService['companyRepository'], 'findOne').mockResolvedValue(mockCompany);
       jest.spyOn(stripeService, 'cancelSubscribe').mockResolvedValue(mockCancelSubscribeResponse);
 
