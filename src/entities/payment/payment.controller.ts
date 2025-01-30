@@ -46,7 +46,7 @@ export class PaymentController {
   @UsePipes(ValidationPipe)
   @UseGuards(JwtAuthGuard)
   async create(@Req() req: RequestWithUser, @Body() body: ReqBodyCreatePaymentDto) {
-    const user = await this.userService.getOneUser({id: req.user.id});
+    const user = await this.userService.getOneUser({id: req.user.id}, undefined, ['company']);
     return this.paymentService.create(body, user);
   }
 

@@ -33,8 +33,8 @@ export class PaymentService {
     @Inject(forwardRef(() => UserService))
     private userService: UserService,
     private stripeService: StripeService,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    // @InjectRepository(User)
+    // private userRepository: Repository<User>,
   ) {}
 
   async getOnePayment(userId: number): Promise<Payment> {
@@ -175,7 +175,7 @@ export class PaymentService {
     const payment: Payment = await this.findById(paymentId);
 
     // const user: User = await this.userRepository.findOne({select: ['id', 'companyId'], where: {id: payment.userId}});
-    const user: User = await this.userService.getOneUser({id: payment.userId}, ['id', 'companyId']);
+    const user: User = await this.userService.getOneUser({id: payment.userId}, ['id', 'companyId'], ['company']);
 
     const company: Company = await this.companyRepository.findOne({select: ['id', 'isTrial'], where: {id: user.companyId}});
 
