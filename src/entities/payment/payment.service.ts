@@ -173,7 +173,7 @@ export class PaymentService {
 
     const payment: Payment = await this.findById(paymentId);
 
-    const user: User = await this.userRepository.findOne({select: ['id', 'companyId'], where: {id: payment.userId}}); //
+    const user: User = await this.userRepository.findOne({select: ['id', 'companyId'], where: {id: payment.userId}}); // //
     const company: Company = await this.companyRepository.findOne({select: ['id', 'isTrial'], where: {id: user.companyId}});
 
     if (company.isTrial) {
