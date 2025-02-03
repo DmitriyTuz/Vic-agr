@@ -11,7 +11,7 @@ import {AuthModule} from "@src/auth/auth.module";
 import {SeedsModule} from "@src/seeds/seeds.module";
 import {ReportTaskModule} from "@src/entities/report-task/report-task.module";
 import {CompleteTaskModule} from "@src/entities/complete-task/complete-task.module";
-import { ConfigModule } from '@nestjs/config';
+import {ConfigModule, ConfigService} from '@nestjs/config';
 import {StripeModule} from "@src/stripe/stripe.module";
 import {HelperModule} from "@src/helper/helper.module";
 import {PasswordModule} from "@src/password/password.module";
@@ -33,15 +33,28 @@ import {ElasticSearchModule} from "@src/elastic-search/elastic-search.module";
       envFilePath: `.${process.env.NODE_ENV}.env`,
       isGlobal: true,
     }),
-    BullModule.forRoot({
-      redis: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT, 10) || 6379,
-      },
+
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        redis: {
+          host: configService.get<string>('REDIS_HOST', 'localhost'),
+          port: configService.get<number>('REDIS_PORT', 6379),
+        },
+      }),
     }),
+
+    // BullModule.forRoot({
+    //   redis: {
+    //     host: process.env.REDIS_HOST || 'localhost',
+    //     port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+    //   },
+    // }),
     // BullModule.registerQueue({
     //   name: 'message-queue'
     // }),
+
     TypeormModule,
     UserModule,
     TagModule,

@@ -10,12 +10,16 @@ import {ConfigService} from "@nestjs/config";
 import {AllExceptionsFilter} from "@src/exception-filters/exception-filter";
 import {LoggingInterceptor} from "@src/interceptors/logging.interceptor";
 
-const configService = new ConfigService();
+// const configService = new ConfigService();
 
 async function start() {
 
-  const PORT = configService.get('PORT') || 5000;
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  const PORT = configService.get('PORT') || 5000;
+
+  // const PORT = configService.get('PORT') || 5000;
+  // const app = await NestFactory.create(AppModule);
 
   app.useGlobalFilters(new AllExceptionsFilter());
 
